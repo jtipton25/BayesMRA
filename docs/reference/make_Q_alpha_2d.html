@@ -40,7 +40,7 @@
 
 
 <meta property="og:title" content="Generate CAR precision matrix — make_Q_alpha_2d" />
-<meta property="og:description" content="A function for setting up a conditional autoregressive (CAR) precision matrix for use as a prior in Bayesian penalized splines" />
+<meta property="og:description" content="A function for setting up a conditional autoregressive (CAR) or simultaneous autoregressive (SAR) precision matrix for use as a prior in Bayesian models" />
 
 
 
@@ -114,7 +114,7 @@
     </div>
 
     <div class="ref-description">
-    <p>A function for setting up a conditional autoregressive (CAR) precision matrix for use as a prior in Bayesian penalized splines</p>
+    <p>A function for setting up a conditional autoregressive (CAR) or simultaneous autoregressive (SAR) precision matrix for use as a prior in Bayesian models</p>
     </div>
 
     <pre class="usage"><span class='fu'>make_Q_alpha_2d</span>(<span class='no'>n_dims</span>, <span class='no'>phi</span>, <span class='kw'>use_spam</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>prec_model</span> <span class='kw'>=</span> <span class='st'>"CAR"</span>)</pre>
@@ -123,16 +123,20 @@
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
+      <th>n_dims</th>
+      <td><p>is a vector of length M that are the dimensions of the CAR/SAR matrix at each resolution</p></td>
+    </tr>
+    <tr>
       <th>phi</th>
-      <td><p>is a number between -1 and 1 that defines the strength of the  autoregressive process. Typically this will be set to 1 for use as a prior in Bayesian penalized splines</p></td>
+      <td><p>is a vector of length M with each element between -1 and 1 that defines the strength of the  autoregressive process. Typically this will be set to 1 for use as a prior in penalized Bayesian models</p></td>
     </tr>
     <tr>
       <th>use_spam</th>
       <td><p>is a boolean flag to determine whether the output is a list of spam matrix objects (<code>use_spam = TRUE</code>) or a an \(n \times n\) sparse Matrix of class "dgCMatrix" <code>use_spam = FALSE</code>(see Matrix package for details)</p></td>
     </tr>
     <tr>
-      <th>n</th>
-      <td><p>is the length of the coefficient vector for the penalized bspline model</p></td>
+      <th>prec_model</th>
+      <td><p>is a string that takes the values "CAR" or "SAR" and defines the graphical structure for the precision matrix.</p></td>
     </tr>
     </table>
 

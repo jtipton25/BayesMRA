@@ -135,27 +135,35 @@
     </tr>
     <tr>
       <th>M</th>
-      <td><p>The number of resolutions</p></td>
+      <td><p>The number of resolutions.</p></td>
     </tr>
     <tr>
       <th>n_neighbors</th>
-      <td></td>
+      <td><p>The expected number of neighbors for each interior basis function. This determines the basis radius parameter.</p></td>
+    </tr>
+    <tr>
+      <th>n_coarse_grid</th>
+      <td><p>The number of basis functions in one direction (e.g. <code>n_coarse_grid = 10</code> results in a \(10 \times 10\) course grid which is further extended by the number of additional padding basis functions given by <code>n_padding</code>.</p></td>
+    </tr>
+    <tr>
+      <th>n_padding</th>
+      <td><p>The number of additional boundary points to add on each boundary. For example, n_padding = 5 will add 5 boundary knots to the both the left  and right side of the grid).</p></td>
     </tr>
     <tr>
       <th>use_spam</th>
-      <td></td>
-    </tr>
-    <tr>
-      <th>padding</th>
-      <td></td>
+      <td><p>is a boolean flag to determine whether the output is a list of spam matrix objects (<code>use_spam = TRUE</code>) or a an \(n \times n\) sparse Matrix of class "dgCMatrix" <code>use_spam = FALSE</code> (see spam and Matrix packages for details).</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    
-
-
+    <p>A list of objects including the MRA knots locations <code>locs_grid</code>,
+the Wendland basis representation matrix <code>W</code> at the observed locations,
+the basis radius <code>radius</code>, the numbers of resolutions <code>M</code>,
+the number of expected neighbors in the interior oe each grid <code>n_neighbors</code>,
+the number of interior basis functions in one direction <code>n_coarse_grid</code>,
+the number of additional padding basis functions given by <code>n_padding</code>,
+and the setting <code>use_spam</code> which determines whether the MRA output uses the <code>spam</code> format.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

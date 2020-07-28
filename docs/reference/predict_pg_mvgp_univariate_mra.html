@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Title — make_Q_alpha_tau2 • BayesMRA</title>
+<title>Bayesian Polya-gamma regression prediction — predict_pg_mvgp_univariate_mra • BayesMRA</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Title — make_Q_alpha_tau2" />
-<meta property="og:description" content="Title" />
+<meta property="og:title" content="Bayesian Polya-gamma regression prediction — predict_pg_mvgp_univariate_mra" />
+<meta property="og:description" content="this function generates predictions from the Bayesian multinomial regression using Polya-gamma data augmentation" />
 
 
 
@@ -108,37 +108,63 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Title</h1>
-    <small class="dont-index">Source: <a href='https://github.com/jtipton25/BayesMRA/blob/master/R/make-Q-alpha_tau2.R'><code>R/make-Q-alpha_tau2.R</code></a></small>
-    <div class="hidden name"><code>make_Q_alpha_tau2.Rd</code></div>
+    <h1>Bayesian Polya-gamma regression prediction</h1>
+    <small class="dont-index">Source: <a href='https://github.com/jtipton25/BayesMRA/blob/master/R/predict-pg_mvgp_univariate_mra.R'><code>R/predict-pg_mvgp_univariate_mra.R</code></a></small>
+    <div class="hidden name"><code>predict_pg_mvgp_univariate_mra.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Title</p>
+    <p>this function generates predictions from the Bayesian multinomial regression using Polya-gamma data augmentation</p>
     </div>
 
-    <pre class="usage"><span class='fu'>make_Q_alpha_tau2</span>(<span class='no'>Q_alpha</span>, <span class='no'>tau2</span>, <span class='kw'>use_spam</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
+    <pre class="usage"><span class='fu'>predict_pg_mvgp_univariate_mra</span>(
+  <span class='no'>out</span>,
+  <span class='no'>X</span>,
+  <span class='no'>X_pred</span>,
+  <span class='no'>locs</span>,
+  <span class='no'>locs_pred</span>,
+  <span class='kw'>n_cores</span> <span class='kw'>=</span> <span class='fl'>1L</span>,
+  <span class='kw'>progress</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>Q_alpha</th>
-      <td><p>a list of length M composed of matrices that are the correlation structure of the CAR prior on beta</p></td>
+      <th>out</th>
+      <td><p>is a list of MCMC outputs from pgSPLM</p></td>
     </tr>
     <tr>
-      <th>tau2</th>
-      <td><p>a vector of length M that contains the CAR prior precisions</p></td>
+      <th>X</th>
+      <td><p>is a \(n \times p\) matrix of covariates at the observed locations.</p></td>
     </tr>
     <tr>
-      <th>use_spam</th>
-      <td><p>a boolean that determines if the output matrix is of class "spam" (<code>use_spam = TRUE</code>) or of class "dgCMatrix" (<code>use_spam = FALSE</code>; see Matrix package for details)</p></td>
+      <th>X_pred</th>
+      <td><p>is a \(n_{pred} \times p\) matrix of covariates at the locations where predictions are to be made.</p></td>
+    </tr>
+    <tr>
+      <th>locs</th>
+      <td><p>is a \(n \times 2\) matrix of locations where observations were taken.</p></td>
+    </tr>
+    <tr>
+      <th>locs_pred</th>
+      <td><p>is a \(n_pred \times 2\) matrix of locations where predictions are to be made.</p></td>
+    </tr>
+    <tr>
+      <th>n_cores</th>
+      <td><p>is the number of cores for parallel computation using openMP.</p></td>
+    </tr>
+    <tr>
+      <th>progress</th>
+      <td><p>is a logicial input that determines whether to print a progress bar.</p></td>
+    </tr>
+    <tr>
+      <th>verbose</th>
+      <td><p>is a logicial input that determines whether to print more detailed messages.</p></td>
     </tr>
     </table>
 
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
-
-    <p>A sparse block diagonal matrix representing the precisions for all of the resolutions of the random effects</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

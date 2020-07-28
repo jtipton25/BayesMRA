@@ -124,31 +124,26 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>locs</th>
-      <td><p>The location variables in 2 dimensions over which to construct the basis function representation</p></td>
+      <td><p>The location variables in 2 dimensions over which to construct the basis function representation in the fitting stage.</p></td>
+    </tr>
+    <tr>
+      <th>locs_pred</th>
+      <td><p>The location variables in 2 dimensions over which to construct the basis function representation in the prediction stage.</p></td>
+    </tr>
+    <tr>
+      <th>MRA</th>
+      <td><p>The multiresolution basis expansion at the observed locations. This object is the output of <code>mra_wendland-2d()</code> amd os of class "mra_wendland_2d".</p></td>
     </tr>
     <tr>
       <th>use_spam</th>
-      <td></td>
-    </tr>
-    <tr>
-      <th>M</th>
-      <td><p>The number of resolutions</p></td>
-    </tr>
-    <tr>
-      <th>n_neighbors</th>
-      <td></td>
-    </tr>
-    <tr>
-      <th>padding</th>
-      <td></td>
+      <td><p>is a boolean flag to determine whether the output is a list of spam matrix objects (<code>use_spam = TRUE</code>) or a an \(n \times n\) sparse Matrix of class "dgCMatrix" <code>use_spam = FALSE</code> (see spam and Matrix packages for details).</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    
-
-
+    <p>A list of objects including the MRA knots locations <code>locs_grid</code>,
+the Wendland basis representation matrix <code>W_pred</code> at the prediction locations, and the basis radius <code>radius</code></p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

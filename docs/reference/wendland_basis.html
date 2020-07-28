@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Title — make_Q_alpha_tau2 • BayesMRA</title>
+<title>calculate the Wendland basis function — wendland_basis • BayesMRA</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Title — make_Q_alpha_tau2" />
-<meta property="og:description" content="Title" />
+<meta property="og:title" content="calculate the Wendland basis function — wendland_basis" />
+<meta property="og:description" content="calculate the Wendland basis function" />
 
 
 
@@ -108,37 +108,33 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Title</h1>
-    <small class="dont-index">Source: <a href='https://github.com/jtipton25/BayesMRA/blob/master/R/make-Q-alpha_tau2.R'><code>R/make-Q-alpha_tau2.R</code></a></small>
-    <div class="hidden name"><code>make_Q_alpha_tau2.Rd</code></div>
+    <h1>calculate the Wendland basis function</h1>
+    <small class="dont-index">Source: <a href='https://github.com/jtipton25/BayesMRA/blob/master/R/wendland_basis.R'><code>R/wendland_basis.R</code></a></small>
+    <div class="hidden name"><code>wendland_basis.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Title</p>
+    <p>calculate the Wendland basis function</p>
     </div>
 
-    <pre class="usage"><span class='fu'>make_Q_alpha_tau2</span>(<span class='no'>Q_alpha</span>, <span class='no'>tau2</span>, <span class='kw'>use_spam</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
+    <pre class="usage"><span class='fu'>wendland_basis</span>(<span class='no'>d</span>, <span class='no'>radius</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>Q_alpha</th>
-      <td><p>a list of length M composed of matrices that are the correlation structure of the CAR prior on beta</p></td>
+      <th>d</th>
+      <td><p>The distance over which to calculate the Wendland basis</p></td>
     </tr>
     <tr>
-      <th>tau2</th>
-      <td><p>a vector of length M that contains the CAR prior precisions</p></td>
-    </tr>
-    <tr>
-      <th>use_spam</th>
-      <td><p>a boolean that determines if the output matrix is of class "spam" (<code>use_spam = TRUE</code>) or of class "dgCMatrix" (<code>use_spam = FALSE</code>; see Matrix package for details)</p></td>
+      <th>radius</th>
+      <td><p>The effective radius over which the Wendland basis is defined</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A sparse block diagonal matrix representing the precisions for all of the resolutions of the random effects</p>
+    <p>The output of the Wendland basis applied to the distance <code>d</code> for a given radius <code>radius</code>.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
