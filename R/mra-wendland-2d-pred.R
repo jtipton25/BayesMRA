@@ -1,22 +1,21 @@
 #' Code to construct the mutli-resolution sparse basis function representation for fitting spatial processes
 #'
-#' @param locs The location variables in 2 dimensions over which to construct the basis function representation
-#' @param M The number of resolutions
-#' @param n_neighbors 
-#' @param padding 
-#' @param use_spam 
+#' @param locs The location variables in 2 dimensions over which to construct the basis function representation in the fitting stage.
+#' @param locs_pred The location variables in 2 dimensions over which to construct the basis function representation in the prediction stage.
+#' @param MRA The multiresolution basis expansion at the observed locations. This object is the output of \code{mra_wendland-2d()}.
+#' @param use_spam is a boolean flag to determine whether the output is a list of spam matrix objects (\code{use_spam = TRUE}) or a an \eqn{n \times n}{n x n} sparse Matrix of class "dgCMatrix" \code{use_spam = FALSE} (see spam and Matrix packages for details).
 #'
 #' @importFrom fields rdist
 #' @importFrom spam spam
 #' @importFrom Matrix Matrix
-#' @return
+#' @return A list of objects including the MRA knots locations \code{locs_grid},
+#' the Wendland basis representation matrix \code{W_pred} at the prediction locations, and the basis radius \code{radius}
 #' @export
 mra_wendland_2d_pred <- function(
     locs,
     locs_pred,
     MRA,
-    # M           = 4,
-    use_spam    = TRUE
+    use_spam = TRUE
 ) {
     ## helper function
     wendland_basis <- function(d, radius) {
@@ -30,47 +29,15 @@ mra_wendland_2d_pred <- function(
         return(((1 - d_rad)^6 * (35 * d_rad^2 + 18 * d_rad + 3)) / 3 * (d_rad < 1))
     }
 
-    # if (padding < 0 | padding > 1) {
-    #     stop("the padding must be a number between 0 and 1")
-    # }
-
     N      <- nrow(locs)
     N_pred <- nrow(locs_pred)
     M      <- length(MRA$radius)
-    
-    # ## Assign as many gridpoints (approximately) as data
-    # n_grid <- ceiling(sqrt(N / 2^(M:1 - 1)))
-    # if (min(n_grid) < 4) {
-    #     stop("There are too many resolutions to form a reliable grid. Reduce M and try again.")
-    # }
-    # 
-    # ## define radius so that each basis function covers approximately 5 neighbors
-    # area_domain      <- diff(range(locs[, 1])) * diff(range(locs[, 2]))
-    # density_domain   <- N / area_domain
-    # radius_fine_grid <- sqrt(n_neighbors / (density_domain * base::pi))
-    # # radius           <- radius_fine_grid * (2^(1:M - 1))^2
-    # radius           <- radius_fine_grid * (2^(M:1 - 1))
-    # # radius <- radius / 2^(1:M - 1)
-    # 
-    # ## generate a set of grid locations for the Wendland basis
-    # locs_grid    <- vector(mode = "list", length = M)
-    # out          <- vector(mode = "list", length = M)
+
+
     W_pred       <- vector(mode = "list", length = M)
 
     for (m in 1:M) {
-        ## right now assuming a 2D grid -- can generalize later
-        # locs_grid[[m]] <- expand.grid(
-        #     seq(
-        #         range(locs[, 1])[1] - padding * diff(range(locs[, 1])),
-        #         range(locs[, 1])[2] + padding * diff(range(locs[, 1])),
-        #         length.out = n_grid[m]
-        #     ),
-        #     seq(
-        #         range(locs[, 2])[1] - padding * diff(range(locs[, 2])),
-        #         range(locs[, 2])[2] + padding * diff(range(locs[, 2])),
-        #         length.out = n_grid[m]
-        #     )
-        # )
+
         D_pred <- rdist(locs_pred, MRA$locs_grid[[m]])
         if (use_spam) {
             ## use the spam sparse matrix package

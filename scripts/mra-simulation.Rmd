@@ -1,11 +1,9 @@
 ---
 title: "`mcmc_mra()` simulation test"
-bibliography: pg.bib
 output:
   bookdown::html_document2: default
   bookdown::pdf_document2: 
     keep_tex: true
-nocite: '@*'  
 ---
 
 \newcommand{\bs}[1]{\boldsymbol{#1}}
@@ -231,7 +229,7 @@ sim_MRA <- rbind(
 sim_MRA
 ```
 
-```{r, sample_data}
+```{r, sample_data, cache = TRUE}
 set.seed(111)
 n_sites   <- 500
 s         <- sample(N, n_sites)
@@ -267,19 +265,16 @@ params <- list(
   n_mcmc = 500, 
   n_adapt = 500,
   n_thin = 1,
-  n_message = 5
+  n_message = 50
 )
 
 priors <- list(
-  alpha_tau2 = 1,
-  beta_tau2 = 1, 
+  alpha_tau2   = 1,
+  beta_tau2    = 1, 
   alpha_sigma2 = 1,
-  beta_sigma2 = 1, 
-  mu_beta =  rep(0, ncol(X_s)),
-  Sigma_beta = 5 * diag(ncol(X_s)),
-  mu_gamma =  rep(0, ncol(X)),
-  Sigma_gamma = 5 * diag(ncol(X))
-)
+  beta_sigma2  = 1, 
+  mu_beta      = rep(0, ncol(X_s)),
+  Sigma_beta   = 5 * diag(ncol(X_s)))
 
 inits <- NULL#list(tau2 = tau2)
 
@@ -306,7 +301,7 @@ if (file.exists(here::here("results", "fit-mra-sim.RData"))) {
     inits   = inits, 
     config  = config, 
     n_cores = 1L, 
-    verbose = TRUE
+    verbose = FALSE
   )
   end     <- Sys.time()
   runtime <- end - start
@@ -369,7 +364,7 @@ p1 + p2
 ```
 
 
-```{r, cache = TRUE, dependson = "simulate_data"}
+```{r, cache = TRUE, cache.extra = tools::md5sum(here::here("results", "fit-mra-sim.RData"))}
 data.frame(
     x = unlist(sapply(1:M, function(i) MRA$locs_grid[[i]][, 1])), 
     y = unlist(sapply(1:M, function(i) MRA$locs_grid[[i]][, 2])),
@@ -383,7 +378,7 @@ data.frame(
   theme_bw() 
 ```
 
-```{r}
+```{r, cache = TRUE, cache.extra = tools::md5sum(here::here("results", "fit-mra-sim.RData"))}
 ## Estimated MRA spatial proces
 W_alpha_res = unlist(sapply(1:M, function(m) W[, dims_idx == m] %*% apply(out$alpha, 2, mean)[dims_idx == m], simplify = "matrix"))
 dimnames(W_alpha_res) <- list(
@@ -484,206 +479,177 @@ dat_plot %>%
 
 
 
+<!-- ```{r, cache = TRUE, cache.extra = tools::md5sum(here::here("results", "fit-mra-sim.RData"))} -->
 
-```{r, cache = TRUE, cache.extra = tools::md5sum(here::here("results", "fit-mra-sim.RData"))}
-## time process averaged over space
-## with full uncertainty
+<!-- zlims <- c(min(c(Z_s), c(apply(out$Z, c(2, 3), mean))), max(c(Z_s), c(apply(out$Z, c(2, 3), mean)))) -->
 
-data.frame(
-  Z = c(
-    c(apply(out$Z, 3, mean)), 
-    c(apply(apply(out$Z, c(1, 3), mean), 2, quantile, prob = 0.025)), 
-    c(apply(apply(out$Z, c(1, 3), mean), 2, quantile, prob = 0.975)), 
-    c(apply(apply(out$Z, c(1, 3), mean), 2, quantile, prob = 0.25)), 
-    c(apply(apply(out$Z, c(1, 3), mean), 2, quantile, prob = 0.75)),
-    c(apply(Z_s, 2, mean))
-  ),
-  type = rep(c("mean", "lower95", "upper95", "lower50", "upper50", "truth"), each = n_time),
-  time = 1:n_time
-) %>%
-  pivot_wider(names_from = type, values_from = Z) %>%
-  ggplot(aes(x = time, y = mean)) +
-  geom_line(aes(x = time, y = mean), color = "red") +
-    geom_line(aes(x = time, y = truth), color = "black") +
-  geom_ribbon(aes(ymin = lower95, ymax = upper95), color = NA, fill = "red", alpha = 0.2) +
-  geom_ribbon(aes(ymin = lower50, ymax = upper50), color = NA, fill = "red", alpha = 0.4) +
-  ggtitle("spatially-averaged estimates for climate state Z") +
-  xlab("Years in the past")
-```
+<!-- dat_map <- data.frame( -->
+<!--   temp    = c(Z_s), -->
+<!--   lat     = locs_s[, 2], -->
+<!--   long    = locs_s[, 1], -->
+<!--   time    = rep(1:n_time, each = n_sites) -->
+<!-- ) -->
 
+<!-- g_map <- dat_map %>%  -->
+<!--   # subset(time == 3) %>% -->
+<!--   ggplot(aes(x = long, y = lat, fill = temp)) + -->
+<!--   geom_raster() + -->
+<!--   xlab("Longitude") +  -->
+<!--   ylab("Latitude") +  -->
+<!--   ggtitle("Simulated surface") + -->
+<!--   colorspace::scale_fill_continuous_diverging("Blue-Red 3", mid = mean(Z_s[, 1]), limits = zlims) + -->
+<!--   facet_wrap(~ time) -->
 
+<!-- dat_pred <- data.frame( -->
+<!--   temp    = c(apply(out$Z, c(2, 3), mean)), -->
+<!--   lat     = locs_s[, 2], -->
+<!--   long    = locs_s[, 1], -->
+<!--   time    = rep(1:n_time, each = n_sites) -->
+<!-- ) -->
 
-```{r, cache = TRUE, cache.extra = tools::md5sum(here::here("results", "fit-mra-sim.RData"))}
+<!-- g_preds <- dat_pred %>%  -->
+<!--   # subset(time == 3) %>% -->
+<!--   ggplot(aes(x = long, y = lat, fill = temp)) + -->
+<!--   geom_raster() + -->
+<!--   xlab("Longitude") +  -->
+<!--   ylab("Latitude") +  -->
+<!--   ggtitle("Posterior mean predictions") + -->
+<!--   colorspace::scale_fill_continuous_diverging("Blue-Red 3", mid = mean(Z[, 1]), limits = zlims) + -->
+<!--   facet_wrap(~ time) -->
 
-zlims <- c(min(c(Z_s), c(apply(out$Z, c(2, 3), mean))), max(c(Z_s), c(apply(out$Z, c(2, 3), mean))))
+<!-- g_map + g_preds + plot_layout(guides = "collect") -->
 
-dat_map <- data.frame(
-  temp    = c(Z_s),
-  lat     = locs_s[, 2],
-  long    = locs_s[, 1],
-  time    = rep(1:n_time, each = n_sites)
-)
+<!-- ``` -->
 
-g_map <- dat_map %>% 
-  # subset(time == 3) %>%
-  ggplot(aes(x = long, y = lat, fill = temp)) +
-  geom_raster() +
-  xlab("Longitude") + 
-  ylab("Latitude") + 
-  ggtitle("Simulated surface") +
-  colorspace::scale_fill_continuous_diverging("Blue-Red 3", mid = mean(Z_s[, 1]), limits = zlims) +
-  facet_wrap(~ time)
+<!-- ```{r, cache = TRUE, cache.extra = tools::md5sum(here::here("results", "fit-mra-sim.RData"))} -->
 
-dat_pred <- data.frame(
-  temp    = c(apply(out$Z, c(2, 3), mean)),
-  lat     = locs_s[, 2],
-  long    = locs_s[, 1],
-  time    = rep(1:n_time, each = n_sites)
-)
+<!-- zlims <- c(min(c(X %*% gamma), c(X %*% apply(out$gamma, 2, mean))), max(c(X %*% gamma), c(X %*% apply(out$gamma, 2, mean)))) -->
+<!-- mid_lims <- mean(X %*% gamma) -->
 
-g_preds <- dat_pred %>% 
-  # subset(time == 3) %>%
-  ggplot(aes(x = long, y = lat, fill = temp)) +
-  geom_raster() +
-  xlab("Longitude") + 
-  ylab("Latitude") + 
-  ggtitle("Posterior mean predictions") +
-  colorspace::scale_fill_continuous_diverging("Blue-Red 3", mid = mean(Z[, 1]), limits = zlims) +
-  facet_wrap(~ time)
+<!-- dat_fixed <- data.frame( -->
+<!--   temp    = c(X %*% gamma), -->
+<!--   lat     = locs[, 2], -->
+<!--   long    = locs[, 1] -->
+<!-- ) -->
 
-g_map + g_preds + plot_layout(guides = "collect")
+<!-- g_fixed <- dat_fixed %>%  -->
+<!--   # subset(time == 3) %>% -->
+<!--   ggplot(aes(x = long, y = lat, fill = temp)) + -->
+<!--   geom_raster() + -->
+<!--   xlab("Longitude") +  -->
+<!--   ylab("Latitude") +  -->
+<!--   ggtitle("Simulated Fixed effects") + -->
+<!--   colorspace::scale_fill_continuous_diverging("Blue-Red 3", mid = mid_lims, limits = zlims) -->
 
-```
+<!-- dat_fixed_pred <- data.frame( -->
+<!--   temp    = c(X %*% apply(out$gamma, 2, mean)), -->
+<!--   lat     = locs[, 2], -->
+<!--   long    = locs[, 1] -->
+<!-- ) -->
 
-```{r, cache = TRUE, cache.extra = tools::md5sum(here::here("results", "fit-mra-sim.RData"))}
+<!-- g_fixed_pred <- dat_fixed_pred %>%  -->
+<!--   # subset(time == 3) %>% -->
+<!--   ggplot(aes(x = long, y = lat, fill = temp)) + -->
+<!--   geom_raster() + -->
+<!--   xlab("Longitude") +  -->
+<!--   ylab("Latitude") +  -->
+<!--   ggtitle("Estimated Fixed effects") + -->
+<!--   colorspace::scale_fill_continuous_diverging("Blue-Red 3", mid = mid_lims, limits = zlims)  -->
 
-zlims <- c(min(c(X %*% gamma), c(X %*% apply(out$gamma, 2, mean))), max(c(X %*% gamma), c(X %*% apply(out$gamma, 2, mean))))
-mid_lims <- mean(X %*% gamma)
+<!-- g_fixed + g_fixed_pred + plot_layout(guides = "collect") -->
+<!-- ``` -->
 
-dat_fixed <- data.frame(
-  temp    = c(X %*% gamma),
-  lat     = locs[, 2],
-  long    = locs[, 1]
-)
+<!-- ### Posterior predictions -->
 
-g_fixed <- dat_fixed %>% 
-  # subset(time == 3) %>%
-  ggplot(aes(x = long, y = lat, fill = temp)) +
-  geom_raster() +
-  xlab("Longitude") + 
-  ylab("Latitude") + 
-  ggtitle("Simulated Fixed effects") +
-  colorspace::scale_fill_continuous_diverging("Blue-Red 3", mid = mid_lims, limits = zlims)
-
-dat_fixed_pred <- data.frame(
-  temp    = c(X %*% apply(out$gamma, 2, mean)),
-  lat     = locs[, 2],
-  long    = locs[, 1]
-)
-
-g_fixed_pred <- dat_fixed_pred %>% 
-  # subset(time == 3) %>%
-  ggplot(aes(x = long, y = lat, fill = temp)) +
-  geom_raster() +
-  xlab("Longitude") + 
-  ylab("Latitude") + 
-  ggtitle("Estimated Fixed effects") +
-  colorspace::scale_fill_continuous_diverging("Blue-Red 3", mid = mid_lims, limits = zlims) 
-
-g_fixed + g_fixed_pred + plot_layout(guides = "collect")
-```
-
-### Posterior predictions
-
-```{r, eval=TRUE, message=FALSE, include=FALSE}
-if (file.exists(here::here("results", "pg-mvgp", "posterior-prediction-sim-mra.RData"))) {
-  load(here::here("results", "pg-mvgp", "posterior-prediction-sim-mra.RData"))
-} else {
-  preds <- predict_pg_mvgp_univariate_mra(out, X_s, X_oos, locs_s, locs_oos)
-  save(preds, file = here::here("results", "pg-mvgp", "posterior-prediction-sim-mra.RData"), compress = FALSE)
-}  
-```
+<!-- ```{r, eval=TRUE, message=FALSE, include=FALSE} -->
+<!-- if (file.exists(here::here("results", "pg-mvgp", "posterior-prediction-sim-mra.RData"))) { -->
+<!--   load(here::here("results", "pg-mvgp", "posterior-prediction-sim-mra.RData")) -->
+<!-- } else { -->
+<!--   preds <- predict_pg_mvgp_univariate_mra(out, X_s, X_oos, locs_s, locs_oos) -->
+<!--   save(preds, file = here::here("results", "pg-mvgp", "posterior-prediction-sim-mra.RData"), compress = FALSE) -->
+<!-- }   -->
+<!-- ``` -->
 
 
 
 
 
-```{r}
-Z_post_mean <- apply(out$Z, c(2, 3), mean)
-Z_pred_mean <- apply(preds$Z, c(2, 3), mean)
-dat_preds <- data.frame(
-  temp    = c(rbind(Z_post_mean, Z_pred_mean)),
-  anomaly = c(rbind(Z_post_mean - Z_post_mean[, 1], 
-                    Z_pred_mean - Z_pred_mean[, 1])),
-  lat     = c(locs_s[, 2], locs_oos[, 2]),
-  long    = c(locs_s[, 1], locs_oos[, 1]),
-  time    = rep(1:n_time, each = sum(nrow(Z_post_mean), nrow(Z_pred_mean)))
-)
+<!-- ```{r} -->
+<!-- Z_post_mean <- apply(out$Z, c(2, 3), mean) -->
+<!-- Z_pred_mean <- apply(preds$Z, c(2, 3), mean) -->
+<!-- dat_preds <- data.frame( -->
+<!--   temp    = c(rbind(Z_post_mean, Z_pred_mean)), -->
+<!--   anomaly = c(rbind(Z_post_mean - Z_post_mean[, 1],  -->
+<!--                     Z_pred_mean - Z_pred_mean[, 1])), -->
+<!--   lat     = c(locs_s[, 2], locs_oos[, 2]), -->
+<!--   long    = c(locs_s[, 1], locs_oos[, 1]), -->
+<!--   time    = rep(1:n_time, each = sum(nrow(Z_post_mean), nrow(Z_pred_mean))) -->
+<!-- ) -->
 
-g_preds <- dat_preds %>% 
-  # subset(time == 3) %>%
-  ggplot(aes(x = long, y = lat, fill = temp)) +
-  geom_raster() +
-  xlab("Longitude") + 
-  ylab("Latitude") + 
-  ggtitle("Posterior mean predictions") +
-  # scale_fill_viridis()  +
-  colorspace::scale_fill_continuous_diverging("Blue-Red 3", mid = mean(Z[, 1])) +
-  facet_wrap(~ time)
-# scale_fill_continuous(low = "blue", high = "red")# +
-# geom_point(data = dat_fossil, aes(x = londd, y = latdd),
-#            col = "white", size = 0.1, alpha = 0.25)
+<!-- g_preds <- dat_preds %>%  -->
+<!--   # subset(time == 3) %>% -->
+<!--   ggplot(aes(x = long, y = lat, fill = temp)) + -->
+<!--   geom_raster() + -->
+<!--   xlab("Longitude") +  -->
+<!--   ylab("Latitude") +  -->
+<!--   ggtitle("Posterior mean predictions") + -->
+<!--   # scale_fill_viridis()  + -->
+<!--   colorspace::scale_fill_continuous_diverging("Blue-Red 3", mid = mean(Z[, 1])) + -->
+<!--   facet_wrap(~ time) -->
+<!-- # scale_fill_continuous(low = "blue", high = "red")# + -->
+<!-- # geom_point(data = dat_fossil, aes(x = londd, y = latdd), -->
+<!-- #            col = "white", size = 0.1, alpha = 0.25) -->
 
-g_full + g_preds  
-```
+<!-- g_full + g_preds   -->
+<!-- ``` -->
 
-```{r}
-g_anom <- dat_preds %>% 
-  # subset(time == 1) %>%
-  ggplot(aes(x = long, y = lat, fill = anomaly)) +
-  geom_raster() +
-  xlab("Longitude") + 
-  ylab("Latitude") + 
-  ggtitle("Posterior mean anomalies") +
-  colorspace::scale_fill_continuous_diverging("Blue-Red 3", mid = 0) +
-  facet_wrap(~ time)
+<!-- ```{r} -->
+<!-- g_anom <- dat_preds %>%  -->
+<!--   # subset(time == 1) %>% -->
+<!--   ggplot(aes(x = long, y = lat, fill = anomaly)) + -->
+<!--   geom_raster() + -->
+<!--   xlab("Longitude") +  -->
+<!--   ylab("Latitude") +  -->
+<!--   ggtitle("Posterior mean anomalies") + -->
+<!--   colorspace::scale_fill_continuous_diverging("Blue-Red 3", mid = 0) + -->
+<!--   facet_wrap(~ time) -->
 
-g_anom
-```
+<!-- g_anom -->
+<!-- ``` -->
 
 
-```{r}
-Z_pred_mean <- apply(preds$Z, c(2, 3), mean)
-Z_lower_95 <- apply(apply(preds$Z, c(1, 3), mean), 2, quantile, prob = 0.025)
-Z_upper_95 <- apply(apply(preds$Z, c(1, 3), mean), 2, quantile, prob = 0.975)
-Z_lower_50 <- apply(apply(preds$Z, c(1, 3), mean), 2, quantile, prob = 0.25)
-Z_upper_50 <- apply(apply(preds$Z, c(1, 3), mean), 2, quantile, prob = 0.75)
+<!-- ```{r} -->
+<!-- Z_pred_mean <- apply(preds$Z, c(2, 3), mean) -->
+<!-- Z_lower_95 <- apply(apply(preds$Z, c(1, 3), mean), 2, quantile, prob = 0.025) -->
+<!-- Z_upper_95 <- apply(apply(preds$Z, c(1, 3), mean), 2, quantile, prob = 0.975) -->
+<!-- Z_lower_50 <- apply(apply(preds$Z, c(1, 3), mean), 2, quantile, prob = 0.25) -->
+<!-- Z_upper_50 <- apply(apply(preds$Z, c(1, 3), mean), 2, quantile, prob = 0.75) -->
 
-## time process averaged over space
-## with full uncertainty
-data.frame(
-  Z = c(
-    c(apply(Z_pred_mean, 2, mean)),
-    # c(apply(preds, 3, mean)), 
-    c(Z_lower_95),
-    c(Z_upper_95),
-    c(Z_lower_50),
-    c(Z_upper_50),
-    c(apply(Z_oos, 2, mean))
-  ),
-  # type = "mean",
-  type = rep(c("mean", "lower95", "upper95", "lower50", "upper50", "truth"), each = n_time),
-  time = 1:n_time * 250 - 250
-) %>%
-  pivot_wider(names_from = type, values_from = Z) %>%
-  ggplot(aes(x = time, y = mean)) +
-  geom_line(aes(x = time, y = mean), color = "red") +
-  geom_line(aes(x = time, y = truth), color = "black") +
-  geom_ribbon(aes(ymin = lower95, ymax = upper95), color = NA, fill = "red", alpha = 0.2) +
-  geom_ribbon(aes(ymin = lower50, ymax = upper50), color = NA, fill = "red", alpha = 0.4) +
-  ggtitle("spatially-averaged estimates for climate state Z") +
-  xlab("Years in the past")
-```
+<!-- ## time process averaged over space -->
+<!-- ## with full uncertainty -->
+<!-- data.frame( -->
+<!--   Z = c( -->
+<!--     c(apply(Z_pred_mean, 2, mean)), -->
+<!--     # c(apply(preds, 3, mean)),  -->
+<!--     c(Z_lower_95), -->
+<!--     c(Z_upper_95), -->
+<!--     c(Z_lower_50), -->
+<!--     c(Z_upper_50), -->
+<!--     c(apply(Z_oos, 2, mean)) -->
+<!--   ), -->
+<!--   # type = "mean", -->
+<!--   type = rep(c("mean", "lower95", "upper95", "lower50", "upper50", "truth"), each = n_time), -->
+<!--   time = 1:n_time * 250 - 250 -->
+<!-- ) %>% -->
+<!--   pivot_wider(names_from = type, values_from = Z) %>% -->
+<!--   ggplot(aes(x = time, y = mean)) + -->
+<!--   geom_line(aes(x = time, y = mean), color = "red") + -->
+<!--   geom_line(aes(x = time, y = truth), color = "black") + -->
+<!--   geom_ribbon(aes(ymin = lower95, ymax = upper95), color = NA, fill = "red", alpha = 0.2) + -->
+<!--   geom_ribbon(aes(ymin = lower50, ymax = upper50), color = NA, fill = "red", alpha = 0.4) + -->
+<!--   ggtitle("spatially-averaged estimates for climate state Z") + -->
+<!--   xlab("Years in the past") -->
+<!-- ``` -->
 
 
 
