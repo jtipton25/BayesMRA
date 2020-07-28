@@ -10,34 +10,52 @@
 #' @importFrom fields rdist
 #' @importFrom spam spam
 #' @importFrom Matrix Matrix
-#' @return A list of objects including the MRA knots locations \code{locs_grid},
-#' the Wendland basis representation matrix \code{W} at the observed locations, and the basis radius \code{radius}
+#' @return A list of objects including the MRA knots locations `locs_grid`,
+#' the Wendland basis representation matrix `W` at the observed locations,
+#' the basis radius `radius`, the numbers of resolutions `M`,
+#' the number of expected neighbors in the interior oe each grid `n_neighbors`,
+#' the number of interior basis functions in one direction `n_coarse_grid`,
+#' the number of additional padding basis functions given by `n_padding`,
+#' and the setting `use_spam` which determines whether the MRA output uses the `spam` format.
 #' @export
 mra_wendland_2d <- function(
     locs,
-    M           = 4,
-    n_neighbors = 68,
+    M             = 4,
+    n_neighbors   = 68,
     n_coarse_grid = 10,
     # n_max_fine_grid = 2^12,
     # radius      = 25,
     n_padding     = 5L,
-    use_spam    = TRUE
+    use_spam      = TRUE
 ) {
-    ## helper function
-    wendland_basis <- function(d, radius) {
-        if (any(d < 0)) {
-            stop("d must be nonnegative")
-        }
-        if (radius <= 0) {
-            stop("radius must be positive")
-        }
-        d_rad <- d / radius
-        return(((1 - d_rad)^6 * (35 * d_rad^2 + 18 * d_rad + 3)) / 3 * (d_rad < 1))
+    ##
+    ## check inputs
+    ##
+
+    if (is.null(nrow(locs))) {
+        stop("locs must be a numeric matrix with N rows and 2 columns")
+    }
+    N <- nrow(locs)
+
+    if (!is_numeric_matrix(locs, N, 2)) {
+        stop("locs must be a numeric matrix with N rows and 2 columns")
+    }
+    if (!is_positive_integer(M, 1)) {
+        stop("the number of resolutions M must be a positive integer")
+    }
+    if (!is_positive_integer(n_neighbors, 1)) {
+        stop("n_neighbors must be a positive integer")
+    }
+    if (!is_positive_integer(n_coarse_grid, 1)) {
+        stop("n_coarse_grid must be a positive integer")
+    }
+    if (!is_positive_integer(n_padding, 1)) {
+        stop("n_padding must be a positive integer")
+    }
+    if (!is.logical(use_spam) || length(use_spam) != 1 || is.na(use_spam)) {
+        stop("use_spam must be either TRUE or FALSE")
     }
 
-    if (!is_positive_integer(n_padding, 1)) {
-        stop("the padding must be a positive integer")
-    }
 
     N <- nrow(locs)
     ## Assign as many gridpoints (approximately) as data
@@ -102,9 +120,14 @@ mra_wendland_2d <- function(
     }
     return(
         list(
-            locs_grid = locs_grid,
-            W         = W,
-            radius    = radius
+            locs_grid     = locs_grid,
+            W             = W,
+            radius        = radius,
+            M             = M,
+            n_neighbors   = n_neighbors,
+            n_coarse_grid = n_coarse_grid,
+            n_padding     = n_padding,
+            use_spam      = use_spam
         )
     )
 }

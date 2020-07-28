@@ -7,18 +7,17 @@
 mra_wendland_2d_pred(locs, locs_pred, MRA, use_spam = TRUE)
 }
 \arguments{
-\item{locs}{The location variables in 2 dimensions over which to construct the basis function representation}
+\item{locs}{The location variables in 2 dimensions over which to construct the basis function representation in the fitting stage.}
 
-\item{use_spam}{}
+\item{locs_pred}{The location variables in 2 dimensions over which to construct the basis function representation in the prediction stage.}
 
-\item{M}{The number of resolutions}
+\item{MRA}{The multiresolution basis expansion at the observed locations. This object is the output of \code{mra_wendland-2d()}.}
 
-\item{n_neighbors}{}
-
-\item{padding}{}
+\item{use_spam}{is a boolean flag to determine whether the output is a list of spam matrix objects (\code{use_spam = TRUE}) or a an \eqn{n \times n}{n x n} sparse Matrix of class "dgCMatrix" \code{use_spam = FALSE} (see spam and Matrix packages for details).}
 }
 \value{
-
+A list of objects including the MRA knots locations \code{locs_grid},
+the Wendland basis representation matrix \code{W_pred} at the prediction locations, and the basis radius \code{radius}
 }
 \description{
 Code to construct the mutli-resolution sparse basis function representation for fitting spatial processes
