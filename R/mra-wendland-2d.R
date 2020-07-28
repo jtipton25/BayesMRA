@@ -118,16 +118,19 @@ mra_wendland_2d <- function(
             W[[m]] <- Matrix(wendland_basis(D, radius[m]), sparse = TRUE)
         }
     }
-    return(
-        list(
-            locs_grid     = locs_grid,
-            W             = W,
-            radius        = radius,
-            M             = M,
-            n_neighbors   = n_neighbors,
-            n_coarse_grid = n_coarse_grid,
-            n_padding     = n_padding,
-            use_spam      = use_spam
-        )
+
+    out <- list(
+        locs_grid     = locs_grid,
+        W             = W,
+        radius        = radius,
+        M             = M,
+        n_neighbors   = n_neighbors,
+        n_coarse_grid = n_coarse_grid,
+        n_padding     = n_padding,
+        use_spam      = use_spam
     )
+
+    class(out) <- "mra_wendland_2d"
+
+    return(out)
 }

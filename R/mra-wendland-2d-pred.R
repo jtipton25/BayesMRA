@@ -2,14 +2,14 @@
 #'
 #' @param locs The location variables in 2 dimensions over which to construct the basis function representation in the fitting stage.
 #' @param locs_pred The location variables in 2 dimensions over which to construct the basis function representation in the prediction stage.
-#' @param MRA The multiresolution basis expansion at the observed locations. This object is the output of \code{mra_wendland-2d()}.
-#' @param use_spam is a boolean flag to determine whether the output is a list of spam matrix objects (\code{use_spam = TRUE}) or a an \eqn{n \times n}{n x n} sparse Matrix of class "dgCMatrix" \code{use_spam = FALSE} (see spam and Matrix packages for details).
+#' @param MRA The multiresolution basis expansion at the observed locations. This object is the output of `mra_wendland-2d()` amd os of class "mra_wendland_2d".
+#' @param use_spam is a boolean flag to determine whether the output is a list of spam matrix objects (`use_spam = TRUE`) or a an \eqn{n \times n}{n x n} sparse Matrix of class "dgCMatrix" `use_spam = FALSE` (see spam and Matrix packages for details).
 #'
 #' @importFrom fields rdist
 #' @importFrom spam spam
 #' @importFrom Matrix Matrix
-#' @return A list of objects including the MRA knots locations \code{locs_grid},
-#' the Wendland basis representation matrix \code{W_pred} at the prediction locations, and the basis radius \code{radius}
+#' @return A list of objects including the MRA knots locations `locs_grid`,
+#' the Wendland basis representation matrix `W_pred` at the prediction locations, and the basis radius `radius`
 #' @export
 mra_wendland_2d_pred <- function(
     locs,
@@ -18,16 +18,19 @@ mra_wendland_2d_pred <- function(
     use_spam = TRUE
 ) {
     ## helper function
-    wendland_basis <- function(d, radius) {
-        if (any(d < 0)) {
-            stop("d must be nonnegative")
-        }
-        if (radius <= 0) {
-            stop("radius must be positive")
-        }
-        d_rad <- d / radius
-        return(((1 - d_rad)^6 * (35 * d_rad^2 + 18 * d_rad + 3)) / 3 * (d_rad < 1))
-    }
+    # wendland_basis <- function(d, radius) {
+    #     if (any(d < 0)) {
+    #         stop("d must be nonnegative")
+    #     }
+    #     if (radius <= 0) {
+    #         stop("radius must be positive")
+    #     }
+    #     d_rad <- d / radius
+    #     return(((1 - d_rad)^6 * (35 * d_rad^2 + 18 * d_rad + 3)) / 3 * (d_rad < 1))
+    # }
+
+    if (class(MRA) != "mra_wendland_2d")
+        stop('MRA must be of class "mra_wendland_2d"')
 
     N      <- nrow(locs)
     N_pred <- nrow(locs_pred)
@@ -47,11 +50,14 @@ mra_wendland_2d_pred <- function(
             W_pred[[m]] <- Matrix(wendland_basis(D_pred, MRA$radius[m]), sparse = TRUE)
         }
     }
-    return(
-        list(
-            locs_grid = MRA$locs_grid,
-            W_pred    = W_pred,
-            radius    = MRA$radius
-        )
+
+    out <- list(
+        locs_grid = MRA$locs_grid,
+        W_pred    = W_pred,
+        radius    = MRA$radius
     )
+
+    class(out) <- "mra_wendland_2d_pred"
+
+    return(out)
 }
