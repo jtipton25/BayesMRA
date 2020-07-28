@@ -7,7 +7,7 @@
 #' @importFrom spam bdiag.spam
 #' @importFrom Matrix bdiag
 #'
-#' @return
+#' @return A sparse block diagonal matrix representing the precisions for all of the resolutions of the random effects
 #' @export
 make_Q_alpha_tau2 <- function(Q_alpha, tau2, use_spam = TRUE) {
 

@@ -14,7 +14,7 @@ make_Q_alpha_tau2(Q_alpha, tau2, use_spam = TRUE)
 \item{use_spam}{a boolean that determines if the output matrix is of class "spam" (\code{use_spam = TRUE}) or of class "dgCMatrix" (\code{use_spam = FALSE}; see Matrix package for details)}
 }
 \value{
-
+A sparse block diagonal matrix representing the precisions for all of the resolutions of the random effects
 }
 \description{
 Title

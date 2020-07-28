@@ -15,15 +15,9 @@
 #'  to output a progress message. For example, \code{n_message = 50}
 #'  outputs progress messages every 50 iterations.
 #' @param priors is the list of prior settings.
-#' @param M The number of resolutions.
-#' @param n_neighbors The expected number of neighbors for each interior basis function. This determines the basis radius parameter.
-#' @param n_coarse_grid The number of basis functions in one direction (e.g. \code{n_coarse_grid = 10} results in a \eqn{10 \times 10}{10x10} course grid which is further extended by the number of additional padding basis functions given by \code{n_padding}.
-#' @param n_padding The number of additional boundary points to add on each boundary. For example, n_padding = 5 will add 5 boundary knots to the both the left  and right side of the grid).
 #' @param n_cores is the number of cores for parallel computation using openMP.
 #' @param inits is the list of initial values if the user wishes to specify initial values. If these values are not specified, then the initial values will be randomly sampled from the prior.
 #' @param config is the list of configuration values if the user wishes to specify initial values. If these values are not specified, then default a configuration will be used.
-#' @param verbose Should verbose output be printed? Typically this is only useful for troubleshooting.
-#' @param use_spam is a boolean flag to determine whether the output is a list of spam matrix objects (\code{use_spam = TRUE}) or a an \eqn{n \times n}{n x n} sparse Matrix of class "dgCMatrix" \code{use_spam = FALSE} (see spam and Matrix packages for details).
 #' @param n_chain is the MCMC chain id. The default is 1.
 #'
 #' @export
@@ -34,22 +28,25 @@
 #' @importFrom stats lm rgamma
 #' @import spam
 
-mcmc_mra <- function(
+## polya-gamma spatial linear regression model
+mcmc_mra_integrated <- function(
     y,
     X,
     locs,
     params,
     priors,
-    M             = 4,
-    n_neighbors   = 68,
+    M = 4,
     n_coarse_grid = 10,
-    n_padding     = 5L,
+    # n_max_fine_grid = 2^6,
     n_cores = 1L,
     inits   = NULL,
     config  = NULL,
     verbose = FALSE,
     use_spam = TRUE, ## use spam or Matrix for sparse matrix operations
     n_chain       = 1
+    # pool_s2_tau2  = true,
+    # file_name     = "DM-fit",
+    # corr_function = "exponential"
 ) {
 
     ##
@@ -104,14 +101,6 @@ mcmc_mra <- function(
     if (!is.null(config)) {
         if (!is.null(config[['sample_sigma2']])) {
             sample_sigma2 <- config[['sample_sigma2']]
-        }
-    }
-
-    ## do we sample the latent intensity parameter alpha
-    sample_alpha <- TRUE
-    if (!is.null(config)) {
-        if (!is.null(config[['sample_alpha']])) {
-            sample_alpha <- config[['sample_alpha']]
         }
     }
 
@@ -217,9 +206,6 @@ mcmc_mra <- function(
     tau2   <- rep(1, M)
     #100 * pmin(pmax(1 / rgamma(M, 0.5, lambda), 1), 100)
 
-
-    Q_alpha_tau2 <- make_Q_alpha_tau2(Q_alpha, tau2, use_spam = use_spam)
-
     ##
     ## initialize rho
     ##
@@ -233,45 +219,16 @@ mcmc_mra <- function(
     sigma2  <- pmax(pmin(1 / rgamma(1, priors$alpha_sigma2, priors$beta_sigma2), 5), 0.1)
     sigma   <- sqrt(sigma2)
 
-    ##
-    ## initialize alpha
-    ##
-
-    alpha <- NULL
-    if (use_spam) {
-        A_alpha <- 1 / sigma2 * tWW + Q_alpha_tau2
-        ## precalculate the sparse cholesky structure for faster Gibbs updates
-        Rstruct <- chol(A_alpha)
-        b_alpha <- 1 / sigma2 * tW %*% (y - X_beta)
-        # alpha   <- as.vector(rmvnorm.canonical(1, b_alpha, A_alpha, Rstruct = Rstruct))
-        alpha  <- rep(0, sum(n_dims))
-    } else {
-        stop("The only sparse matrix pacakage available is spam")
-    }
-
-    ## define the constraint matrices to ensure each resolution has random effects with mean 0
-    A_constraint <- t(
-        sapply(1:M, function(i){
-            tmp = rep(0, sum(n_dims))
-            tmp[dims_idx == i] <- 1
-            return(tmp)
-        })
-    )
-    a_constraint <- rep(0, M)
-
-
     ## intialize an ICAR structure for fitting alpha
     Q_alpha      <- make_Q_alpha_2d(sqrt(n_dims), rep(1, length(n_dims)), use_spam = use_spam)
     Q_alpha_tau2 <- make_Q_alpha_tau2(Q_alpha, tau2, use_spam = use_spam)
 
 
-    W_alpha <- W %*% alpha
-
     ##
     ## sampler config options -- to be added later
     ##
-    #
 
+    ##
     ## check for initial values
     ##
 
@@ -317,7 +274,6 @@ mcmc_mra <- function(
     #     }
     # }
 
-
     ##
     ## setup save variables
     ##
@@ -327,8 +283,7 @@ mcmc_mra <- function(
     # rho_save     <- rep(0, n_save)
     tau2_save    <- matrix(0, n_save, M)
     sigma2_save  <- rep(0, n_save)
-    alpha_save   <- matrix(0, n_save, sum(n_dims))
-    lambda_save    <- matrix(0, n_save, M)
+    lambda_save  <- matrix(0, n_save, M)
 
     ##
     ## initialize tuning
@@ -369,10 +324,10 @@ mcmc_mra <- function(
             if (verbose)
                 message("sample sigma2")
 
-            devs <- y - X_beta - W_alpha
-            SS        <- sum(devs^2)
+            devs   <- y - X_beta - W_alpha
+            SS     <- sum(devs^2)
             sigma2 <- 1 / rgamma(1, N / 2 + priors$alpha_sigma2, SS / 2 + priors$beta_sigma2)
-            sigma     <- sqrt(sigma2)
+            sigma  <- sqrt(sigma2)
         }
 
         ##
@@ -396,20 +351,16 @@ mcmc_mra <- function(
         ## sample alpha
         ##
 
-        if (sample_alpha) {
-            if (verbose)
-                message("sample alpha")
-            A_alpha <- 1 / sigma2 * tWW + Q_alpha_tau2
-            # A_alpha_chol <- chol.spam(A_alpha, Rstruct = Rstruct)
-            b_alpha <- 1 / sigma2 * tW %*% (y - X_beta)
-            # alpha   <- as.vector(rmvnorm.canonical(1, b_alpha, A_alpha, Rstruct = Rstruct))
-            ## sample constrained to sum to 1
-            alpha   <- as.vector(rmvnorm.canonical.const(1, b_alpha, A_alpha, Rstruct = Rstruct,
-                                                         A = A_constraint, a = a_constraint))
-        }
-
-        ## update W_alpha
-        W_alpha <- W %*% alpha
+        # if (sample_alpha) {
+        #     if (verbose)
+        #         message("sample alpha")
+        #     A_alpha <- 1 / sigma2 * tWW + Q_alpha_tau2
+        #     b_alpha <- 1 / sigma2 * tW %*% (y - X_beta)
+        #     alpha   <- as.vector(rmvnorm.canonical(1, b_alpha, A_alpha, Rstruct = Rstruct))
+        # }
+        #
+        # ## update W_alpha
+        # W_alpha <- W %*% alpha
 
         ##
         ## sample rho
@@ -444,8 +395,7 @@ mcmc_mra <- function(
             for (m in 1:M) {
                 devs    <- alpha[dims_idx == m]
                 SS      <- as.numeric(devs %*% (Q_alpha[[m]] %*% devs))
-                tau2[m] <- rgamma(1, priors$alpha_tau2 + n_dims[m] / 2, priors$beta_tau2 + SS / 2)
-                # tau2[m] <- 1 / rgamma(1, 0.5 + n_dims[m] / 2, lambda[m] + SS / 2)
+                tau2[m] <- 1 / rgamma(1, 0.5 + n_dims[m] / 2, lambda[m] + SS / 2)
                 # tau2_inv[m] <- 1 / rgamma(1, 0.5 + n_dims[m] / 2, lambda[m] + SS / 2)
                 # tau2[m]     <- 1 / tau2_inv[m]
             }
@@ -461,8 +411,8 @@ mcmc_mra <- function(
             if (verbose)
                 message("sample lambda")
             for (m in 1:M) {
-                lambda[m]     <- rgamma(1, 1, scale_lambda + 1 / tau2[m])
-                # lambda[m]     <- rgamma(1, 1, scale_lambda + tau2[m])
+                # lambda[m]     <- rgamma(1, 1, scale_lambda + 1 / tau2[m])
+                lambda[m]     <- rgamma(1, 1, scale_lambda + tau2[m])
             }
         }
 

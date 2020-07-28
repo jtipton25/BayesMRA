@@ -1,19 +1,20 @@
 #' Generate CAR precision matrix
 #'
-#' A function for setting up a conditional autoregressive (CAR) precision matrix for use as a prior in Bayesian penalized splines
+#' A function for setting up a conditional autoregressive (CAR) or simultaneous autoregressive (SAR) precision matrix for use as a prior in Bayesian models
 #'
-#' @param n is the length of the coefficient vector for the penalized bspline model  
-#' @param phi is a number between -1 and 1 that defines the strength of the  autoregressive process. Typically this will be set to 1 for use as a prior in Bayesian penalized splines
+#' @param n_dims is a vector of length M that are the dimensions of the CAR/SAR matrix at each resolution
+#' @param phi is a vector of length M with each element between -1 and 1 that defines the strength of the  autoregressive process. Typically this will be set to 1 for use as a prior in penalized Bayesian models
 #' @param use_spam is a boolean flag to determine whether the output is a list of spam matrix objects (\code{use_spam = TRUE}) or a an \eqn{n \times n}{n x n} sparse Matrix of class "dgCMatrix" \code{use_spam = FALSE}(see Matrix package for details)
+#' @param prec_model is a string that takes the values "CAR" or "SAR" and defines the graphical structure for the precision matrix.
 #' @return a list of  \eqn{n \times n}{n x n} sparse spam matrices or Matrix matrices of class "dgCMatrix" (see Matrix package for details)
 #' @importFrom igraph as_adjacency_matrix make_lattice
 #' @importFrom Matrix Diagonal colSums
 #' @importFrom spam spam
-#' 
+#'
 #' @export
 
 make_Q_alpha_2d <- function(n_dims, phi, use_spam = TRUE, prec_model = "CAR") {
-    
+
     if (!(prec_model %in% c("CAR", "SAR")))
         stop('The only valid options for prec_model are "CAR" and "SAR"')
     ## n_dims is a vector of length M that contains the dimensions of each resolution of the process

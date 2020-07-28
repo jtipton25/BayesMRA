@@ -7,15 +7,17 @@
 make_Q_alpha_2d(n_dims, phi, use_spam = TRUE, prec_model = "CAR")
 }
 \arguments{
-\item{phi}{is a number between -1 and 1 that defines the strength of the  autoregressive process. Typically this will be set to 1 for use as a prior in Bayesian penalized splines}
+\item{n_dims}{is a vector of length M that are the dimensions of the CAR/SAR matrix at each resolution}
+
+\item{phi}{is a vector of length M with each element between -1 and 1 that defines the strength of the  autoregressive process. Typically this will be set to 1 for use as a prior in penalized Bayesian models}
 
 \item{use_spam}{is a boolean flag to determine whether the output is a list of spam matrix objects (\code{use_spam = TRUE}) or a an \eqn{n \times n}{n x n} sparse Matrix of class "dgCMatrix" \code{use_spam = FALSE}(see Matrix package for details)}
 
-\item{n}{is the length of the coefficient vector for the penalized bspline model}
+\item{prec_model}{is a string that takes the values "CAR" or "SAR" and defines the graphical structure for the precision matrix.}
 }
 \value{
 a list of  \eqn{n \times n}{n x n} sparse spam matrices or Matrix matrices of class "dgCMatrix" (see Matrix package for details)
 }
 \description{
-A function for setting up a conditional autoregressive (CAR) precision matrix for use as a prior in Bayesian penalized splines
+A function for setting up a conditional autoregressive (CAR) or simultaneous autoregressive (SAR) precision matrix for use as a prior in Bayesian models
 }
