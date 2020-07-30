@@ -7,12 +7,16 @@
 #' @export
 #'
 wendland_basis <- function(d, radius) {
+    if (any(is.na(d))) {
+        stop("d must not contain missing values")
+    }
     if (any(d < 0)) {
         stop("d must be nonnegative")
     }
-    if (radius <= 0) {
-        stop("radius must be positive")
+    if (!is_positive_numeric(radius, 1)) {
+        stop("radius must be a single positive numeric value")
     }
+
     d_rad <- d / radius
     return(((1 - d_rad)^6 * (35 * d_rad^2 + 18 * d_rad + 3)) / 3 * (d_rad < 1))
 }

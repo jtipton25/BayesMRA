@@ -39,16 +39,16 @@ mcmc_mra <- function(
     X,
     locs,
     params,
-    priors,
+    priors        = NULL,
     M             = 4,
     n_neighbors   = 68,
     n_coarse_grid = 10,
     n_padding     = 5L,
-    n_cores = 1L,
-    inits   = NULL,
-    config  = NULL,
-    verbose = FALSE,
-    use_spam = TRUE, ## use spam or Matrix for sparse matrix operations
+    n_cores       = 1L,
+    inits         = NULL,
+    config        = NULL,
+    verbose       = FALSE,
+    use_spam      = TRUE, ## use spam or Matrix for sparse matrix operations
     n_chain       = 1
 ) {
 
@@ -56,10 +56,36 @@ mcmc_mra <- function(
     ## Run error checks
     ##
 
-    # check_input_spatial(Y, X, locs)
-    # check_params(param)
-    # check_inits_pgLM(params, inits)
-    # check_config(params, config)
+    if (!is_numeric_vector(y, length(y)))
+        stop("y must be a numeric vector of length N.")
+    if (!is_numeric_matrix(X, nrow(X), ncol(X)))
+        stop("X must be a numeric matrix with N rows.")
+    if (length(y) != nrow(X))
+        stop("X must have the same number of rows as the length of y.")
+    if (!is_numeric_matrix(locs, length(y), 2))
+        stop("locs must be a numeric matrix with N rows and 2 columns.")
+
+    ## check the params list
+    if (!is_positive_integer(params$n_adapt, 1))
+        stop("params must contain a positive integer n_adapt.")
+    if (!is_positive_integer(params$n_mcmc, 1))
+        stop("params must contain a positive integer n_mcmc.")
+    if (!is_positive_integer(params$n_thin, 1))
+        stop("params must contain a positive integer n_thin.")
+    if (!is_positive_integer(params$n_message, 1))
+        stop("params must contain a positive integer n_message.")
+
+    ## check the priors list
+
+
+
+    if (!is.logical(verbose) || length(verbose) != 1 || is.na(verbose)) {
+        stop("use_spam must be either TRUE or FALSE.")
+    }
+
+    if (!is.logical(use_spam) || length(use_spam) != 1 || is.na(use_spam)) {
+        stop("use_spam must be either TRUE or FALSE.")
+    }
 
     ##
     ## setup config
@@ -174,6 +200,8 @@ mcmc_mra <- function(
 
     ## check if priors for mu_beta are specified
     if (!is.null(priors[['mu_beta']])) {
+        if(!is_numeric_vector(priors[['mu_beta']], p))
+            stop("If specified, the parameter mu_beta in priors must be a numeric vector of length equal to the number of columns of X.")
         if (all(!is.na(priors[['mu_beta']]))) {
             mu_beta <- priors[['mu_beta']]
         }
@@ -181,6 +209,8 @@ mcmc_mra <- function(
 
     ## check if priors for Sigma_beta are specified
     if (!is.null(priors[['Sigma_beta']])) {
+        if(!is_sympd_matrix(priors[['Sigma_beta']], p))
+            stop("If specified, the parameter Sigma_beta in priors must be a symmetric positive definite matrix with rows and columns equal to the number of columns of X.")
         if (all(!is.na(priors[['Sigma_beta']]))) {
             Sigma_beta <- priors[['Sigma_beta']]
         }
@@ -215,6 +245,25 @@ mcmc_mra <- function(
 
     lambda <- rgamma(M, 0.5, scale_lambda)
     tau2   <- rep(1, M)
+
+    alpha_tau2 <- 1
+    beta_tau2  <- 1
+    ## check if priors for alpha_tau2 are specified
+    if (!is.null(priors[['alpha_tau2']])) {
+        if (!is_positive_numeric(priors[['alpha_tau2']], 1))
+            stop("If specified, the parameter alpha_tau2 in priors must be a positive numeric value.")
+        if (all(!is.na(priors[['alpha_tau2']]))) {
+            alpha_tau2 <- priors[['alpha_tau2']]
+        }
+    }
+    ## check if priors for beta_tau2 are specified
+    if (!is.null(priors[['beta_tau2']])) {
+        if (!is_positive_numeric(priors[['beta_tau2']], 1))
+            stop("If specified, the parameter beta_tau2 in priors must be a positive numeric value.")
+        if (all(!is.na(priors[['beta_tau2']]))) {
+            beta_tau2 <- priors[['beta_tau2']]
+        }
+    }
     #100 * pmin(pmax(1 / rgamma(M, 0.5, lambda), 1), 100)
 
 
@@ -230,7 +279,26 @@ mcmc_mra <- function(
     ## initialize sigma2
     ##
 
-    sigma2  <- pmax(pmin(1 / rgamma(1, priors$alpha_sigma2, priors$beta_sigma2), 5), 0.1)
+    alpha_sigma2 <- 1
+    beta_sigma2  <- 1
+    ## check if priors for alpha_sigma2 are specified
+    if (!is.null(priors[['alpha_sigma2']])) {
+        if (!is_positive_numeric(priors[['alpha_sigma2']], 1))
+            stop("If specified, the parameter alpha_sigma2 in priors must be a positive numeric value.")
+        if (all(!is.na(priors[['alpha_sigma2']]))) {
+            alpha_sigma2 <- priors[['alpha_sigma2']]
+        }
+    }
+    ## check if priors for beta_sigma2 are specified
+    if (!is.null(priors[['beta_sigma2']])) {
+        if (!is_positive_numeric(priors[['beta_sigma2']], 1))
+            stop("If specified, the parameter beta_sigma2 in priors must be a positive numeric value.")
+        if (all(!is.na(priors[['beta_sigma2']]))) {
+            beta_sigma2 <- priors[['beta_sigma2']]
+        }
+    }
+
+    sigma2  <- pmax(pmin(1 / rgamma(1, alpha_sigma2, beta_sigma2), 5), 0.1)
     sigma   <- sqrt(sigma2)
 
     ##
@@ -371,7 +439,7 @@ mcmc_mra <- function(
 
             devs <- y - X_beta - W_alpha
             SS        <- sum(devs^2)
-            sigma2 <- 1 / rgamma(1, N / 2 + priors$alpha_sigma2, SS / 2 + priors$beta_sigma2)
+            sigma2 <- 1 / rgamma(1, N / 2 + alpha_sigma2, SS / 2 + beta_sigma2)
             sigma     <- sqrt(sigma2)
         }
 
@@ -444,7 +512,7 @@ mcmc_mra <- function(
             for (m in 1:M) {
                 devs    <- alpha[dims_idx == m]
                 SS      <- as.numeric(devs %*% (Q_alpha[[m]] %*% devs))
-                tau2[m] <- rgamma(1, priors$alpha_tau2 + n_dims[m] / 2, priors$beta_tau2 + SS / 2)
+                tau2[m] <- rgamma(1, alpha_tau2 + n_dims[m] / 2, beta_tau2 + SS / 2)
                 # tau2[m] <- 1 / rgamma(1, 0.5 + n_dims[m] / 2, lambda[m] + SS / 2)
                 # tau2_inv[m] <- 1 / rgamma(1, 0.5 + n_dims[m] / 2, lambda[m] + SS / 2)
                 # tau2[m]     <- 1 / tau2_inv[m]

@@ -12,7 +12,15 @@
 make_Q_alpha_tau2 <- function(Q_alpha, tau2, use_spam = TRUE) {
 
     if (length(Q_alpha) != length(tau2))
-        stop("Q_alpha must be a list of length M and tau2 must be a vector of length M")
+        stop("Q_alpha must be a list of length M and tau2 must be a positive numeric vector of length M.")
+
+    if (!is_positive_numeric(tau2, length(tau2)))
+        stop("tau2 must be a positive numeric vector of length M.")
+
+    if (!is.logical(use_spam) || length(use_spam) != 1 || is.na(use_spam)) {
+        stop("use_spam must be either TRUE or FALSE.")
+    }
+
     M <- length(Q_alpha)
     Q_alpha_tau2 <- vector(mode = "list", length = M)
     for (m in 1:M) {

@@ -78,6 +78,19 @@ is_integer <- function(x, n) {
     # typeof(x) == "integer" && length(x) == n
 }
 
+#'  Check if an integer matrix of dimension \eqn{n \times m}{n x m}
+#'
+#' this function checks if the input is an integer matrix of dimension \eqn{n \times m}{n x m}
+#' @param x is the input
+#' @param n is the input matrix rows
+#' @param m is the input matrix columns
+#' @keywords internal
+
+is_integer_matrix <- function(x, n, m) {
+    is_integer(x, n * m) && is.matrix(x) && all(dim(x) == c(n, m))
+}
+
+
 
 #' Check if value is a positive integer or integer-like
 #'

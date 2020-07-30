@@ -74,6 +74,21 @@ test_that("is_integer", {
     expect_true(is_integer(2.0, 1))
 })
 
+test_that("is_integer_matrix", {
+    expect_error(is_integer_matrix(1L))
+    expect_error(is_integer_matrix(2.5, 1))
+    expect_false(is_integer_matrix(NA, 1, 1))
+    expect_false(is_integer_matrix("NA", 1))
+    expect_false(is_integer_matrix(NULL, 1))
+    expect_false(is_integer_matrix(1L:6L, 4, 1))
+    expect_false(is_integer_matrix(1, 1, 1))
+    expect_false(is_integer_matrix(matrix(1:6 + 0.5, 3, 2), 3, 2))
+    expect_false(is_integer_matrix(matrix(1:6, 2, 3), 3, 2))
+    expect_true(is_integer_matrix(matrix(1:6, 2, 3), 2, 3))
+    expect_true(is_integer_matrix(matrix(1L:6L, 2, 3), 2, 3))
+    expect_true(is_integer_matrix(matrix(2.0, 2, 2), 2, 2))
+})
+
 
 test_that("is_positive_integer function", {
     expect_true(is_positive_integer(1, 1))

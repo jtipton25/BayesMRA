@@ -15,12 +15,27 @@
 
 make_Q_alpha_2d <- function(n_dims, phi, use_spam = TRUE, prec_model = "CAR") {
 
-    if (!(prec_model %in% c("CAR", "SAR")))
-        stop('The only valid options for prec_model are "CAR" and "SAR"')
-    ## n_dims is a vector of length M that contains the dimensions of each resolution of the process
-    ## phi is a vector of length M that contains the CAR parameter
+
+    if (any(phi < -1) || any(phi > 1) || any(is.na(phi)))
+        stop("phi must be a numeric vector of length M with values between -1 and 1.")
+
+    if (!is_numeric_vector(phi, length(phi)))
+        stop("phi must be a numeric vector of length M with values between -1 and 1.")
+
+    if (!is_integer(n_dims, length(n_dims)))
+        stop("n_dims must be a vector of integers of length M.")
+
     if (length(n_dims) != length(phi))
-        stop("n_dims and phi must both be vectors of length M")
+        stop("n_dims and phi must both be vectors of length M.")
+
+    if (!is.logical(use_spam) || length(use_spam) != 1 || is.na(use_spam)) {
+        stop("use_spam must be either TRUE or FALSE.")
+    }
+
+    if (!(prec_model %in% c("CAR", "SAR")))
+        stop('The only valid options for prec_model are "CAR" and "SAR".')
+
+
     M <- length(n_dims)
     Q_alpha <- vector(mode = "list", length = M)
     for (m in 1:M) {

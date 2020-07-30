@@ -17,23 +17,25 @@ mra_wendland_2d_pred <- function(
     MRA,
     use_spam = TRUE
 ) {
-    ## helper function
-    # wendland_basis <- function(d, radius) {
-    #     if (any(d < 0)) {
-    #         stop("d must be nonnegative")
-    #     }
-    #     if (radius <= 0) {
-    #         stop("radius must be positive")
-    #     }
-    #     d_rad <- d / radius
-    #     return(((1 - d_rad)^6 * (35 * d_rad^2 + 18 * d_rad + 3)) / 3 * (d_rad < 1))
-    # }
+
+    N      <- nrow(locs)
+    N_pred <- nrow(locs_pred)
 
     if (class(MRA) != "mra_wendland_2d")
         stop('MRA must be of class "mra_wendland_2d"')
 
-    N      <- nrow(locs)
-    N_pred <- nrow(locs_pred)
+    if (!is_numeric_matrix(locs, N, 2)) {
+        stop("locs must be a numeric matrix with N rows and 2 columns")
+    }
+    if (!is_numeric_matrix(locs_pred, N_pred, 2)) {
+        stop("locs_pred must be a numeric matrix with N rows and 2 columns")
+    }
+
+    if (!is.logical(use_spam) || length(use_spam) != 1 || is.na(use_spam)) {
+        stop("use_spam must be either TRUE or FALSE")
+    }
+
+
     M      <- length(MRA$radius)
 
 

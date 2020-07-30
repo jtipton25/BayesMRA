@@ -9,7 +9,7 @@ mcmc_mra(
   X,
   locs,
   params,
-  priors,
+  priors = NULL,
   M = 4,
   n_neighbors = 68,
   n_coarse_grid = 10,
