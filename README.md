@@ -23,17 +23,19 @@ Once the `devtools` library is installed, you can install the `BayesMRA` library
 ```r
 devtools::install_github("jtipton25/BayesMRA")
 ```
-**Note: It is recommended to reguarly check for updates by using `devtools::install_github("jtipton25/BayesMRA")` regularly as this package is in development and regularly undergoes large changes**
+**Note: It is recommended to reguarly check for updates by using `devtools::install_github("jtipton25/BayesMRA")` frequently as this package is in active development and regularly undergoes large changes**
 
 ### Installation from CRAN
 
-Installation from CRAN is not currently supported (hopefully coming soon). Therefore
+Installation from CRAN is not currently supported (hopefully coming soon). 
 
+<!-- 
+Therefore
 ```r
 install.packages("BayesMRA")
 ``` 
-
-will fail
+will fail.
+-->
 
 
 ### Make sure you have the appropriate compiler

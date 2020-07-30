@@ -11,7 +11,7 @@ mra_wendland_2d_pred(locs, locs_pred, MRA, use_spam = TRUE)
 
 \item{locs_pred}{The location variables in 2 dimensions over which to construct the basis function representation in the prediction stage.}
 
-\item{MRA}{The multiresolution basis expansion at the observed locations. This object is the output of \verb{mra_wendland-2d()} amd os of class "mra_wendland_2d".}
+\item{MRA}{The multiresolution basis expansion at the observed locations. This object is the output of \verb{mra_wendland-2d()} and is of class "mra_wendland_2d".}
 
 \item{use_spam}{is a boolean flag to determine whether the output is a list of spam matrix objects (\code{use_spam = TRUE}) or a an \eqn{n \times n}{n x n} sparse Matrix of class "dgCMatrix" \code{use_spam = FALSE} (see spam and Matrix packages for details).}
 }

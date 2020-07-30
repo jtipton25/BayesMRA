@@ -13,7 +13,7 @@
 #' @return A list of objects including the MRA knots locations `locs_grid`,
 #' the Wendland basis representation matrix `W` at the observed locations,
 #' the basis radius `radius`, the numbers of resolutions `M`,
-#' the number of expected neighbors in the interior oe each grid `n_neighbors`,
+#' the number of expected neighbors in the interior of each grid `n_neighbors`,
 #' the number of interior basis functions in one direction `n_coarse_grid`,
 #' the number of additional padding basis functions given by `n_padding`,
 #' and the setting `use_spam` which determines whether the MRA output uses the `spam` format.

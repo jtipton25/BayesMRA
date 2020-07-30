@@ -30,7 +30,7 @@ mra_wendland_2d(
 A list of objects including the MRA knots locations \code{locs_grid},
 the Wendland basis representation matrix \code{W} at the observed locations,
 the basis radius \code{radius}, the numbers of resolutions \code{M},
-the number of expected neighbors in the interior oe each grid \code{n_neighbors},
+the number of expected neighbors in the interior of each grid \code{n_neighbors},
 the number of interior basis functions in one direction \code{n_coarse_grid},
 the number of additional padding basis functions given by \code{n_padding},
 and the setting \code{use_spam} which determines whether the MRA output uses the \code{spam} format.

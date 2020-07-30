@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Check if a symmetric positive definite numeric matrix of dimension \(n \times n\) — is_sympd_matrix • BayesMRA</title>
+<title>Check if an integer matrix of dimension \(n \times m\) — is_integer_matrix • BayesMRA</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Check if a symmetric positive definite numeric matrix of dimension \(n \times n\) — is_sympd_matrix" />
-<meta property="og:description" content="this function checks if the input is a symmetrix positive definite matrix" />
+<meta property="og:title" content="Check if an integer matrix of dimension \(n \times m\) — is_integer_matrix" />
+<meta property="og:description" content="this function checks if the input is an integer matrix of dimension \(n \times m\)" />
 
 
 
@@ -108,16 +108,16 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Check if a symmetric positive definite numeric matrix of dimension \(n \times n\)</h1>
+    <h1>Check if an integer matrix of dimension \(n \times m\)</h1>
     <small class="dont-index">Source: <a href='https://github.com/jtipton25/BayesMRA/blob/master/R/predicates.R'><code>R/predicates.R</code></a></small>
-    <div class="hidden name"><code>is_sympd_matrix.Rd</code></div>
+    <div class="hidden name"><code>is_integer_matrix.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>this function checks if the input is a symmetrix positive definite matrix</p>
+    <p>this function checks if the input is an integer matrix of dimension \(n \times m\)</p>
     </div>
 
-    <pre class="usage"><span class='fu'>is_sympd_matrix</span>(<span class='no'>x</span>, <span class='no'>n</span>)</pre>
+    <pre class="usage"><span class='fu'>is_integer_matrix</span>(<span class='no'>x</span>, <span class='no'>n</span>, <span class='no'>m</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -128,7 +128,11 @@
     </tr>
     <tr>
       <th>n</th>
-      <td><p>is the input matrix dimension (assuming a square matrix)</p></td>
+      <td><p>is the input matrix rows</p></td>
+    </tr>
+    <tr>
+      <th>m</th>
+      <td><p>is the input matrix columns</p></td>
     </tr>
     </table>
 

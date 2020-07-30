@@ -25,7 +25,7 @@ rmvn_arma_chol <- function(A_chol, b) {
 #'
 #' @param a \code{a} A scalar for the Gaussian full conditional distribution precision.
 #' @param b \code{b} A \eqn{d} \code{vector} for the Gaussian full conditional distribution mean.
-#' 
+#'
 #' @export
 rmvn_arma_scalar <- function(a, b) {
     .Call('_BayesMRA_rmvn_arma_scalar', PACKAGE = 'BayesMRA', a, b)
