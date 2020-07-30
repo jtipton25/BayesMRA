@@ -1,5 +1,10 @@
 # BayesMRA
 
+<!-- badges: start -->
+[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
+[![Codecov test coverage](https://codecov.io/gh/jtipton25/BayesMRA/branch/master/graph/badge.svg)](https://codecov.io/gh/jtipton25/BayesMRA?branch=master)
+<!-- badges: end -->
+
 An R package for Bayesian spatial and spatio-temporal regression using sparse multi-resolution matrices.
 
 

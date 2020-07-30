@@ -6,3 +6,4 @@
 ^scripts$
 ^results$
 ^development$
+^codecov\.yml$
