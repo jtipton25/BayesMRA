@@ -12,9 +12,10 @@ notifications:
     on_success: change
     on_failure: change
 
-# for codecov
+# for codecov and install of package
 r_packages:
   - covr
+  - devtools
 
 # only report coverage after build is successful
 after_success:
