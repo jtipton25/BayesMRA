@@ -7,3 +7,4 @@
 ^results$
 ^development$
 ^codecov\.yml$
+^README\.Rmd$
