@@ -2,3 +2,5 @@
 .Rproj.user/
 *.o
 *.so
+## ignore the docs folder as this is build by Travis-CI
+docs/*
