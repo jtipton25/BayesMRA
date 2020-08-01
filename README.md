@@ -9,6 +9,8 @@
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
 [![Codecov test
 coverage](https://codecov.io/gh/jtipton25/BayesMRA/branch/master/graph/badge.svg)](https://codecov.io/gh/jtipton25/BayesMRA?branch=master)
+[![Travis build
+status](https://travis-ci.org/jtipton25/BayesMRA.svg?branch=master)](https://travis-ci.org/jtipton25/BayesMRA)
 <!-- badges: end -->
 
 An R package for Bayesian spatial and spatio-temporal regression using
