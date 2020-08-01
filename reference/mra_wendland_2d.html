@@ -132,9 +132,9 @@
     <pre class="usage"><span class='fu'>mra_wendland_2d</span>(
   <span class='no'>locs</span>,
   <span class='kw'>M</span> <span class='kw'>=</span> <span class='fl'>4</span>,
-  <span class='kw'>n_neighbors</span> <span class='kw'>=</span> <span class='fl'>68</span>,
   <span class='kw'>n_coarse_grid</span> <span class='kw'>=</span> <span class='fl'>10</span>,
   <span class='kw'>n_padding</span> <span class='kw'>=</span> <span class='fl'>5L</span>,
+  <span class='kw'>n_neighbors</span> <span class='kw'>=</span> <span class='fl'>68</span>,
   <span class='kw'>use_spam</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>
 )</pre>
 
@@ -150,10 +150,6 @@
       <td><p>The number of resolutions.</p></td>
     </tr>
     <tr>
-      <th>n_neighbors</th>
-      <td><p>The expected number of neighbors for each interior basis function. This determines the basis radius parameter.</p></td>
-    </tr>
-    <tr>
       <th>n_coarse_grid</th>
       <td><p>The number of basis functions in one direction (e.g. <code>n_coarse_grid = 10</code> results in a \(10 \times 10\) course grid which is further extended by the number of additional padding basis functions given by <code>n_padding</code>.</p></td>
     </tr>
@@ -162,8 +158,12 @@
       <td><p>The number of additional boundary points to add on each boundary. For example, n_padding = 5 will add 5 boundary knots to the both the left  and right side of the grid).</p></td>
     </tr>
     <tr>
+      <th>n_neighbors</th>
+      <td><p>The expected number of neighbors for each interior basis function. This determines the basis radius parameter.</p></td>
+    </tr>
+    <tr>
       <th>use_spam</th>
-      <td><p>is a boolean flag to determine whether the output is a list of spam matrix objects (<code>use_spam = TRUE</code>) or a an \(n \times n\) sparse Matrix of class "dgCMatrix" <code>use_spam = FALSE</code> (see spam and Matrix packages for details).</p></td>
+      <td><p>is a boolean flag to determine whether the output is a list of <code><a href='https://www.math.uzh.ch/pages/spam//reference/spam.creation.html'>spam::spam</a></code> matrix objects (<code>use_spam = TRUE</code>) or a an \(n \times n\) sparse Matrix of class <code>Matrix::dgCMatrix</code> <code>use_spam = FALSE</code> (see spam and Matrix packages for details).</p></td>
     </tr>
     </table>
 
