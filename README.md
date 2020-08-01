@@ -16,7 +16,9 @@ status](https://travis-ci.org/jtipton25/BayesMRA.svg?branch=master)](https://tra
 An R package for Bayesian spatial and spatio-temporal regression using
 sparse multi-resolution matrices. This package includes functions for
 setting up the multi-resolution process and a function `mcmc_mra()` for
-fitting a spatial model using Markov Chain Monte Carlo.
+fitting a spatial model using Markov Chain Monte Carlo. For details
+about the model and an example using simulated data, see
+`vignette("BayesMRA")`.
 
 ## Installation
 

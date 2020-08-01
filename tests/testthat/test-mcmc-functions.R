@@ -3,15 +3,38 @@ context("mcmc functions")
 test_that("mcmc_mra", {
     y <- rnorm(10)
     X <- matrix(1:20, 10, 2)
-    expect_error(mcmc_mra(y, X), 'argument "locs" is missing, with no default')
-    locs <- matrix(1:20, 10, 2)
-    expect_error(mcmc_mra(y, X, locs), 'argument "params" is missing, with no default')
     params <- list(
         n_mcmc    = 500,
         n_adapt   = 500,
         n_thin    = 1,
         n_message = 50
     )
+    locs <- matrix(1:20, 10, 2)
+
+    expect_error(mcmc_mra(y, X), 'argument "locs" is missing, with no default')
+    expect_error(mcmc_mra(y, X, locs), 'argument "params" is missing, with no default')
+    y <- matrix(1:10, 5, 2)
+    expect_error(mcmc_mra(y, X, locs, params), "y must be a numeric vector of length N.")
+    y <- rep(NA, 10)
+    expect_error(mcmc_mra(y, X, locs, params), "y must be a numeric vector of length N.")
+    y <- rep("aaa", 10)
+    expect_error(mcmc_mra(y, X, locs, params), "y must be a numeric vector of length N.")
+    y <- rep(TRUE, 10)
+    expect_error(mcmc_mra(y, X, locs, params), "y must be a numeric vector of length N.")
+
+    y <- rnorm(10)
+    X <- array(0, dim=c(2, 2, 2))
+    expect_error(mcmc_mra(y, X, locs, params), "X must be a numeric matrix with N rows.")
+    X <- matrix(0, 5, 3)
+    expect_error(mcmc_mra(y, X, locs, params), "X must have the same number of rows as the length of y.")
+
+    X <- matrix(1:20, 10, 2)
+    locs <- matrix(0, 10, 3)
+    expect_error(mcmc_mra(y, X, locs, params), "locs must be a numeric matrix with N rows and 2 columns.")
+    locs <- matrix(NA, 10, 2)
+    expect_error(mcmc_mra(y, X, locs, params), "locs must be a numeric matrix with N rows and 2 columns.")
+    locs <- matrix(1:20, 10, 2)
+
     params$n_mcmc <- -10
     expect_error(mcmc_mra(y, X, locs, params), "params must contain a positive integer n_mcmc.")
     params$n_mcmc <- NA
@@ -138,7 +161,15 @@ test_that("mcmc_mra", {
     expect_error(mcmc_mra(y, X, locs, params, priors), "If specified, the parameter beta_tau2 in priors must be a positive numeric value.")
     priors$beta_tau2 <- 1
 
+    priors <- NULL
 
+    expect_error(mcmc_mra(y, X, locs, params, use_spam = "aaa"), "use_spam must be either TRUE or FALSE.")
+    expect_error(mcmc_mra(y, X, locs, params, use_spam = 3), "use_spam must be either TRUE or FALSE.")
+    expect_error(mcmc_mra(y, X, locs, params, use_spam = NA), "use_spam must be either TRUE or FALSE.")
+
+    expect_error(mcmc_mra(y, X, locs, params, verbose = "aaa"), "verbose must be either TRUE or FALSE.")
+    expect_error(mcmc_mra(y, X, locs, params, verbose = 3), "verbose must be either TRUE or FALSE.")
+    expect_error(mcmc_mra(y, X, locs, params, verbose = NA), "verbose must be either TRUE or FALSE.")
 
     # mcmc_mra(y, X, locs, params, priors,  M = 2, n_coarse_grid = 4)
 
@@ -148,3 +179,4 @@ test_that("mcmc_mra", {
     # expect_true(class(out) == "pg_lm")
 
 })
+

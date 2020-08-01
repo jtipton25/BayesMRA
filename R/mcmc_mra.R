@@ -58,10 +58,10 @@ mcmc_mra <- function(
 
     if (!is_numeric_vector(y, length(y)))
         stop("y must be a numeric vector of length N.")
-    if (!is_numeric_matrix(X, nrow(X), ncol(X)))
-        stop("X must be a numeric matrix with N rows.")
     if (length(y) != nrow(X))
         stop("X must have the same number of rows as the length of y.")
+    if (!is_numeric_matrix(X, length(y), ncol(X)))
+        stop("X must be a numeric matrix with N rows.")
     if (!is_numeric_matrix(locs, length(y), 2))
         stop("locs must be a numeric matrix with N rows and 2 columns.")
 
@@ -80,7 +80,7 @@ mcmc_mra <- function(
 
 
     if (!is.logical(verbose) || length(verbose) != 1 || is.na(verbose)) {
-        stop("use_spam must be either TRUE or FALSE.")
+        stop("verbose must be either TRUE or FALSE.")
     }
 
     if (!is.logical(use_spam) || length(use_spam) != 1 || is.na(use_spam)) {

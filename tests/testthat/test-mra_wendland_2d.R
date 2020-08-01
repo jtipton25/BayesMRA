@@ -8,6 +8,8 @@ test_that("wendland_basis", {
 })
 
 test_that("illegal input for mra_wendland_2d", {
+    locs <- NULL
+    expect_error(mra_wendland_2d(locs), "locs must be a numeric matrix with N rows and 2 columns")
     locs <- matrix(NA, 10, 3)
     expect_error(mra_wendland_2d(locs), "locs must be a numeric matrix with N rows and 2 columns")
     locs <- matrix(NA, 10, 2)
@@ -32,6 +34,11 @@ test_that("illegal input for mra_wendland_2d", {
     expect_error(mra_wendland_2d(locs, use_spam = NA), "use_spam must be either TRUE or FALSE")
     expect_error(mra_wendland_2d(locs, use_spam = "aaa"), "use_spam must be either TRUE or FALSE")
     expect_error(mra_wendland_2d(locs, M = 4, n_coarse_grid = 3), "There are too many resolutions to form a reliable grid. Reduce M and try again.")
+
+    locs <- matrix(1:6, 3, 2)
+    expect_s3_class(mra_wendland_2d(locs, M = 2), "mra_wendland_2d")
+    expect_s3_class(mra_wendland_2d(locs, M = 2, use_spam = FALSE), "mra_wendland_2d")
+
 })
 
 
@@ -64,4 +71,8 @@ test_that("illegal input for mra_wendland_2d_pred", {
 
     class(MRA) <- "XXX"
     expect_error(mra_wendland_2d_pred(locs, locs_pred, MRA), 'MRA must be of class "mra_wendland_2d"')
+
+    MRA <- mra_wendland_2d(locs)
+    expect_s3_class(mra_wendland_2d_pred(locs, locs_pred, MRA), "mra_wendland_2d_pred")
+    expect_s3_class(mra_wendland_2d_pred(locs, locs_pred, MRA, use_spam = FALSE), "mra_wendland_2d_pred")
 })
