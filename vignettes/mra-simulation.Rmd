@@ -764,7 +764,7 @@ plot_mu <- dat_plot %>%
 plot_Xbeta + plot_Walpha + plot_mu
 ```
 
-![plot of chunk plot-sim-vs-fitted-effects](plot-sim-vs-fitted-effects-1.png)
+<img src="plot-sim-vs-fitted-effects-1.png" title="plot of chunk plot-sim-vs-fitted-effects" alt="plot of chunk plot-sim-vs-fitted-effects" style="display: block; margin: auto;" />
 
 
 

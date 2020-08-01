@@ -662,7 +662,7 @@ sim_MRA + theme_custom(0.5) + estimated_MRA
 
 The next plots show the estimated vs. simulated fixed effects, spatial process, and mean response. There is some evidence of non-identifiability between the fixed effects plot and the spatial effects plot (left two plots) as there is a bias in each of the predictions. This is understood to be a consequence of spatial confounding (@hodges2010adding, @hughes2013dimension, @hanks2015restricted).
 
-```{r plot-sim-vs-fitted-effects, cache = TRUE, cache.extra = tools::md5sum(here::here("results", "fit-mra-sim.RData"))}
+```{r plot-sim-vs-fitted-effects, cache = TRUE, cache.extra = tools::md5sum(here::here("results", "fit-mra-sim.RData")), fig.align = 'center'}
 ## plot estimated mean response
 Xbeta_post <- t(X_s %*% t(out$beta))
 Walpha_post <- t(do.call(cbind, out$MRA$W) %*% t(out$alpha))
