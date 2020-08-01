@@ -1,82 +1,33 @@
 ---
 title: "Fitting Bayesian multiresolution models with `mcmc_mra()`"
-output:
-  bookdown::html_document2: default
-  bookdown::pdf_document2: 
-    keep_tex: true
-bibliography: mra.bib    
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Multinomial logistic regression using pgLM}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+bibliography: mra.bib
 ---
 
 \newcommand{\bs}[1]{\boldsymbol{#1}}
 \newcommand{\bm}[1]{\mathbf{#1}}
 \newcommand{\oN}[1]{\operatorname{#1}}
 
-In this Vignette, we demonstrate how to fit Bayesian spatial models using the multiresolution model using Markov Chain Monte Carlo (MCMC). 
+In this Vignette, we demonstrate how to fit Bayesian spatial models using the multiresolution model using Markov Chain Monte Carlo (MCMC).
+
+
+
 
 
 # Defining the MRA model
 
-This package provides a Bayesian implementation of the multi-resolution Gaussian process model presented by @nychka2015multiresolution. This package is similar to the R package `LatticeKrig` (@LatticeKrig) and provides an implementation that is suitable for use in MCMC samplers.
+This package provides a Bayesian implementation of the multi-resolution Gaussian process model presented by @nychka2015multiresolution. This package is similar to the R package `LatticeKrig` (@LatticeKrig)
 
-The model that the function `mcmc_mra()` fits is defined below. Let $\mathbf{s}$ be a spatial location in a domain of interest $\mathcal{D}$ and let $y(\mathbf{s})$ be the observation of the spatial process at location $\mathbf{s}$. Then, we can write the observation as
+# Simulating data from the model
 
-$$\begin{align*}
-y(\mathbf{s}) & = \mathbf{x}(\mathbf{s})' \boldsymbol{\beta} + \eta(\mathbf{s}) + \varepsilon(\mathbf{s}),
-\end{align*}$$
-
-where $\mathbf{x}(s)$ is a vector of covariates at site $\mathbf{s}$, $\boldsymbol{\beta}$ are regression coefficients, $\boldsymbol{\eta}(\mathbf{s})$ is the realization of a correlated Gaussian process at location $\mathbf{s}$ and $\varepsilon(\mathbf{s})$ is the realization of an uncorrelated Gaussian error process. The model can be written in matrix form where
-
-$$\begin{align*}
-\mathbf{y} & = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\eta} + \boldsymbol{\varepsilon}.
-\end{align*}$$
-
-In matrix form, the spatially correlated random process has the distribution $\boldsymbol{\eta} \sim \operatorname{N}(\mathbf{0}, \mathbf{C})$ where the $\mathbf{C}_{ij}$ (the $i$th row and $j$th column of $\mathbf{C}$) is defined as the output of the covariance function $cov(\mathbf{s}_i, \mathbf{s}_j)$ at sites $\mathbf{s}_i$ and $\mathbf{s}_j$. The residual process $\boldsymbol{\varepsilon} \sim \operatorname{N}(\mathbf{0}, \sigma^2 \mathbf{I})$ models measurement error, commonly referred to as the nugget in the spatial statistics literature.
-
-Rather than specifying a parametric form for the covariance function 
+First, we simulate some data from the process of interest. We simulate a spatially explicit set of fired effects X that represent spatial variables like elevation, latitude, etc. Next, the spatial process is initialized
 
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(fig.width = 8, fig.height = 4.5, dpi = 300, dev.args = list(type = "cairo"))
-```
-
-
-```{r, message = FALSE}
-library(tidyverse)
-library(BayesMRA)
-library(mvnfast)
-# library(MCMCpack)
-library(tidyverse)
-library(patchwork)
-library(spam)
-library(fields)
-
-theme_custom <- function(scale_text = 1) {
-  theme(
-    plot.title = element_text(
-      size  = 24 * scale_text,
-      face  = "bold",
-      hjust = 0.5
-    ),
-    axis.text.x  = element_text(size = 14 * scale_text), 
-    axis.text.y  = element_text(size = 14 * scale_text), 
-    strip.text.x = element_text(size = 10 * scale_text),
-    axis.title.x = element_text(
-      size   = 16 * scale_text,
-      margin = margin(t = 10, r = 0, b = 0, l = 0)
-    ), 
-    axis.title.y = element_text(
-      size   = 16 * scale_text, 
-      margin = margin(t = 0, r = 10, b = 0, l = 0)
-    ),
-    legend.text  = element_text(size = 10 * scale_text),
-    legend.title = element_text(size = 14 * scale_text)
-  )
-}
-```
-
-First, we simulate some data from the process of interest. We simulate a spatially explicit set of fired effects X that represent spatial variables like elevation, latitude, etc. Next, the spatial process is initialized 
-
-```{r, simulate_data, cache = TRUE}
+```r
 set.seed(11)
 
 N <- 40^2
@@ -111,7 +62,7 @@ for (i in 1:M) {
   dims_idx  <- c(dims_idx, rep(i, n_dims[i]))
 }
 W <- do.call(cbind, W_list)
-    
+
 Q_alpha      <- make_Q_alpha_2d(sqrt(n_dims), rep(0.999, length(n_dims)), prec_model = "CAR")
 
 tau2         <- 10 * 2^(2 * (1:M - 1))
@@ -135,16 +86,45 @@ y <- X %*% beta + W %*% alpha + rnorm(N, 0, sqrt(sigma2))
 
 Next, the sum-to-one constraint is verified by checking that within each dimension the sum of the $\boldsymbol{\alpha}_m$ parameters is 0.
 
-```{r}
+
+```r
 sum(alpha)
+```
+
+```
+## [1] 1.98782e-14
+```
+
+```r
 sum(alpha[dims_idx == 1])
+```
+
+```
+## [1] 1.450229e-15
+```
+
+```r
 sum(alpha[dims_idx == 2])
+```
+
+```
+## [1] 4.22995e-14
+```
+
+```r
 sum(alpha[dims_idx == 3])
 ```
 
-To explore the structure of the precision matrix of the spatial random effects, we plot the pattern of nonzero elements in the precision matrices $\mathbf{Q}_{m}$ for each resolution $m$. The sparse, banded structure in the precision matrices at each resolution are what enable efficient computation. 
+```
+## [1] -2.387153e-14
+```
 
-```{r plot-precision-matrices, cache = TRUE, warning = FALSE, dependson = "simulate_data", fig.align = 'center', dev.args = list(pointsize = 12)}
+## Plotting the simulated data
+
+To explore the structure of the precision matrix of the spatial random effects, we plot the pattern of nonzero elements in the precision matrices $\mathbf{Q}_{m}$ for each resolution $m$. The sparse, banded structure in the precision matrices at each resolution are what enable efficient computation.
+
+
+```r
 ## plot Q_alpha_tau2 structure
 ## note: the display function gives a warning about the default cex setting
 layout(matrix(1:4, 2, 2, byrow = TRUE))
@@ -154,11 +134,14 @@ for (m in 1:M) {
 }
 ```
 
-The MRA approach requires a set of grid point at each resolution. The set of grid points at each resolution extends beyond the spatial domain that is highlighted in the black box. 
+<img src="figure/plot-precision-matrices-1.png" title="plot of chunk plot-precision-matrices" alt="plot of chunk plot-precision-matrices" style="display: block; margin: auto;" />
 
-```{r MRA-grid, cache = TRUE, dependson = "simulate_data", fig.height = 4.5, fig.width = 4.5, fig.align = 'center'}
+The MRA approach requires a set of grid point at each resolution. The set of grid points at each resolution extends beyond the spatial domain that is highlighted in the black box.
+
+
+```r
 data.frame(
-    x = unlist(sapply(1:M, function(i) MRA$locs_grid[[i]][, 1])), 
+    x = unlist(sapply(1:M, function(i) MRA$locs_grid[[i]][, 1])),
     y = unlist(sapply(1:M, function(i) MRA$locs_grid[[i]][, 2])),
     resolution = factor(unlist(sapply(1:M, function(i) rep(i, each = nrow(MRA$locs_grid[[i]])))))
 ) %>%
@@ -166,25 +149,27 @@ data.frame(
     geom_point(alpha = 0.75, size = 0.75) +
     ggtitle("MRA grid points") +
     theme_bw() +
-  scale_colour_viridis_d(end = 0.8) + 
+  scale_colour_viridis_d(end = 0.8) +
   geom_rect(
-    data = NULL, 
+    data = NULL,
     aes(xmin = min(locs[, 1]),
         xmax = max(locs[, 1]),
         ymin = min(locs[, 2]),
         ymax = max(locs[, 2])
     ),
     fill  = NA,
-    color = "black", 
+    color = "black",
     alpha = 0.5
   ) +
   theme_custom()
 ```
 
+<img src="figure/MRA-grid-1.png" title="plot of chunk MRA-grid" alt="plot of chunk MRA-grid" style="display: block; margin: auto;" />
+
 At each internal grid cell, we expect there to be 68 neighbors where the Wendland basis is nonzero. The plot below shows the number of neighbors at each grid point for each resolution.
 
-```{r plot-neighbors, cache = TRUE, dependson = "simulate_data", fig.align = 'center', warning = FALSE}
 
+```r
 nnn <- sapply(1:M, function(i) {
   D <- rdist(MRA$locs_grid[[i]])
   sapply(1:nrow(MRA$locs_grid[[i]]), function(j) {
@@ -193,7 +178,7 @@ nnn <- sapply(1:M, function(i) {
 })
 
 data.frame(
-  x = unlist(sapply(1:M, function(i) MRA$locs_grid[[i]][, 1])), 
+  x = unlist(sapply(1:M, function(i) MRA$locs_grid[[i]][, 1])),
   y = unlist(sapply(1:M, function(i) MRA$locs_grid[[i]][, 2])),
   resolution = factor(unlist(sapply(1:M, function(i) rep(paste("resolution", i), each = nrow(MRA$locs_grid[[i]]))))),
   neighbors <- unlist(nnn)
@@ -204,25 +189,28 @@ data.frame(
   ggtitle("number of neighbors") +
   scale_fill_viridis_c() +
     geom_rect(
-    data = NULL, 
+    data = NULL,
     aes(xmin = min(locs[, 1]),
         xmax = max(locs[, 1]),
         ymin = min(locs[, 2]),
         ymax = max(locs[, 2])
     ),
     fill  = NA,
-    color = "black", 
+    color = "black",
     alpha = 0.5
   ) +
   theme_bw() +
   theme_custom()
 ```
 
+<img src="figure/plot-neighbors-1.png" title="plot of chunk plot-neighbors" alt="plot of chunk plot-neighbors" style="display: block; margin: auto;" />
+
 The next plot shows the simulated spatial random effects $\boldsymbol{\alpha}_m$ at each of the grid points. Notice that the variation is largest for the coarse resolution and the variability decreases for each finer resolution.
 
-```{r plot-random-effects, cache = TRUE, dependson = "simulate_data", fig.align = 'center', warning = FALSE}
+
+```r
 sim_alphas <- data.frame(
-    x = unlist(sapply(1:M, function(i) MRA$locs_grid[[i]][, 1])), 
+    x = unlist(sapply(1:M, function(i) MRA$locs_grid[[i]][, 1])),
     y = unlist(sapply(1:M, function(i) MRA$locs_grid[[i]][, 2])),
     resolution = factor(unlist(sapply(1:M, function(i) rep(paste("resolution", i), each = nrow(MRA$locs_grid[[i]]))))),
     alpha = unlist(sapply(1:M, function(i) alpha[dims_idx == i]))
@@ -232,14 +220,14 @@ sim_alphas <- data.frame(
   ggtitle("MRA spatial random effects") +
     scale_fill_viridis_c() +
     geom_rect(
-    data = NULL, 
+    data = NULL,
     aes(xmin = min(locs[, 1]),
         xmax = max(locs[, 1]),
         ymin = min(locs[, 2]),
         ymax = max(locs[, 2])
     ),
     fill  = NA,
-    color = "black", 
+    color = "black",
     alpha = 0.5
   ) +
   facet_wrap( ~ resolution, ncol = 2) +
@@ -249,9 +237,12 @@ sim_alphas <- data.frame(
 sim_alphas
 ```
 
+<img src="figure/plot-random-effects-1.png" title="plot of chunk plot-random-effects" alt="plot of chunk plot-random-effects" style="display: block; margin: auto;" />
+
 Next, we show a simulated realization of the model. The left figure below shows the fixed effects in the model, the middle figure shows the simulated spatial process, and the right plot shows the observed surface.
 
-```{r plot-data-process, cache = TRUE, dependson = "simulate_data", fig.align = 'center'}
+
+```r
 zlims <- c(
   min(c(X %*% beta), c(y), c(W %*% alpha)),
   max(c(X %*% beta), c(y), c(W %*% alpha))
@@ -261,16 +252,22 @@ g_fixed <- data.frame(
   temp = c(X %*% beta),
   x    = locs[, 1],
   y    = locs[, 2]
-) %>% 
+) %>%
   ggplot(aes(x = x, y = y, fill = temp)) +
   geom_raster() +
-  xlab("x") + 
-  ylab("y") + 
+  xlab("x") +
+  ylab("y") +
   ggtitle("Fixed effects") +
   colorspace::scale_fill_continuous_diverging("Blue-Red 3", limits = zlims) +
   theme_bw() +
   theme_custom(0.70)
+```
 
+```
+## Error in ggplot2::continuous_scale(aesthetics, "continuous_diverging", : object 'zlims' not found
+```
+
+```r
 dat_map <- data.frame(
   temp = c(y),
   re   = c(W %*% alpha),
@@ -278,37 +275,54 @@ dat_map <- data.frame(
   y    = locs[, 2]
 )
 
-g_full <- dat_map %>% 
+g_full <- dat_map %>%
   ggplot(aes(x = x, y = y, fill = temp)) +
   geom_raster() +
-  xlab("x") + 
-  ylab("y") + 
+  xlab("x") +
+  ylab("y") +
   ggtitle("Observed surface") +
   colorspace::scale_fill_continuous_diverging("Blue-Red 3", limits = zlims) +
   theme_bw() +
   theme_custom(0.70)
+```
 
-g_re <- dat_map %>% 
+```
+## Error in ggplot2::continuous_scale(aesthetics, "continuous_diverging", : object 'zlims' not found
+```
+
+```r
+g_re <- dat_map %>%
   ggplot(aes(x = x, y = y, fill = re)) +
   geom_raster() +
-  xlab("x") + 
-  ylab("y") + 
+  xlab("x") +
+  ylab("y") +
   ggtitle("Spatial process") +
   colorspace::scale_fill_continuous_diverging("Blue-Red 3", limits = zlims) +
   theme_bw() +
   theme(legend.position = "none") +
   theme_custom(0.70)
-  
+```
+
+```
+## Error in ggplot2::continuous_scale(aesthetics, "continuous_diverging", : object 'zlims' not found
+```
+
+```r
 g_fixed + g_re + g_full + plot_layout(guides = "collect")
+```
+
+```
+## Error in eval(expr, envir, enclos): object 'g_fixed' not found
 ```
 
 To further examine how the spatial process is constructed, the plot below shows the contribution to the full spatial process (bottom right plot) from each of the different resolutions. The plot shows how the coarsest resolution (top left) produces a coarse process over large spatial resolutions and the finest resolution (lower left) produces a finer-scale process. The three (M) resolutions are added together to produce the full process.
 
-```{r plot-multiresolution-process, cache = TRUE, dependson = "simulate_data", fig.align = 'center'}
+
+```r
 ## MRA spatial process
 W_alpha_res = unlist(sapply(1:M, function(m) W[, dims_idx == m] %*% alpha[dims_idx == m], simplify = "matrix"))
 dimnames(W_alpha_res) <- list(
-  site = 1:N, 
+  site = 1:N,
   res  = paste("resolution", 1:M)
 )
 dat_locs <- data.frame(
@@ -319,7 +333,7 @@ dat_locs <- data.frame(
 
 sim_MRA <- rbind(
   merge(dat_locs, as.data.frame.table(W_alpha_res, responseName = "W_alpha")),
-  data.frame(  
+  data.frame(
     site    = 1:N,
     x       = locs[, 1],
     y       = locs[, 2],
@@ -330,8 +344,8 @@ sim_MRA <- rbind(
   ggplot(aes(x = x, y = y, fill = W_alpha)) +
   geom_raster() +
   facet_wrap( ~ res, ncol = 2) +
-  xlab("x") + 
-  ylab("y") + 
+  xlab("x") +
+  ylab("y") +
   ggtitle("Multiresolution process") +
   colorspace::scale_fill_continuous_diverging("Blue-Red 3") +
   theme_bw() +
@@ -339,9 +353,14 @@ sim_MRA <- rbind(
 sim_MRA
 ```
 
+<img src="figure/plot-multiresolution-process-1.png" title="plot of chunk plot-multiresolution-process" alt="plot of chunk plot-multiresolution-process" style="display: block; margin: auto;" />
+
+# Fitting the MRA model
+
 To explore how well the fitted model can predict out of sample data, we take a sample $s$ of size $n_{sites}$ from the $N$ simulated points and fit the model using `mcmc_mra()`.
 
-```{r, sample_data, cache = TRUE, dependson = "simulate-data"}
+
+```r
 set.seed(111)
 n_sites   <- 500
 s         <- sample(N, n_sites)
@@ -353,9 +372,10 @@ locs_s    <- locs[s, ]
 locs_oos  <- locs[ - s, ]
 ```
 
-The plot below shows the sampled data to which the model is fit, showing the spatial patterns of the sampled data. 
+The plot below shows the sampled data to which the model is fit, showing the spatial patterns of the sampled data.
 
-```{r plot-sampled-data, cache = TRUE, dependson = c("simulate_data", "sample_data"), fig.align = 'center', fig.height = 4.5, fig.width = 4.5}
+
+```r
 data.frame(
   x     = locs_s[, 1],
   y     = locs_s[, 2],
@@ -371,12 +391,17 @@ data.frame(
   theme(legend.position = "none")
 ```
 
+```
+## Error in ggplot2::continuous_scale(aesthetics, "continuous_diverging", : object 'zlims' not found
+```
+
 
 To fit the model, we must specify the parameters form model fitting. The parameter `params$n_adapt` determines the number of warm-up MCMC iterations and these iterations are discarded. The parameter `params$n_mcmc` determines the number of post warm-up MCMC iterations (i.e., the total number of MCMC iterations is `params$n_adapt + params$n_mcmc`). The parameter `params$n_thin` determines the thinning rate for keeping posterior samples which is primarily used when the number of MCMC samples to keep stresses the computer memory usage. The total number of samples kept is `params$n_mcmc / params$n_thin`. The parameter `params$n_message` specifies the frequency of messages to display showing the progress of the MCMC algorithm. The object `priors` defines the priors for fitting the model. If `priors` is not specified, default priors are used.
 
-```{r}
+
+```r
 params <- list(
-  n_mcmc    = 500, 
+  n_mcmc    = 500,
   n_adapt   = 500,
   n_thin    = 1,
   n_message = 50
@@ -384,17 +409,19 @@ params <- list(
 
 priors <- list(
   alpha_tau2   = 1,
-  beta_tau2    = 1, 
+  beta_tau2    = 1,
   alpha_sigma2 = 1,
-  beta_sigma2  = 1, 
+  beta_sigma2  = 1,
   mu_beta      = rep(0, ncol(X_s)),
   Sigma_beta   = 5 * diag(ncol(X_s)))
 ```
 
-Now we can fit the model to the simulated data. Using a [project-oriented workflow](https://www.tidyverse.org/blog/2017/12/workflow-vs-script/), we save the MCMC output that results from `mcmc_mra()` in a folder named `results`. 
+Now we can fit the model to the simulated data. Using a [project-oriented workflow](https://www.tidyverse.org/blog/2017/12/workflow-vs-script/), we save the MCMC output that results from `mcmc_mra()` in a folder named `results`.
+
+## Fitting the MCMC
 
 
-```{r fit-model}
+```r
 set.seed(999)
 
 if (file.exists(here::here("results", "fit-mra-sim.RData"))) {
@@ -402,14 +429,14 @@ if (file.exists(here::here("results", "fit-mra-sim.RData"))) {
 } else {
   start   <- Sys.time()
   out     <- mcmc_mra(
-    y             = y_s, 
-    X             = X_s, 
-    locs          = locs_s, 
-    params        = params, 
+    y             = y_s,
+    X             = X_s,
+    locs          = locs_s,
+    params        = params,
     priors        = priors,
     M             = M,
     n_coarse_grid = n_coarse,
-    n_cores       = 1L, 
+    n_cores       = 1L,
     verbose       = FALSE
   )
   end     <- Sys.time()
@@ -419,12 +446,15 @@ if (file.exists(here::here("results", "fit-mra-sim.RData"))) {
 ```
 
 
-The fitting of `mcmc_mra()` took `r format(runtime, nsmall = 2, digits = 2)`.
+The fitting of `mcmc_mra()` took 6.02 mins.
+
+
+# Examining the MRA MCMC output
 
 After fitting the MCMC using `mcmc_mra()`, we plot the trace plots of the parameters to check for evidence that the model has not converged and to identify that the parameters have mixed. The first trace plots we examine are for the variance parameters and the regression coefficients. Overall, these trace plots look decent although the effective samples size for the $\tau^2$s and $\beta$s might be low and more samples might be needed for making inference with the model.
 
-```{r trace-plots, cache = TRUE, cache.extra = tools::md5sum(here::here("results", "fit-mra-sim.RData")), fig.align = 'center'}
 
+```r
 dat_tau2 <- data.frame(
   tau2      = c(out$tau2),
   iteration = rep(1:nrow(out$tau2), times = M),
@@ -475,10 +505,13 @@ p_beta  <- ggplot(dat_beta, aes(x = iteration, y = beta, group = covariate, colo
 (p_tau2 + p_lambda) /  (p_sigma2 + p_beta)
 ```
 
+<img src="figure/trace-plots-1.png" title="plot of chunk trace-plots" alt="plot of chunk trace-plots" style="display: block; margin: auto;" />
+
 Next, the trace plots for the spatial parameter $\boldsymbol{\alpha}_m$ are shown. Because there are so many parameters, a sample is taken for plotting. These traceplots suggest that perhaps $\boldsymbol{\alpha}$ hasn't entirely converged. However, as there is a non-identifiability between $\tau^2_m$ and $\boldsymbol{\alpha}_m$, this is not surprising and might not be remedied with more samples.
 
 
-```{r trace-plots-alpha, cache = TRUE, cache.extra = tools::md5sum(here::here("results", "fit-mra-sim.RData")), fig.align = 'center'}
+
+```r
 ## posterior plots for alpha
 
 dat_alpha <- data.frame(
@@ -494,21 +527,24 @@ dat_alpha %>%
   subset(
     (resolution == "resolution 1" & knot %in% plot_idx[, 1]) |
       (resolution == "resolution 2" & knot %in% plot_idx[, 2]) |
-      (resolution == "resolution 3" & knot %in% plot_idx[, 3]) 
+      (resolution == "resolution 3" & knot %in% plot_idx[, 3])
   ) %>%
   ggplot(aes(x = iteration, y = alpha, group = knot, color = knot)) +
   geom_line(alpha = 0.5) +
-  facet_wrap( ~ resolution, ncol = 1) + 
+  facet_wrap( ~ resolution, ncol = 1) +
   scale_color_viridis_d(end = 0.8) +
   ggtitle("Trace plots for alpha") +
   theme_bw() +
   theme_custom(0.7) +
   theme(legend.position = "none")
 ```
-  
+
+<img src="figure/trace-plots-alpha-1.png" title="plot of chunk trace-plots-alpha" alt="plot of chunk trace-plots-alpha" style="display: block; margin: auto;" />
+
 Because the model was fit to simulated data, the posterior predictions can be compared to the simulated parameters to evaluate the model performance. The following plots show the 95\% central credible intervals for different parameters plotted against the simulated parameters. For the regression parameters $\boldsymbol{\beta}$, the model is doing a reasonable job of recovering these parameters. The parameter estimates for $\tau^2_m$ and $\boldsymbol{\alpha}_m$ show poor performance in estimating the true parameters. This is due to a non-identifiability in the model; however, this is not a concern as the spatial process $\sum_{m=1}^M \mathbf{W}_m \boldsymbol{\alpha}_m$ is well estimated which will be shown later.
-  
-```{r estimated-vs-predicted, cache = TRUE, cache.extra = tools::md5sum(here::here("results", "fit-mra-sim.RData")), fig.align = 'center'}
+
+
+```r
 ## predicted vs. estimated beta
 dat_plot <- data.frame(
   truth = beta,
@@ -563,7 +599,7 @@ p_tau2 <- dat_plot %>%
 
 # plot alpha estimates
 dat_plot <- data.frame(
-  truth = alpha, 
+  truth = alpha,
   mean = apply(out$alpha, 2, mean),
   lower = apply(out$alpha, 2, quantile, prob = 0.025),
   upper = apply(out$alpha, 2, quantile, prob = 0.975),
@@ -583,12 +619,15 @@ p_alpha <- dat_plot %>%
 (p_beta + p_sigma2) / (p_tau2 + p_alpha)
 ```
 
+<img src="figure/estimated-vs-predicted-1.png" title="plot of chunk estimated-vs-predicted" alt="plot of chunk estimated-vs-predicted" style="display: block; margin: auto;" />
+
 
 Next, the simulated and estimated $\boldsymbol{\alpha}_m$ are plotted on the spatial grid. The plots show that the $\boldsymbol{\alpha}_m$s are not being identified.
 
-```{r estimated-alphas, cache = TRUE, cache.extra = tools::md5sum(here::here("results", "fit-mra-sim.RData")), fig.align = 'center', warning = FALSE}
+
+```r
 fitted_alphas <- data.frame(
-    x = unlist(sapply(1:M, function(i) MRA$locs_grid[[i]][, 1])), 
+    x = unlist(sapply(1:M, function(i) MRA$locs_grid[[i]][, 1])),
     y = unlist(sapply(1:M, function(i) MRA$locs_grid[[i]][, 2])),
     res = factor(unlist(sapply(1:M, function(i) rep(i, each = nrow(MRA$locs_grid[[i]]))))),
     alpha = unlist(sapply(1:M, function(i) apply(out$alpha, 2, mean)[dims_idx == i]))
@@ -599,14 +638,14 @@ fitted_alphas <- data.frame(
   ggtitle("Posterior mean spatial random effects") +
   facet_wrap( ~ res, ncol = 2) +
   geom_rect(
-    data = NULL, 
+    data = NULL,
     aes(xmin = min(locs[, 1]),
         xmax = max(locs[, 1]),
         ymin = min(locs[, 2]),
         ymax = max(locs[, 2])
     ),
     fill  = NA,
-    color = "black", 
+    color = "black",
     alpha = 0.5
   ) +
   theme_bw() +
@@ -614,13 +653,16 @@ fitted_alphas <- data.frame(
 sim_alphas + theme_custom(0.5) + fitted_alphas
 ```
 
+<img src="figure/estimated-alphas-1.png" title="plot of chunk estimated-alphas" alt="plot of chunk estimated-alphas" style="display: block; margin: auto;" />
+
 Despite the parameters $\tau^2_m$ and $\boldsymbol{\alpha}_m$ not being identifiable, the following plot shows that the full spatial process $\sum_{m=1}^M \mathbf{W}_m \boldsymbol{\alpha}_m$. The two figures (simulated on the left, fitted on the right) demonstrate that each of the $m$ resolutions of the process $\mathbf{W}_m \boldsymbol{\alpha}_m$ are also non-identifiable.
 
-```{r simulated-vs-estimated-process, , cache = TRUE, cache.extra = tools::md5sum(here::here("results", "fit-mra-sim.RData")), fig.align = 'center'}
+
+```r
 ## Estimated MRA spatial proces
 W_alpha_res = unlist(sapply(1:M, function(m) W[, dims_idx == m] %*% apply(out$alpha, 2, mean)[dims_idx == m], simplify = "matrix"))
 dimnames(W_alpha_res) <- list(
-  site = 1:N, 
+  site = 1:N,
   res  = paste("resolution", 1:M)
 )
 dat_locs <- data.frame(
@@ -631,7 +673,7 @@ dat_locs <- data.frame(
 
 estimated_MRA <- rbind(
   merge(dat_locs, as.data.frame.table(W_alpha_res, responseName = "W_alpha")),
-  data.frame(  
+  data.frame(
     site = 1:N,
     lat  = locs[, 2],
     lon  = locs[, 1],
@@ -642,19 +684,22 @@ estimated_MRA <- rbind(
   ggplot(aes(x = lon, y = lat, fill = W_alpha)) +
   geom_raster() +
   facet_wrap( ~ res, ncol = 2) +
-  xlab("Longitude") + 
-  ylab("Latitude") + 
+  xlab("Longitude") +
+  ylab("Latitude") +
   ggtitle("Estimated Multiresolution process") +
   colorspace::scale_fill_continuous_diverging("Blue-Red 3") +
   theme_bw() +
   theme_custom(0.5)
 
-sim_MRA + theme_custom(0.5) + estimated_MRA 
+sim_MRA + theme_custom(0.5) + estimated_MRA
 ```
+
+<img src="figure/simulated-vs-estimated-process-1.png" title="plot of chunk simulated-vs-estimated-process" alt="plot of chunk simulated-vs-estimated-process" style="display: block; margin: auto;" />
 
 The next plots show the estimated vs. simulated fixed effects, spatial process, and mean response. There is some evidence of non-identifiability between the fixed effects plot and the spatial effects plot (left two plots) as there is a bias in each of the predictions. This is understood to be a consequence of spatial confounding (@hodges2010adding, @hughes2013dimension, @hanks2015restricted).
 
-```{r plot-sim-vs-fitted-effects, cache = TRUE, cache.extra = tools::md5sum(here::here("results", "fit-mra-sim.RData"))}
+
+```r
 ## plot estimated mean response
 Xbeta_post <- t(X_s %*% t(out$beta))
 Walpha_post <- t(do.call(cbind, out$MRA$W) %*% t(out$alpha))
@@ -664,20 +709,20 @@ dat_plot <- data.frame(
   mean_Xbeta   = apply(Xbeta_post, 2, mean),
   lower_Xbeta  = apply(Xbeta_post, 2, quantile, prob = 0.025),
   upper_Xbeta  = apply(Xbeta_post, 2, quantile, prob = 0.975),
-  truth_Xbeta  = X_s %*% beta, 
-  
+  truth_Xbeta  = X_s %*% beta,
+
   mean_Walpha  = apply(Walpha_post, 2, mean),
   lower_Walpha = apply(Walpha_post, 2, quantile, prob = 0.025),
   upper_Walpha = apply(Walpha_post, 2, quantile, prob = 0.975),
-  truth_Walpha = (W %*% alpha)[s], 
-  
+  truth_Walpha = (W %*% alpha)[s],
+
   mean_mu      = apply(mu_post, 2, mean),
   lower_mu     = apply(mu_post, 2, quantile, prob = 0.025),
   upper_mu     = apply(mu_post, 2, quantile, prob = 0.975),
   truth_mu     = X_s %*% beta + (W %*% alpha)[s]
 )
 
-plot_Xbeta <- dat_plot %>% 
+plot_Xbeta <- dat_plot %>%
   ggplot(aes(x = truth_Xbeta, y = mean_Xbeta)) +
   scale_color_viridis_d(begin = 0, end = 0.8) +
   geom_point(alpha = 0.5) +
@@ -685,7 +730,7 @@ plot_Xbeta <- dat_plot %>%
   geom_abline(intercept = 0, slope = 1, col = "red") +
   ggtitle("Estimated vs. simulated fixed effects")
 
-plot_Walpha <- dat_plot %>% 
+plot_Walpha <- dat_plot %>%
   ggplot(aes(x = truth_Walpha, y = mean_Walpha)) +
   scale_color_viridis_d(begin = 0, end = 0.8) +
   geom_point(alpha = 0.5) +
@@ -693,7 +738,7 @@ plot_Walpha <- dat_plot %>%
   geom_abline(intercept = 0, slope = 1, col = "red") +
   ggtitle("Estimated vs. simulated spatial process")
 
-plot_mu <- dat_plot %>% 
+plot_mu <- dat_plot %>%
   ggplot(aes(x = truth_mu, y = mean_mu)) +
   scale_color_viridis_d(begin = 0, end = 0.8) +
   geom_point(alpha = 0.5) +
@@ -703,6 +748,8 @@ plot_mu <- dat_plot %>%
 
 plot_Xbeta + plot_Walpha + plot_mu
 ```
+
+![plot of chunk plot-sim-vs-fitted-effects](figure/plot-sim-vs-fitted-effects-1.png)
 
 
 

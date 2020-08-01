@@ -53,5 +53,7 @@ make_Q_alpha_2d <- function(n_dims, phi, use_spam = TRUE, prec_model = "CAR") {
             Q_alpha[[m]] <- as.spam.dgCMatrix(Q_alpha[[m]])
         }
     }
+    class(Q_alpha) <- "Q_alpha"
+
     return(Q_alpha)
 }

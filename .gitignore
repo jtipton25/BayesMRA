@@ -5,3 +5,5 @@
 ## ignore the docs folder as this is build by Travis-CI
 docs/*
 docs/
+doc
+Meta

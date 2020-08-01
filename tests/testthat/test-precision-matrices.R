@@ -25,7 +25,7 @@ test_that("make_Q_alpha_2d", {
 
     expect_identical(
         make_Q_alpha_2d(4, 0.5),
-        list(new("spam",
+        structure(list(new("spam",
                  entries = c(2, -0.5, -0.5, -0.5, 3, -0.5, -0.5,
                              -0.5, 3, -0.5, -0.5, -0.5, 2, -0.5, -0.5, 3, -0.5, -0.5, -0.5,
                              -0.5, 4, -0.5, -0.5, -0.5, -0.5, 4, -0.5, -0.5, -0.5, -0.5, 3,
@@ -40,7 +40,8 @@ test_that("make_Q_alpha_2d", {
                                 15L, 16L, 12L, 15L, 16L),
                  rowpointers = c(1L, 4L, 8L, 12L, 15L,
                                  19L, 24L, 29L, 33L, 37L, 42L, 47L, 51L, 54L, 58L, 62L, 65L),
-                 dimension = c(16L, 16L))
+                 dimension = c(16L, 16L))),
+                 class = "Q_alpha"
         )
     )
 
@@ -71,7 +72,11 @@ test_that("make_Q_alpha_tau2", {
 
     n_dims <- c(4, 16)
     phi    <- c(1, 1)
+    tau2 <- c(2, 2)
     Q_alpha <- make_Q_alpha_2d(n_dims, phi)
+    class(Q_alpha) <- "aaa"
+    expect_error(make_Q_alpha_tau2(Q_alpha, tau2), 'Q_alpha must by of class "Q_alpha" which is the output of make_Q_alpha_2d\\(\\)')
+    class(Q_alpha) <- "Q_alpha"
     tau2 <- 1:3
     expect_error(make_Q_alpha_tau2(Q_alpha, tau2), "Q_alpha must be a list of length M and tau2 must be a positive numeric vector of length M.")
     tau2 <- c(1, NA)
@@ -89,34 +94,28 @@ test_that("make_Q_alpha_tau2", {
     expect_identical({
         n_dims <- c(2, 4)
         phi    <- c(1, 1)
-        make_Q_alpha_2d(n_dims, phi)
+        Q_alpha <- make_Q_alpha_2d(n_dims, phi)
+        tau2 <- c(3, 5)
+        make_Q_alpha_tau2(Q_alpha, tau2)
     },
     {
-        list(
-            new("spam",
-                entries = c(2, -1, -1, -1, 2, -1, -1, 2, -1,
-                            -1, -1, 2),
-                colindices = c(1L, 2L, 3L, 1L, 2L, 4L, 1L, 3L, 4L,
-                               2L, 3L, 4L),
-                rowpointers = c(1L, 4L, 7L, 10L, 13L),
-                dimension = c(4L, 4L)
-            ),
-            new("spam",
-                entries = c(2, -1, -1, -1, 3, -1, -1, -1, 3,
-                            -1, -1, -1, 2, -1, -1, 3, -1, -1, -1, -1, 4, -1, -1, -1, -1,
-                            4, -1, -1, -1, -1, 3, -1, -1, 3, -1, -1, -1, -1, 4, -1, -1, -1,
-                            -1, 4, -1, -1, -1, -1, 3, -1, -1, 2, -1, -1, -1, 3, -1, -1, -1,
-                            3, -1, -1, -1, 2),
-                colindices = c(1L, 2L, 5L, 1L, 2L, 3L, 6L,
-                               2L, 3L, 4L, 7L, 3L, 4L, 8L, 1L, 5L, 6L, 9L, 2L, 5L, 6L, 7L, 10L,
-                               3L, 6L, 7L, 8L, 11L, 4L, 7L, 8L, 12L, 5L, 9L, 10L, 13L, 6L, 9L,
-                               10L, 11L, 14L, 7L, 10L, 11L, 12L, 15L, 8L, 11L, 12L, 16L, 9L,
-                               13L, 14L, 10L, 13L, 14L, 15L, 11L, 14L, 15L, 16L, 12L, 15L, 16L),
-                rowpointers = c(1L, 4L, 8L, 12L, 15L, 19L, 24L, 29L, 33L,
-                                37L, 42L, 47L, 51L, 54L, 58L, 62L, 65L),
-                dimension = c(16L, 16L)
-            )
-        )
+        new("spam",
+            entries = c(6, -3, -3, -3, 6, -3, -3, 6, -3, -3,
+                        -3, 6, 10, -5, -5, -5, 15, -5, -5, -5, 15, -5, -5, -5, 10, -5,
+                        -5, 15, -5, -5, -5, -5, 20, -5, -5, -5, -5, 20, -5, -5, -5, -5,
+                        15, -5, -5, 15, -5, -5, -5, -5, 20, -5, -5, -5, -5, 20, -5, -5,
+                        -5, -5, 15, -5, -5, 10, -5, -5, -5, 15, -5, -5, -5, 15, -5, -5,
+                        -5, 10),
+            colindices = c(1L, 2L, 3L, 1L, 2L, 4L, 1L, 3L, 4L, 2L,
+                           3L, 4L, 5L, 6L, 9L, 5L, 6L, 7L, 10L, 6L, 7L, 8L, 11L, 7L, 8L,
+                           12L, 5L, 9L, 10L, 13L, 6L, 9L, 10L, 11L, 14L, 7L, 10L, 11L, 12L,
+                           15L, 8L, 11L, 12L, 16L, 9L, 13L, 14L, 17L, 10L, 13L, 14L, 15L,
+                           18L, 11L, 14L, 15L, 16L, 19L, 12L, 15L, 16L, 20L, 13L, 17L, 18L,
+                           14L, 17L, 18L, 19L, 15L, 18L, 19L, 20L, 16L, 19L, 20L),
+            rowpointers = c(1L,
+                            4L, 7L, 10L, 13L, 16L, 20L, 24L, 27L, 31L, 36L, 41L, 45L, 49L,
+                            54L, 59L, 63L, 66L, 70L, 74L, 77L),
+            dimension = c(20L, 20L))
     })
 
     # locs <- matrix(1:20, 10, 2)

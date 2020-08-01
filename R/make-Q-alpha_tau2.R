@@ -14,6 +14,9 @@ make_Q_alpha_tau2 <- function(Q_alpha, tau2, use_spam = TRUE) {
     if (length(Q_alpha) != length(tau2))
         stop("Q_alpha must be a list of length M and tau2 must be a positive numeric vector of length M.")
 
+    if (class(Q_alpha) != "Q_alpha")
+        stop('Q_alpha must by of class "Q_alpha" which is the output of make_Q_alpha_2d()')
+
     if (!is_positive_numeric(tau2, length(tau2)))
         stop("tau2 must be a positive numeric vector of length M.")
 
@@ -33,5 +36,7 @@ make_Q_alpha_tau2 <- function(Q_alpha, tau2, use_spam = TRUE) {
         ## use the Matrix package
         Q_alpha_tau2 <- do.call(bdiag, Q_alpha_tau2)
     }
+
+
     return(Q_alpha_tau2)
 }
