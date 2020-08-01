@@ -24,7 +24,7 @@ test_that("mcmc_mra", {
 
     y <- rnorm(10)
     X <- array(0, dim=c(2, 2, 2))
-    expect_error(mcmc_mra(y, X, locs, params), "X must be a numeric matrix with N rows.")
+    expect_error(mcmc_mra(y, X, locs, params), "X must have the same number of rows as the length of y.")
     X <- matrix(0, 5, 3)
     expect_error(mcmc_mra(y, X, locs, params), "X must have the same number of rows as the length of y.")
 
