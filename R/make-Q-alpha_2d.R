@@ -19,9 +19,6 @@ make_Q_alpha_2d <- function(n_dims, phi, use_spam = TRUE, prec_model = "CAR") {
     if (any(phi < -1) || any(phi > 1) || any(is.na(phi)))
         stop("phi must be a numeric vector of length M with values between -1 and 1.")
 
-    if (!is_numeric_vector(phi, length(phi)))
-        stop("phi must be a numeric vector of length M with values between -1 and 1.")
-
     if (!is_integer(n_dims, length(n_dims)))
         stop("n_dims must be a vector of integers of length M.")
 

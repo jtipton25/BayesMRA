@@ -7,9 +7,9 @@
 mra_wendland_2d(
   locs,
   M = 4,
-  n_neighbors = 68,
   n_coarse_grid = 10,
   n_padding = 5L,
+  n_neighbors = 68,
   use_spam = TRUE
 )
 }
@@ -18,13 +18,13 @@ mra_wendland_2d(
 
 \item{M}{The number of resolutions.}
 
-\item{n_neighbors}{The expected number of neighbors for each interior basis function. This determines the basis radius parameter.}
-
 \item{n_coarse_grid}{The number of basis functions in one direction (e.g. \code{n_coarse_grid = 10} results in a \eqn{10 \times 10}{10x10} course grid which is further extended by the number of additional padding basis functions given by \code{n_padding}.}
 
 \item{n_padding}{The number of additional boundary points to add on each boundary. For example, n_padding = 5 will add 5 boundary knots to the both the left  and right side of the grid).}
 
-\item{use_spam}{is a boolean flag to determine whether the output is a list of spam matrix objects (\code{use_spam = TRUE}) or a an \eqn{n \times n}{n x n} sparse Matrix of class "dgCMatrix" \code{use_spam = FALSE} (see spam and Matrix packages for details).}
+\item{n_neighbors}{The expected number of neighbors for each interior basis function. This determines the basis radius parameter.}
+
+\item{use_spam}{is a boolean flag to determine whether the output is a list of \code{spam::spam} matrix objects (\code{use_spam = TRUE}) or a an \eqn{n \times n}{n x n} sparse Matrix of class \code{Matrix::dgCMatrix} \code{use_spam = FALSE} (see spam and Matrix packages for details).}
 }
 \value{
 A list of objects including the MRA knots locations \code{locs_grid},

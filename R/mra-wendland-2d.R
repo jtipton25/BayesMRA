@@ -2,10 +2,10 @@
 #'
 #' @param locs The location variables in 2 dimensions over which to construct the basis function representation
 #' @param M The number of resolutions.
-#' @param n_neighbors The expected number of neighbors for each interior basis function. This determines the basis radius parameter.
-#' @param n_coarse_grid The number of basis functions in one direction (e.g. \code{n_coarse_grid = 10} results in a \eqn{10 \times 10}{10x10} course grid which is further extended by the number of additional padding basis functions given by \code{n_padding}.
+#' @param n_coarse_grid The number of basis functions in one direction (e.g. `n_coarse_grid = 10` results in a \eqn{10 \times 10}{10x10} course grid which is further extended by the number of additional padding basis functions given by `n_padding`.
 #' @param n_padding The number of additional boundary points to add on each boundary. For example, n_padding = 5 will add 5 boundary knots to the both the left  and right side of the grid).
-#' @param use_spam is a boolean flag to determine whether the output is a list of spam matrix objects (\code{use_spam = TRUE}) or a an \eqn{n \times n}{n x n} sparse Matrix of class "dgCMatrix" \code{use_spam = FALSE} (see spam and Matrix packages for details).
+#' @param n_neighbors The expected number of neighbors for each interior basis function. This determines the basis radius parameter.
+#' @param use_spam is a boolean flag to determine whether the output is a list of `spam::spam` matrix objects (`use_spam = TRUE`) or a an \eqn{n \times n}{n x n} sparse Matrix of class `Matrix::dgCMatrix` `use_spam = FALSE` (see spam and Matrix packages for details).
 #'
 #' @importFrom fields rdist
 #' @importFrom spam spam
@@ -21,11 +21,11 @@
 mra_wendland_2d <- function(
     locs,
     M             = 4,
-    n_neighbors   = 68,
     n_coarse_grid = 10,
+    n_padding     = 5L,
+    n_neighbors   = 68,
     # n_max_fine_grid = 2^12,
     # radius      = 25,
-    n_padding     = 5L,
     use_spam      = TRUE
 ) {
     ##

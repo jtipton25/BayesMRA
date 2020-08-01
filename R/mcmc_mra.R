@@ -75,10 +75,15 @@ mcmc_mra <- function(
     if (!is_positive_integer(params$n_message, 1))
         stop("params must contain a positive integer n_message.")
 
+    params$n_adapt   <- as.integer(params$n_adapt)
+    params$n_mcmc    <- as.integer(params$n_mcmc)
+    params$n_thin    <- as.integer(params$n_thin)
+    params$n_message <- as.integer(params$n_message)
+
     ## check the priors list
 
 
-
+    ## check mcmc input
     if (!is.logical(verbose) || length(verbose) != 1 || is.na(verbose)) {
         stop("verbose must be either TRUE or FALSE.")
     }
@@ -86,6 +91,18 @@ mcmc_mra <- function(
     if (!is.logical(use_spam) || length(use_spam) != 1 || is.na(use_spam)) {
         stop("use_spam must be either TRUE or FALSE.")
     }
+
+    if (!is_positive_integer(n_cores, 1)) {
+        stop("n_cores must be a positive integer")
+    }
+
+    n_cores <- as.integer(n_cores)
+
+    if (!is_positive_integer(n_chain, 1)) {
+        stop("n_chain must be a positive integer")
+    }
+
+    n_chain <- as.integer(n_chain)
 
     ##
     ## setup config
@@ -98,6 +115,8 @@ mcmc_mra <- function(
     if (!is.null(config)) {
         if (!is.null(config[['sample_beta']])) {
             sample_beta <- config[['sample_beta']]
+            if (!is.logical(sample_beta) | is.na(sample_beta))
+                stop('If specified, sample_beta must be TRUE or FALSE')
         }
     }
 
@@ -115,6 +134,8 @@ mcmc_mra <- function(
     if (!is.null(config)) {
         if (!is.null(config[['sample_tau2']])) {
             sample_tau2 <- config[['sample_tau2']]
+            if (!is.logical(sample_tau2) | is.na(sample_tau2))
+                stop('If specified, sample_tau2 must be TRUE or FALSE')
         }
     }
 
@@ -122,6 +143,8 @@ mcmc_mra <- function(
     if (!is.null(config)) {
         if (!is.null(config[['sample_lambda']])) {
             sample_lambda <- config[['sample_lambda']]
+            if (!is.logical(sample_lambda) | is.na(sample_lambda))
+                stop('If specified, sample_lambda must be TRUE or FALSE')
         }
     }
 
@@ -130,6 +153,8 @@ mcmc_mra <- function(
     if (!is.null(config)) {
         if (!is.null(config[['sample_sigma2']])) {
             sample_sigma2 <- config[['sample_sigma2']]
+            if (!is.logical(sample_sigma2) | is.na(sample_sigma2))
+                stop('If specified, sample_sigma2 must be TRUE or FALSE')
         }
     }
 
@@ -138,6 +163,8 @@ mcmc_mra <- function(
     if (!is.null(config)) {
         if (!is.null(config[['sample_alpha']])) {
             sample_alpha <- config[['sample_alpha']]
+            if (!is.logical(sample_alpha) | is.na(sample_alpha))
+                stop('If specified, sample_alpha must be TRUE or FALSE')
         }
     }
 
@@ -152,7 +179,15 @@ mcmc_mra <- function(
     ## setup MRA spatial basis
     ##
 
-    MRA      <- mra_wendland_2d(locs, M, n_coarse_grid = n_coarse_grid, use_spam = use_spam)
+    MRA <- mra_wendland_2d(
+        locs          = locs,
+        M             = M,
+        n_coarse_grid = n_coarse_grid,
+        n_padding     = n_padding,
+        n_neighbors   = n_neighbors,
+        use_spam      = use_spam
+    )
+
     # MRA      <- mra_wendland_2d(locs, M, n_max_fine_grid = n_max_fine_grid, use_spam = use_spam)
     W_list   <- MRA$W
     tW_list  <- vector(mode = 'list', length = M)
@@ -161,7 +196,8 @@ mcmc_mra <- function(
         if (use_spam) {
             tW_list[[m]] <- t(W_list[[m]])
         } else {
-            tW_list[[m]] <- Matrix::t(W_list[[m]])
+            stop("Only support use_spam = TRUE")
+            # tW_list[[m]] <- Matrix::t(W_list[[m]])
         }
         tWW_list[[m]] <- tW_list[[m]] %*% W_list[[m]]
     }
@@ -178,7 +214,7 @@ mcmc_mra <- function(
         tW <- t(W)
     } else {
         stop ('Only support use_spam = TRUE')
-        tW <- Matrix::t(W)
+        # tW <- Matrix::t(W)
     }
 
     tWW <- tW %*% W
@@ -345,24 +381,26 @@ mcmc_mra <- function(
 
     ## initial values for beta
     if (!is.null(inits[['beta']])) {
+        if(!is_numeric_vector(inits[['beta']], p))
+            stop("initial value for beta must be a numeric vector of length p")
         if (all(!is.na(inits[['beta']]))) {
             beta <- inits[['beta']]
-            if(!is_numeric_vector(beta, p))
-                stop("initial value for beta must be a numeric vector of length p")
         }
     }
 
     ## intial values for sigma2
     if (!is.null(inits[['sigma2']])) {
+        if(!is_positive_numeric(inits[['sigma2']], 1))
+            stop("initial value for sigma2 must be a positive numeric value")
         if (all(!is.na(inits[['sigma2']]))) {
             sigma2 <- inits[['sigma2']]
-            if(!is_positive_numeric(sigma2, 1))
-                stop("initial value for sigma2 must be a positive numeric value")
         }
     }
 
     ## initial values for alpha
     if (!is.null(inits[['alpha']])) {
+        if(!is_numeric_vector(inits[['alpha']], length(alpha)))
+            stop("initial value for alpha must be positive numeric vector of length equal to the number of all grid points")
         if (all(!is.na(inits[['alpha']]))) {
             alpha <- inits[['alpha']]
         }
@@ -370,10 +408,10 @@ mcmc_mra <- function(
 
     ## initial values for tau2
     if (!is.null(inits[['tau2']])) {
+        if(!is_positive_numeric(inits[['tau2']], M) | !is.vector(inits[['tau2']]))
+            stop("initial value for tau2 must be a positive numeric vector of length M")
         if (all(!is.na(inits[['tau2']]))) {
             tau2 <- inits[['tau2']]
-            if(!is_positive_numeric(tau2, M))
-                stop("initial value for tau2 must be a positive numeric vector of length M")
         }
 
     }
