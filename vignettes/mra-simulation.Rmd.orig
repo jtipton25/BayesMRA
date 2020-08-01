@@ -1,6 +1,7 @@
 ---
 title: "Fitting Bayesian multiresolution models with `mcmc_mra()`"
-output: rmarkdown::html_vignette
+output: bookdown::html_document2
+link-citations: yes
 vignette: >
   %\VignetteIndexEntry{Multinomial logistic regression using pgLM}
   %\VignetteEngine{knitr::rmarkdown}
@@ -55,14 +56,23 @@ theme_custom <- function(scale_text = 1) {
 
 # Defining the MRA model
 
-This package provides a Bayesian implementation of the multi-resolution Gaussian process model presented by @nychka2015multiresolution. This package is similar to the R package `LatticeKrig` (@LatticeKrig) and provides an implemetation that is suitable for use in MCMC samplers.
+This package provides a Bayesian implementation of the multi-resolution Gaussian process model presented by @nychka2015multiresolution. This package is similar to the R package `LatticeKrig` (@LatticeKrig) and provides an implementation that is suitable for use in MCMC samplers.
 
 The model that the function `mcmc_mra()` fits is defined below. Let $\mathbf{s}$ be a spatial location in a domain of interest $\mathcal{D}$ and let $y(\mathbf{s})$ be the observation of the spatial process at location $\mathbf{s}$. Then, we can write the observation as
 
 $$\begin{align*}
-y(\mathbf{s}) & = \mathbf{X}(\mathbf{s}) \boldsymbol{\beta} + \boldsymbol{\eta}(\mathf{s}) + \varepsilon(\mathbf{s})
+y(\mathbf{s}) & = \mathbf{x}(\mathbf{s})' \boldsymbol{\beta} + \eta(\mathbf{s}) + \varepsilon(\mathbf{s}),
 \end{align*}$$
 
+where $\mathbf{x}(s)$ is a vector of covariates at site $\mathbf{s}$, $\boldsymbol{\beta}$ are regression coefficients, $\boldsymbol{\eta}(\mathbf{s})$ is the realization of a correlated Gaussian process at location $\mathbf{s}$ and $\varepsilon(\mathbf{s})$ is the realization of an uncorrelated Gaussian error process. The model can be written in matrix form where
+
+$$\begin{align*}
+\mathbf{y} & = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\eta} + \boldsymbol{\varepsilon}.
+\end{align*}$$
+
+In matrix form, the spatially correlated random process has the distribution $\boldsymbol{\eta} \sim \operatorname{N}(\mathbf{0}, \mathbf{C})$ where the $\mathbf{C}_{ij}$ (the $i$th row and $j$th column of $\mathbf{C}$) is defined as the output of the covariance function $cov(\mathbf{s}_i, \mathbf{s}_j)$ at sites $\mathbf{s}_i$ and $\mathbf{s}_j$. The residual process $\boldsymbol{\varepsilon} \sim \operatorname{N}(\mathbf{0}, \sigma^2 \mathbf{I})$ models measurement error, commonly referred to as the nugget in the spatial statistics literature.
+
+Rather than specifying a parametric form for the covariance function $cov(\mathbf{s}_i, \mathbf{s}_j)$, we approximate the covariance function effect with a multi-resolution approximation. This approximation gives $\boldsymbol{\eta} \approx \sum_{m=1}^M \mathbf{W}_m \boldsymbol{\alpha}_m$ where $\mathbf{W}_m$ is the Wendland basis expansion at the $m$th resolution and $\boldsymbol{\alpha}_m$ are the $m$th resolution random effect.
 
 # Simulating data from the model
 
@@ -150,7 +160,7 @@ for (m in 1:M) {
 
 The MRA approach requires a set of grid point at each resolution. The set of grid points at each resolution extends beyond the spatial domain that is highlighted in the black box.
 
-```{r MRA-grid, cache = TRUE, dependson = "simulate_data", fig.height = 4.5, fig.width = 4.5, fig.align = 'center'}
+```{r MRA-grid, cache = TRUE, dependson = "simulate_data", fig.height = 4.5, fig.width = 4.5, fig.align = 'center', fig.id = "MRA-grid"}
 data.frame(
     x = unlist(sapply(1:M, function(i) MRA$locs_grid[[i]][, 1])),
     y = unlist(sapply(1:M, function(i) MRA$locs_grid[[i]][, 2])),

@@ -10,15 +10,16 @@ library(xfun)
 ##
 
 knitr::knit("vignettes/mra-simulation.Rmd.orig", output = "vignettes/mra-simulation.Rmd", envir = new.env())
-
+## change the file path in the .Rmd
+gsub_file("vignettes/mra-simulation.Rmd", "figure/", "")
 
 ##
 ## move images to the vignette folder and delete cached files
 ##
 
 ## list the images created by the vignette and move to the vignettes folder
-mra_images <- list.files("figure/")[grep(".svg", list.files("figure/"))]
-file.move(paste0("figure/", mra_images), destinations = "./vignettes/", overwrite = TRUE)
+# mra_images <- list.files("figure/")[grep(".svg", list.files("figure/"))]
+# file.move(paste0("figure/", mra_images), destinations = "./vignettes/", overwrite = TRUE)
 mra_images <- list.files("figure/")[grep(".png", list.files("figure/"))]
 file.move(paste0("figure/", mra_images), destinations = "./vignettes/", overwrite = TRUE)
 
@@ -30,8 +31,7 @@ cache_files <- list.files("cache/")
 file.remove(paste0("cache/", cache_files))
 file.remove("./cache")
 
-## change the file path in the .Rmd
-gsub_file("vignettes/mra-simulation.Rmd", "figure/", "")
+
 
 # knitr::knit("vignettes/mra-simulation.Rmd.orig", output = "vignettes/mra-simulation.Rmd")
 

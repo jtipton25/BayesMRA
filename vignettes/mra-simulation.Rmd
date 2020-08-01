@@ -1,6 +1,7 @@
 ---
 title: "Fitting Bayesian multiresolution models with `mcmc_mra()`"
-output: rmarkdown::html_vignette
+output: bookdown::html_document2
+link-citations: yes
 vignette: >
   %\VignetteIndexEntry{Multinomial logistic regression using pgLM}
   %\VignetteEngine{knitr::rmarkdown}
@@ -20,7 +21,25 @@ In this Vignette, we demonstrate how to fit Bayesian spatial models using the mu
 
 # Defining the MRA model
 
-This package provides a Bayesian implementation of the multi-resolution Gaussian process model presented by @nychka2015multiresolution. This package is similar to the R package `LatticeKrig` (@LatticeKrig)
+This package provides a Bayesian implementation of the multi-resolution Gaussian process model presented by @nychka2015multiresolution. This package is similar to the R package `LatticeKrig` (@LatticeKrig) and provides an implementation that is suitable for use in MCMC samplers.
+
+The model that the function `mcmc_mra()` fits is defined below. Let $\mathbf{s}$ be a spatial location in a domain of interest $\mathcal{D}$ and let $y(\mathbf{s})$ be the observation of the spatial process at location $\mathbf{s}$. Then, we can write the observation as
+
+$$\begin{align*}
+y(\mathbf{s}) & = \mathbf{x}(\mathbf{s})' \boldsymbol{\beta} + \eta(\mathbf{s}) + \varepsilon(\mathbf{s}),
+\end{align*}$$
+
+where $\mathbf{x}(s)$ is a vector of covariates at site $\mathbf{s}$, $\boldsymbol{\beta}$ are regression coefficients, $\boldsymbol{\eta}(\mathbf{s})$ is the realization of a correlated Gaussian process at location $\mathbf{s}$ and $\varepsilon(\mathbf{s})$ is the realization of an uncorrelated Gaussian error process. The model can be written in matrix form where
+
+$$\begin{align*}
+\mathbf{y} & = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\eta} + \boldsymbol{\varepsilon}.
+\end{align*}$$
+
+In matrix form, the spatially correlated random process has the distribution $\boldsymbol{\eta} \sim \operatorname{N}(\mathbf{0}, \mathbf{C})$ where the $\mathbf{C}_{ij}$ (the $i$th row and $j$th column of $\mathbf{C}$) is defined as the output of the covariance function $cov(\mathbf{s}_i, \mathbf{s}_j)$ at sites $\mathbf{s}_i$ and $\mathbf{s}_j$. The residual process $\boldsymbol{\varepsilon} \sim \operatorname{N}(\mathbf{0}, \sigma^2 \mathbf{I})$ models measurement error, commonly referred to as the nugget in the spatial statistics literature.
+
+Rather than specifying a parametric form for the covariance function $cov(\mathbf{s}_i, \mathbf{s}_j)$, we approximate the covariance function effect with a multi-resolution approximation. This approximation gives $\boldsymbol{\eta} \approx \sum_{m=1}^M \mathbf{W}_m \boldsymbol{\alpha}_m$ where
+
+- reference to MRA grid figure \@ref(fig:MRA-grid)
 
 # Simulating data from the model
 
@@ -92,7 +111,7 @@ sum(alpha)
 ```
 
 ```
-## [1] 1.98782e-14
+## [1] 4.128642e-14
 ```
 
 ```r
@@ -100,7 +119,7 @@ sum(alpha[dims_idx == 1])
 ```
 
 ```
-## [1] 1.450229e-15
+## [1] -3.103073e-14
 ```
 
 ```r
@@ -108,7 +127,7 @@ sum(alpha[dims_idx == 2])
 ```
 
 ```
-## [1] 4.22995e-14
+## [1] 2.21767e-14
 ```
 
 ```r
@@ -116,7 +135,7 @@ sum(alpha[dims_idx == 3])
 ```
 
 ```
-## [1] -2.387153e-14
+## [1] 5.014045e-14
 ```
 
 ## Plotting the simulated data
@@ -134,7 +153,7 @@ for (m in 1:M) {
 }
 ```
 
-<img src="figure/plot-precision-matrices-1.png" title="plot of chunk plot-precision-matrices" alt="plot of chunk plot-precision-matrices" style="display: block; margin: auto;" />
+<img src="plot-precision-matrices-1.png" title="plot of chunk plot-precision-matrices" alt="plot of chunk plot-precision-matrices" style="display: block; margin: auto;" />
 
 The MRA approach requires a set of grid point at each resolution. The set of grid points at each resolution extends beyond the spatial domain that is highlighted in the black box.
 
@@ -164,7 +183,7 @@ data.frame(
   theme_custom()
 ```
 
-<img src="figure/MRA-grid-1.png" title="plot of chunk MRA-grid" alt="plot of chunk MRA-grid" style="display: block; margin: auto;" />
+<img src="MRA-grid-1.png" title="plot of chunk MRA-grid" alt="plot of chunk MRA-grid" style="display: block; margin: auto;" />
 
 At each internal grid cell, we expect there to be 68 neighbors where the Wendland basis is nonzero. The plot below shows the number of neighbors at each grid point for each resolution.
 
@@ -203,7 +222,7 @@ data.frame(
   theme_custom()
 ```
 
-<img src="figure/plot-neighbors-1.png" title="plot of chunk plot-neighbors" alt="plot of chunk plot-neighbors" style="display: block; margin: auto;" />
+<img src="plot-neighbors-1.png" title="plot of chunk plot-neighbors" alt="plot of chunk plot-neighbors" style="display: block; margin: auto;" />
 
 The next plot shows the simulated spatial random effects $\boldsymbol{\alpha}_m$ at each of the grid points. Notice that the variation is largest for the coarse resolution and the variability decreases for each finer resolution.
 
@@ -237,7 +256,7 @@ sim_alphas <- data.frame(
 sim_alphas
 ```
 
-<img src="figure/plot-random-effects-1.png" title="plot of chunk plot-random-effects" alt="plot of chunk plot-random-effects" style="display: block; margin: auto;" />
+<img src="plot-random-effects-1.png" title="plot of chunk plot-random-effects" alt="plot of chunk plot-random-effects" style="display: block; margin: auto;" />
 
 Next, we show a simulated realization of the model. The left figure below shows the fixed effects in the model, the middle figure shows the simulated spatial process, and the right plot shows the observed surface.
 
@@ -353,7 +372,7 @@ sim_MRA <- rbind(
 sim_MRA
 ```
 
-<img src="figure/plot-multiresolution-process-1.png" title="plot of chunk plot-multiresolution-process" alt="plot of chunk plot-multiresolution-process" style="display: block; margin: auto;" />
+<img src="plot-multiresolution-process-1.png" title="plot of chunk plot-multiresolution-process" alt="plot of chunk plot-multiresolution-process" style="display: block; margin: auto;" />
 
 # Fitting the MRA model
 
@@ -446,7 +465,7 @@ if (file.exists(here::here("results", "fit-mra-sim.RData"))) {
 ```
 
 
-The fitting of `mcmc_mra()` took 6.02 mins.
+The fitting of `mcmc_mra()` took 10.89 mins.
 
 
 # Examining the MRA MCMC output
@@ -505,7 +524,7 @@ p_beta  <- ggplot(dat_beta, aes(x = iteration, y = beta, group = covariate, colo
 (p_tau2 + p_lambda) /  (p_sigma2 + p_beta)
 ```
 
-<img src="figure/trace-plots-1.png" title="plot of chunk trace-plots" alt="plot of chunk trace-plots" style="display: block; margin: auto;" />
+<img src="trace-plots-1.png" title="plot of chunk trace-plots" alt="plot of chunk trace-plots" style="display: block; margin: auto;" />
 
 Next, the trace plots for the spatial parameter $\boldsymbol{\alpha}_m$ are shown. Because there are so many parameters, a sample is taken for plotting. These traceplots suggest that perhaps $\boldsymbol{\alpha}$ hasn't entirely converged. However, as there is a non-identifiability between $\tau^2_m$ and $\boldsymbol{\alpha}_m$, this is not surprising and might not be remedied with more samples.
 
@@ -539,7 +558,7 @@ dat_alpha %>%
   theme(legend.position = "none")
 ```
 
-<img src="figure/trace-plots-alpha-1.png" title="plot of chunk trace-plots-alpha" alt="plot of chunk trace-plots-alpha" style="display: block; margin: auto;" />
+<img src="trace-plots-alpha-1.png" title="plot of chunk trace-plots-alpha" alt="plot of chunk trace-plots-alpha" style="display: block; margin: auto;" />
 
 Because the model was fit to simulated data, the posterior predictions can be compared to the simulated parameters to evaluate the model performance. The following plots show the 95\% central credible intervals for different parameters plotted against the simulated parameters. For the regression parameters $\boldsymbol{\beta}$, the model is doing a reasonable job of recovering these parameters. The parameter estimates for $\tau^2_m$ and $\boldsymbol{\alpha}_m$ show poor performance in estimating the true parameters. This is due to a non-identifiability in the model; however, this is not a concern as the spatial process $\sum_{m=1}^M \mathbf{W}_m \boldsymbol{\alpha}_m$ is well estimated which will be shown later.
 
@@ -619,7 +638,7 @@ p_alpha <- dat_plot %>%
 (p_beta + p_sigma2) / (p_tau2 + p_alpha)
 ```
 
-<img src="figure/estimated-vs-predicted-1.png" title="plot of chunk estimated-vs-predicted" alt="plot of chunk estimated-vs-predicted" style="display: block; margin: auto;" />
+<img src="estimated-vs-predicted-1.png" title="plot of chunk estimated-vs-predicted" alt="plot of chunk estimated-vs-predicted" style="display: block; margin: auto;" />
 
 
 Next, the simulated and estimated $\boldsymbol{\alpha}_m$ are plotted on the spatial grid. The plots show that the $\boldsymbol{\alpha}_m$s are not being identified.
@@ -653,7 +672,7 @@ fitted_alphas <- data.frame(
 sim_alphas + theme_custom(0.5) + fitted_alphas
 ```
 
-<img src="figure/estimated-alphas-1.png" title="plot of chunk estimated-alphas" alt="plot of chunk estimated-alphas" style="display: block; margin: auto;" />
+<img src="estimated-alphas-1.png" title="plot of chunk estimated-alphas" alt="plot of chunk estimated-alphas" style="display: block; margin: auto;" />
 
 Despite the parameters $\tau^2_m$ and $\boldsymbol{\alpha}_m$ not being identifiable, the following plot shows that the full spatial process $\sum_{m=1}^M \mathbf{W}_m \boldsymbol{\alpha}_m$. The two figures (simulated on the left, fitted on the right) demonstrate that each of the $m$ resolutions of the process $\mathbf{W}_m \boldsymbol{\alpha}_m$ are also non-identifiable.
 
@@ -694,7 +713,7 @@ estimated_MRA <- rbind(
 sim_MRA + theme_custom(0.5) + estimated_MRA
 ```
 
-<img src="figure/simulated-vs-estimated-process-1.png" title="plot of chunk simulated-vs-estimated-process" alt="plot of chunk simulated-vs-estimated-process" style="display: block; margin: auto;" />
+<img src="simulated-vs-estimated-process-1.png" title="plot of chunk simulated-vs-estimated-process" alt="plot of chunk simulated-vs-estimated-process" style="display: block; margin: auto;" />
 
 The next plots show the estimated vs. simulated fixed effects, spatial process, and mean response. There is some evidence of non-identifiability between the fixed effects plot and the spatial effects plot (left two plots) as there is a bias in each of the predictions. This is understood to be a consequence of spatial confounding (@hodges2010adding, @hughes2013dimension, @hanks2015restricted).
 
@@ -749,7 +768,7 @@ plot_mu <- dat_plot %>%
 plot_Xbeta + plot_Walpha + plot_mu
 ```
 
-![plot of chunk plot-sim-vs-fitted-effects](figure/plot-sim-vs-fitted-effects-1.png)
+![plot of chunk plot-sim-vs-fitted-effects](plot-sim-vs-fitted-effects-1.png)
 
 
 
