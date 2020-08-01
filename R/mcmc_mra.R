@@ -1,6 +1,6 @@
-#' Bayesian Polya-gamma regression
+#' Bayesian Multi-resolution Spatial Regression
 #'
-#' this function runs the Bayesian multinomial regression using Polya-gamma data augmentation
+#' this function runs Markov Chain Monte Carlo to estimate the Bayesian multi-resolution spatial regression model
 #' @param y is a \eqn{n}{n} vector of Gaussian data.
 #' @param X is a \eqn{n \times p}{n x p} matrix of fixed effects (like latitude, elevation, etc)
 #' @param locs is a \eqn{n \times 2}{n x 2} matrix of observation locations.
