@@ -1,7 +1,5 @@
 ---
 title: "Fitting Bayesian multiresolution models with `mcmc_mra()`"
-output: bookdown::html_document2
-link-citations: yes
 vignette: >
   %\VignetteIndexEntry{Multinomial logistic regression using pgLM}
   %\VignetteEngine{knitr::rmarkdown}
@@ -37,9 +35,7 @@ $$\begin{align*}
 
 In matrix form, the spatially correlated random process has the distribution $\boldsymbol{\eta} \sim \operatorname{N}(\mathbf{0}, \mathbf{C})$ where the $\mathbf{C}_{ij}$ (the $i$th row and $j$th column of $\mathbf{C}$) is defined as the output of the covariance function $cov(\mathbf{s}_i, \mathbf{s}_j)$ at sites $\mathbf{s}_i$ and $\mathbf{s}_j$. The residual process $\boldsymbol{\varepsilon} \sim \operatorname{N}(\mathbf{0}, \sigma^2 \mathbf{I})$ models measurement error, commonly referred to as the nugget in the spatial statistics literature.
 
-Rather than specifying a parametric form for the covariance function $cov(\mathbf{s}_i, \mathbf{s}_j)$, we approximate the covariance function effect with a multi-resolution approximation. This approximation gives $\boldsymbol{\eta} \approx \sum_{m=1}^M \mathbf{W}_m \boldsymbol{\alpha}_m$ where
-
-- reference to MRA grid figure \@ref(fig:MRA-grid)
+Rather than specifying a parametric form for the covariance function $cov(\mathbf{s}_i, \mathbf{s}_j)$, we approximate the covariance function effect with a multi-resolution approximation. This approximation gives $\boldsymbol{\eta} \approx \sum_{m=1}^M \mathbf{W}_m \boldsymbol{\alpha}_m$ where $\mathbf{W}_m$ is the Wendland basis expansion at the $m$th resolution and $\boldsymbol{\alpha}_m$ are the $m$th resolution random effect.
 
 # Simulating data from the model
 

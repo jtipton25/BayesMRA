@@ -1,7 +1,5 @@
 ---
 title: "Fitting Bayesian multiresolution models with `mcmc_mra()`"
-output: bookdown::html_document2
-link-citations: yes
 vignette: >
   %\VignetteIndexEntry{Multinomial logistic regression using pgLM}
   %\VignetteEngine{knitr::rmarkdown}
