@@ -54,7 +54,7 @@ theme_custom <- function(scale_text = 1) {
 
 # Defining the MRA model
 
-This package provides a Bayesian implementation of the multi-resolution Gaussian process model presented by @nychka2015multiresolution. This package is similar to the R package `LatticeKrig` (@LatticeKrig) and provides an implementation that is suitable for use in MCMC samplers.
+This package provides a Bayesian implementation of the multi-resolution Gaussian process model presented by @nychka2015multiresolution. This package is similar to the R package `LatticeKrig::LatticeKrig` (@LatticeKrig) and provides an implementation that is suitable for use in MCMC samplers.
 
 The model that the function `mcmc_mra()` fits is defined below. Let $\mathbf{s}$ be a spatial location in a domain of interest $\mathcal{D}$ and let $y(\mathbf{s})$ be the observation of the spatial process at location $\mathbf{s}$. Then, we can write the observation as
 
@@ -76,7 +76,7 @@ Rather than specifying a parametric form for the covariance function $cov(\mathb
 
 First, we simulate some data from the process of interest. We simulate a spatially explicit set of fired effects X that represent spatial variables like elevation, latitude, etc. Next, the spatial process is initialized
 
-```{r, simulate_data, cache = TRUE}
+```{r, simulate_data}
 set.seed(11)
 
 N <- 40^2
@@ -135,7 +135,7 @@ y <- X %*% beta + W %*% alpha + rnorm(N, 0, sqrt(sigma2))
 
 Next, the sum-to-one constraint is verified by checking that within each dimension the sum of the $\boldsymbol{\alpha}_m$ parameters is 0.
 
-```{r}
+```{r, show = "hold"}
 sum(alpha)
 sum(alpha[dims_idx == 1])
 sum(alpha[dims_idx == 2])
@@ -146,7 +146,7 @@ sum(alpha[dims_idx == 3])
 
 To explore the structure of the precision matrix of the spatial random effects, we plot the pattern of nonzero elements in the precision matrices $\mathbf{Q}_{m}$ for each resolution $m$. The sparse, banded structure in the precision matrices at each resolution are what enable efficient computation.
 
-```{r plot-precision-matrices, cache = TRUE, warning = FALSE, dependson = "simulate_data", fig.align = 'center', dev.args = list(pointsize = 4)}
+```{r plot-precision-matrices, warning = FALSE, dependson = "simulate_data", fig.align = 'center', dev.args = list(pointsize = 4)}
 ## plot Q_alpha_tau2 structure
 ## note: the display function gives a warning about the default cex setting
 layout(matrix(1:4, 2, 2, byrow = TRUE))
@@ -158,7 +158,7 @@ for (m in 1:M) {
 
 The MRA approach requires a set of grid point at each resolution. The set of grid points at each resolution extends beyond the spatial domain that is highlighted in the black box.
 
-```{r MRA-grid, cache = TRUE, dependson = "simulate_data", fig.height = 4.5, fig.width = 4.5, fig.align = 'center', fig.id = "MRA-grid"}
+```{r MRA-grid, fig.height = 4.5, fig.width = 4.5, fig.align = 'center', fig.id = "MRA-grid"}
 data.frame(
     x = unlist(sapply(1:M, function(i) MRA$locs_grid[[i]][, 1])),
     y = unlist(sapply(1:M, function(i) MRA$locs_grid[[i]][, 2])),
@@ -185,7 +185,7 @@ data.frame(
 
 At each internal grid cell, we expect there to be 68 neighbors where the Wendland basis is nonzero. The plot below shows the number of neighbors at each grid point for each resolution.
 
-```{r plot-neighbors, cache = TRUE, dependson = "simulate_data", fig.align = 'center', warning = FALSE}
+```{r plot-neighbors, fig.align = 'center', warning = FALSE}
 
 nnn <- sapply(1:M, function(i) {
   D <- rdist(MRA$locs_grid[[i]])
@@ -222,7 +222,7 @@ data.frame(
 
 The next plot shows the simulated spatial random effects $\boldsymbol{\alpha}_m$ at each of the grid points. Notice that the variation is largest for the coarse resolution and the variability decreases for each finer resolution.
 
-```{r plot-random-effects, cache = TRUE, dependson = "simulate_data", fig.align = 'center', warning = FALSE}
+```{r plot-random-effects, fig.align = 'center', warning = FALSE}
 sim_alphas <- data.frame(
     x = unlist(sapply(1:M, function(i) MRA$locs_grid[[i]][, 1])),
     y = unlist(sapply(1:M, function(i) MRA$locs_grid[[i]][, 2])),
@@ -253,7 +253,7 @@ sim_alphas
 
 Next, we show a simulated realization of the model. The left figure below shows the fixed effects in the model, the middle figure shows the simulated spatial process, and the right plot shows the observed surface.
 
-```{r plot-data-process, cache = TRUE, dependson = "simulate_data", fig.align = 'center'}
+```{r plot-data-process, fig.align = 'center'}
 zlims <- c(
   min(c(X %*% beta), c(y), c(W %*% alpha)),
   max(c(X %*% beta), c(y), c(W %*% alpha))
@@ -306,7 +306,7 @@ g_fixed + g_re + g_full + plot_layout(guides = "collect")
 
 To further examine how the spatial process is constructed, the plot below shows the contribution to the full spatial process (bottom right plot) from each of the different resolutions. The plot shows how the coarsest resolution (top left) produces a coarse process over large spatial resolutions and the finest resolution (lower left) produces a finer-scale process. The three (M) resolutions are added together to produce the full process.
 
-```{r plot-multiresolution-process, cache = TRUE, dependson = "simulate_data", fig.align = 'center'}
+```{r plot-multiresolution-process, fig.align = 'center'}
 ## MRA spatial process
 W_alpha_res = unlist(sapply(1:M, function(m) W[, dims_idx == m] %*% alpha[dims_idx == m], simplify = "matrix"))
 dimnames(W_alpha_res) <- list(
@@ -345,7 +345,7 @@ sim_MRA
 
 To explore how well the fitted model can predict out of sample data, we take a sample $s$ of size $n_{sites}$ from the $N$ simulated points and fit the model using `mcmc_mra()`.
 
-```{r, sample_data, cache = TRUE, dependson = "simulate-data"}
+```{r, sample_data}
 set.seed(111)
 n_sites   <- 500
 s         <- sample(N, n_sites)
@@ -359,7 +359,7 @@ locs_oos  <- locs[ - s, ]
 
 The plot below shows the sampled data to which the model is fit, showing the spatial patterns of the sampled data.
 
-```{r plot-sampled-data, cache = TRUE, dependson = c("simulate_data", "sample_data"), fig.align = 'center', fig.height = 4.5, fig.width = 4.5}
+```{r plot-sampled-data, fig.align = 'center', fig.height = 4.5, fig.width = 4.5}
 data.frame(
   x     = locs_s[, 1],
   y     = locs_s[, 2],
@@ -431,7 +431,7 @@ The fitting of `mcmc_mra()` took `r format(runtime, nsmall = 2, digits = 2)`.
 
 After fitting the MCMC using `mcmc_mra()`, we plot the trace plots of the parameters to check for evidence that the model has not converged and to identify that the parameters have mixed. The first trace plots we examine are for the variance parameters and the regression coefficients. Overall, these trace plots look decent although the effective samples size for the $\tau^2$s and $\beta$s might be low and more samples might be needed for making inference with the model.
 
-```{r trace-plots, cache = TRUE, cache.extra = tools::md5sum(here::here("results", "fit-mra-sim.RData")), fig.align = 'center'}
+```{r trace-plots, fig.align = 'center'}
 
 dat_tau2 <- data.frame(
   tau2      = c(out$tau2),
@@ -486,7 +486,7 @@ p_beta  <- ggplot(dat_beta, aes(x = iteration, y = beta, group = covariate, colo
 Next, the trace plots for the spatial parameter $\boldsymbol{\alpha}_m$ are shown. Because there are so many parameters, a sample is taken for plotting. These traceplots suggest that perhaps $\boldsymbol{\alpha}$ hasn't entirely converged. However, as there is a non-identifiability between $\tau^2_m$ and $\boldsymbol{\alpha}_m$, this is not surprising and might not be remedied with more samples.
 
 
-```{r trace-plots-alpha, cache = TRUE, cache.extra = tools::md5sum(here::here("results", "fit-mra-sim.RData")), fig.align = 'center'}
+```{r trace-plots-alpha, fig.align = 'center'}
 ## posterior plots for alpha
 
 dat_alpha <- data.frame(
@@ -516,7 +516,7 @@ dat_alpha %>%
 
 Because the model was fit to simulated data, the posterior predictions can be compared to the simulated parameters to evaluate the model performance. The following plots show the 95\% central credible intervals for different parameters plotted against the simulated parameters. For the regression parameters $\boldsymbol{\beta}$, the model is doing a reasonable job of recovering these parameters. The parameter estimates for $\tau^2_m$ and $\boldsymbol{\alpha}_m$ show poor performance in estimating the true parameters. This is due to a non-identifiability in the model; however, this is not a concern as the spatial process $\sum_{m=1}^M \mathbf{W}_m \boldsymbol{\alpha}_m$ is well estimated which will be shown later.
 
-```{r estimated-vs-predicted, cache = TRUE, cache.extra = tools::md5sum(here::here("results", "fit-mra-sim.RData")), fig.align = 'center'}
+```{r estimated-vs-predicted, fig.align = 'center'}
 ## predicted vs. estimated beta
 dat_plot <- data.frame(
   truth = beta,
@@ -594,7 +594,7 @@ p_alpha <- dat_plot %>%
 
 Next, the simulated and estimated $\boldsymbol{\alpha}_m$ are plotted on the spatial grid. The plots show that the $\boldsymbol{\alpha}_m$s are not being identified.
 
-```{r estimated-alphas, cache = TRUE, cache.extra = tools::md5sum(here::here("results", "fit-mra-sim.RData")), fig.align = 'center', warning = FALSE}
+```{r estimated-alphas, fig.align = 'center', warning = FALSE}
 fitted_alphas <- data.frame(
     x = unlist(sapply(1:M, function(i) MRA$locs_grid[[i]][, 1])),
     y = unlist(sapply(1:M, function(i) MRA$locs_grid[[i]][, 2])),
@@ -624,7 +624,7 @@ sim_alphas + theme_custom(0.5) + fitted_alphas
 
 Despite the parameters $\tau^2_m$ and $\boldsymbol{\alpha}_m$ not being identifiable, the following plot shows that the full spatial process $\sum_{m=1}^M \mathbf{W}_m \boldsymbol{\alpha}_m$. The two figures (simulated on the left, fitted on the right) demonstrate that each of the $m$ resolutions of the process $\mathbf{W}_m \boldsymbol{\alpha}_m$ are also non-identifiable.
 
-```{r simulated-vs-estimated-process, cache = TRUE, cache.extra = tools::md5sum(here::here("results", "fit-mra-sim.RData")), fig.align = 'center'}
+```{r simulated-vs-estimated-process, fig.align = 'center'}
 ## Estimated MRA spatial proces
 W_alpha_res = unlist(sapply(1:M, function(m) W[, dims_idx == m] %*% apply(out$alpha, 2, mean)[dims_idx == m], simplify = "matrix"))
 dimnames(W_alpha_res) <- list(
@@ -662,7 +662,7 @@ sim_MRA + theme_custom(0.5) + estimated_MRA
 
 The next plots show the estimated vs. simulated fixed effects, spatial process, and mean response. There is some evidence of non-identifiability between the fixed effects plot and the spatial effects plot (left two plots) as there is a bias in each of the predictions. This is understood to be a consequence of spatial confounding (@hodges2010adding, @hughes2013dimension, @hanks2015restricted).
 
-```{r plot-sim-vs-fitted-effects, cache = TRUE, cache.extra = tools::md5sum(here::here("results", "fit-mra-sim.RData")), fig.align = 'center'}
+```{r plot-sim-vs-fitted-effects, fig.align = 'center'}
 ## plot estimated mean response
 Xbeta_post <- t(X_s %*% t(out$beta))
 Walpha_post <- t(do.call(cbind, out$MRA$W) %*% t(out$alpha))
@@ -714,459 +714,6 @@ plot_Xbeta + plot_Walpha + plot_mu
 
 
 
-
-
-<!-- ```{r, cache = TRUE, cache.extra = tools::md5sum(here::here("results", "fit-mra-sim.RData"))} -->
-
-<!-- zlims <- c(min(c(Z_s), c(apply(out$Z, c(2, 3), mean))), max(c(Z_s), c(apply(out$Z, c(2, 3), mean)))) -->
-
-<!-- dat_map <- data.frame( -->
-<!--   temp    = c(Z_s), -->
-<!--   lat     = locs_s[, 2], -->
-<!--   long    = locs_s[, 1], -->
-<!--   time    = rep(1:n_time, each = n_sites) -->
-<!-- ) -->
-
-<!-- g_map <- dat_map %>%  -->
-<!--   # subset(time == 3) %>% -->
-<!--   ggplot(aes(x = long, y = lat, fill = temp)) + -->
-<!--   geom_raster() + -->
-<!--   xlab("Longitude") +  -->
-<!--   ylab("Latitude") +  -->
-<!--   ggtitle("Simulated surface") + -->
-<!--   colorspace::scale_fill_continuous_diverging("Blue-Red 3", mid = mean(Z_s[, 1]), limits = zlims) + -->
-<!--   facet_wrap(~ time) -->
-
-<!-- dat_pred <- data.frame( -->
-<!--   temp    = c(apply(out$Z, c(2, 3), mean)), -->
-<!--   lat     = locs_s[, 2], -->
-<!--   long    = locs_s[, 1], -->
-<!--   time    = rep(1:n_time, each = n_sites) -->
-<!-- ) -->
-
-<!-- g_preds <- dat_pred %>%  -->
-<!--   # subset(time == 3) %>% -->
-<!--   ggplot(aes(x = long, y = lat, fill = temp)) + -->
-<!--   geom_raster() + -->
-<!--   xlab("Longitude") +  -->
-<!--   ylab("Latitude") +  -->
-<!--   ggtitle("Posterior mean predictions") + -->
-<!--   colorspace::scale_fill_continuous_diverging("Blue-Red 3", mid = mean(Z[, 1]), limits = zlims) + -->
-<!--   facet_wrap(~ time) -->
-
-<!-- g_map + g_preds + plot_layout(guides = "collect") -->
-
-<!-- ``` -->
-
-<!-- ```{r, cache = TRUE, cache.extra = tools::md5sum(here::here("results", "fit-mra-sim.RData"))} -->
-
-<!-- zlims <- c(min(c(X %*% gamma), c(X %*% apply(out$gamma, 2, mean))), max(c(X %*% gamma), c(X %*% apply(out$gamma, 2, mean)))) -->
-<!-- mid_lims <- mean(X %*% gamma) -->
-
-<!-- dat_fixed <- data.frame( -->
-<!--   temp    = c(X %*% gamma), -->
-<!--   lat     = locs[, 2], -->
-<!--   long    = locs[, 1] -->
-<!-- ) -->
-
-<!-- g_fixed <- dat_fixed %>%  -->
-<!--   # subset(time == 3) %>% -->
-<!--   ggplot(aes(x = long, y = lat, fill = temp)) + -->
-<!--   geom_raster() + -->
-<!--   xlab("Longitude") +  -->
-<!--   ylab("Latitude") +  -->
-<!--   ggtitle("Simulated Fixed effects") + -->
-<!--   colorspace::scale_fill_continuous_diverging("Blue-Red 3", mid = mid_lims, limits = zlims) -->
-
-<!-- dat_fixed_pred <- data.frame( -->
-<!--   temp    = c(X %*% apply(out$gamma, 2, mean)), -->
-<!--   lat     = locs[, 2], -->
-<!--   long    = locs[, 1] -->
-<!-- ) -->
-
-<!-- g_fixed_pred <- dat_fixed_pred %>%  -->
-<!--   # subset(time == 3) %>% -->
-<!--   ggplot(aes(x = long, y = lat, fill = temp)) + -->
-<!--   geom_raster() + -->
-<!--   xlab("Longitude") +  -->
-<!--   ylab("Latitude") +  -->
-<!--   ggtitle("Estimated Fixed effects") + -->
-<!--   colorspace::scale_fill_continuous_diverging("Blue-Red 3", mid = mid_lims, limits = zlims)  -->
-
-<!-- g_fixed + g_fixed_pred + plot_layout(guides = "collect") -->
-<!-- ``` -->
-
-<!-- ### Posterior predictions -->
-
-<!-- ```{r, eval=TRUE, message=FALSE, include=FALSE} -->
-<!-- if (file.exists(here::here("results", "pg-mvgp", "posterior-prediction-sim-mra.RData"))) { -->
-<!--   load(here::here("results", "pg-mvgp", "posterior-prediction-sim-mra.RData")) -->
-<!-- } else { -->
-<!--   preds <- predict_pg_mvgp_univariate_mra(out, X_s, X_oos, locs_s, locs_oos) -->
-<!--   save(preds, file = here::here("results", "pg-mvgp", "posterior-prediction-sim-mra.RData"), compress = FALSE) -->
-<!-- }   -->
-<!-- ``` -->
-
-
-
-
-
-<!-- ```{r} -->
-<!-- Z_post_mean <- apply(out$Z, c(2, 3), mean) -->
-<!-- Z_pred_mean <- apply(preds$Z, c(2, 3), mean) -->
-<!-- dat_preds <- data.frame( -->
-<!--   temp    = c(rbind(Z_post_mean, Z_pred_mean)), -->
-<!--   anomaly = c(rbind(Z_post_mean - Z_post_mean[, 1],  -->
-<!--                     Z_pred_mean - Z_pred_mean[, 1])), -->
-<!--   lat     = c(locs_s[, 2], locs_oos[, 2]), -->
-<!--   long    = c(locs_s[, 1], locs_oos[, 1]), -->
-<!--   time    = rep(1:n_time, each = sum(nrow(Z_post_mean), nrow(Z_pred_mean))) -->
-<!-- ) -->
-
-<!-- g_preds <- dat_preds %>%  -->
-<!--   # subset(time == 3) %>% -->
-<!--   ggplot(aes(x = long, y = lat, fill = temp)) + -->
-<!--   geom_raster() + -->
-<!--   xlab("Longitude") +  -->
-<!--   ylab("Latitude") +  -->
-<!--   ggtitle("Posterior mean predictions") + -->
-<!--   # scale_fill_viridis()  + -->
-<!--   colorspace::scale_fill_continuous_diverging("Blue-Red 3", mid = mean(Z[, 1])) + -->
-<!--   facet_wrap(~ time) -->
-<!-- # scale_fill_continuous(low = "blue", high = "red")# + -->
-<!-- # geom_point(data = dat_fossil, aes(x = londd, y = latdd), -->
-<!-- #            col = "white", size = 0.1, alpha = 0.25) -->
-
-<!-- g_full + g_preds   -->
-<!-- ``` -->
-
-<!-- ```{r} -->
-<!-- g_anom <- dat_preds %>%  -->
-<!--   # subset(time == 1) %>% -->
-<!--   ggplot(aes(x = long, y = lat, fill = anomaly)) + -->
-<!--   geom_raster() + -->
-<!--   xlab("Longitude") +  -->
-<!--   ylab("Latitude") +  -->
-<!--   ggtitle("Posterior mean anomalies") + -->
-<!--   colorspace::scale_fill_continuous_diverging("Blue-Red 3", mid = 0) + -->
-<!--   facet_wrap(~ time) -->
-
-<!-- g_anom -->
-<!-- ``` -->
-
-
-<!-- ```{r} -->
-<!-- Z_pred_mean <- apply(preds$Z, c(2, 3), mean) -->
-<!-- Z_lower_95 <- apply(apply(preds$Z, c(1, 3), mean), 2, quantile, prob = 0.025) -->
-<!-- Z_upper_95 <- apply(apply(preds$Z, c(1, 3), mean), 2, quantile, prob = 0.975) -->
-<!-- Z_lower_50 <- apply(apply(preds$Z, c(1, 3), mean), 2, quantile, prob = 0.25) -->
-<!-- Z_upper_50 <- apply(apply(preds$Z, c(1, 3), mean), 2, quantile, prob = 0.75) -->
-
-<!-- ## time process averaged over space -->
-<!-- ## with full uncertainty -->
-<!-- data.frame( -->
-<!--   Z = c( -->
-<!--     c(apply(Z_pred_mean, 2, mean)), -->
-<!--     # c(apply(preds, 3, mean)),  -->
-<!--     c(Z_lower_95), -->
-<!--     c(Z_upper_95), -->
-<!--     c(Z_lower_50), -->
-<!--     c(Z_upper_50), -->
-<!--     c(apply(Z_oos, 2, mean)) -->
-<!--   ), -->
-<!--   # type = "mean", -->
-<!--   type = rep(c("mean", "lower95", "upper95", "lower50", "upper50", "truth"), each = n_time), -->
-<!--   time = 1:n_time * 250 - 250 -->
-<!-- ) %>% -->
-<!--   pivot_wider(names_from = type, values_from = Z) %>% -->
-<!--   ggplot(aes(x = time, y = mean)) + -->
-<!--   geom_line(aes(x = time, y = mean), color = "red") + -->
-<!--   geom_line(aes(x = time, y = truth), color = "black") + -->
-<!--   geom_ribbon(aes(ymin = lower95, ymax = upper95), color = NA, fill = "red", alpha = 0.2) + -->
-<!--   geom_ribbon(aes(ymin = lower50, ymax = upper50), color = NA, fill = "red", alpha = 0.4) + -->
-<!--   ggtitle("spatially-averaged estimates for climate state Z") + -->
-<!--   xlab("Years in the past") -->
-<!-- ``` -->
-
-
-
-
-<!-- # Models -->
-
-<!-- ## Model 1 -->
-
-<!-- $$\begin{align*} -->
-<!-- \mathbf{y}(\mathbf{s}, t) & \sim \oN{Multinomial}(M_i(\mathbf{s}, t), \pi_{SB}(\boldsymbol{\eta}(\mathbf{s}, t))) \\ -->
-<!-- \boldsymbol{\eta}_j \left(\mathbf{s}, t \right) & = \beta_{0j} + \mathbf{Z}'\left(\mathbf{s}, t \right) \beta_j  + -->
-<!-- \varepsilon_j(t) \\ -->
-<!-- z(\mathbf{s}, t) & = \mathbf{X}(\mathbf{s}, t) \boldsymbol{\gamma} + \bm{W} \bs{\alpha} \left( \mathbf{s}, t \right) \\ -->
-<!-- \bs{\gamma} & \sim \oN{N} \left( \bs{\mu}_{\gamma}, \bs{\Sigma}_{\gamma} \right) \\ -->
-<!-- \bs{\alpha}(t) & \sim \oN{N} \left( \rho \bs{\alpha}(t-1), \tau^2 \bm{Q}^{-1} \right) \\ -->
-<!-- \bm{Z}(1) & \sim \oN{N} \left( \bm{X} \bs{\gamma} + \bm{W} \bs{\alpha}(1), \sigma^2_0 \bm{I} \right) -->
-<!-- \end{align*}$$ -->
-
-
-<!-- - $\mathbf{y}(\mathbf{s}, t)$ is the observed pollen count -->
-<!-- - $z(\mathbf{s}, t)$ is an observation of a climate variables (i.e., T_summer, T_winter, P_summer, P_winter).  -->
-<!-- - $\beta_{0j}$ is the species specific intercept and $\beta_j$ is the species-specific slopes for $J-1$ species (the $J$th species is a reference category) where the intensity process is converted into a probability through a (inverse?) stick-breaking transformation. -->
-<!-- - $\mathbf{X}(\mathbf{s}, t)$ are a $p$-dimensional vector coefficients for the climate variables that are either constant in time (latitude and elevation) or potentially varying in time (solar insolation, climate forcings, etc.).  -->
-<!-- - $\boldsymbol{\gamma}$ is a $p$-dimensional vector of fixed effect coefficients for climate response. -->
-<!-- - $z(\mathbf{s}, t)$ is the spatio-temporal process. Can be built into basis functions in the future for fitting larger datasets. -->
-<!-- - $\rho$ is the dynamical process autocorrelation. -->
-<!-- - $\tau^2$ is the overall process variance and $\bs{\Sigma}(\boldsymbol{\theta})$ is the spatial correlation matrix induced by a spatial covariance function given parameters $\theta$ -->
-
-<!-- we assume $\mathbf{X}(t) \equiv \mathbf{X}$ for all $t$ although the model could accommodate temporally varying covariates. -->
-
-
-<!-- ### Posterior Distribution  -->
-
-<!-- $$\begin{align*} -->
-<!-- [\bs{\eta}, \bm{Z}(2:n_t), \bs{\beta}, \bs{\sigma}^2, \bs{\gamma}, \rho, \tau^2, \bs{\theta}, \bs{\omega} | \bm{Y}, \bm{z}(1)] & \propto \left( \prod_{i=1}^N \prod_{t=1}^{n_t} \prod_{j=1}^{J-1} [\eta(\bm{s}, t)_j | \boldsymbol{\beta}, \bm{Z}(\bm{s}, t), \sigma^2_j, \bm{Y}(\bm{s}, t), \omega(\bm{s}, t)_j] [\omega(\bm{s}, t)_j ] \right)  [\bm{z}(1) | \bs{\gamma}, \rho, \tau^2, \bs{\theta}]  \\ -->
-<!-- & \hspace{3cm} \times \left( \prod_{t=2}^T [\bm{z}(t) | \bm{z}(t-1), \bs{\gamma}, \rho, \tau^2, \bs{\theta}] \right) \left( \prod_{j=1}^J [\bs{\beta}_j] [\sigma^2_j] \right) [\bs{\gamma}] [\rho] [\tau^2] [\bs{\theta}] -->
-<!-- \end{align*}$$ -->
-
-
-<!-- ### Full conditionals -->
-
-<!-- #### Full conditional for $\boldsymbol{\beta}$ -->
-
-<!-- $$\begin{align*} -->
-<!-- [\boldsymbol{\beta}_j | \cdot] & \propto N(\mathbf{A}^{-1}\mathbf{b}, \mathbf{A}^{-1}) -->
-<!-- \end{align*}$$ -->
-
-<!-- where -->
-<!-- $$\begin{align*} -->
-<!-- \mathbf{A} & = \boldsymbol{\Sigma}_{\beta}^{-1} + \mathbf{Z}(1)' \boldsymbol{\Omega}_j \mathbf{Z}(1)\\ -->
-<!-- \mathbf{b} & = \boldsymbol{\Sigma}_{\beta}^{-1} \boldsymbol{\mu}_{\beta} + \mathbf{Z}(1)'\boldsymbol{\kappa}_{j1} -->
-<!-- \end{align*}$$ -->
-
-<!-- #### Full conditional for $\mathbf{Z}(t)$ for $t = 2, \ldots, n_t$  -->
-
-
-
-<!-- # Abstract -->
-<!-- In this manuscript, we present a model for reconstructing spatio-temporal climate states from multinomial compositional count pollen data. The contributions of this work are development of a Bayesian hierarchical statistical model for reconstructing climate from pollen in a computationally efficient manner. We improve upon all existing methods in a variety of ways. First, we introduce an augmentation variable to the multinomial likelihood to allow for conjugate sampling of latent parameters within a Markov Chain Monte Carlo algorithm. The conjugate sampling overcomes a fundamental computational challenge in non-Gaussian spatio-temporal allowing for efficient inference. The second contribution is the development of a sparse multiresolution spatio-temporal random effect that efficiently scales to large datasets commonly seen in pollen and other paleoclimate proxy data. In addition, the spatio-temporal model includes meaningful covariates like elevation, latitude, and other potentially time-varying climate forcings as fixed effects. The third contribution is... -->
-<!-- - software? -->
-
-
-
-
-
-<!-- ## Model 2 (with overdispersion) -->
-
-<!-- $$\begin{align*} -->
-<!-- \mathbf{y}(\mathbf{s}, t) & \sim \oN{Multinomial}(M_i(\mathbf{s}, t), \pi_{SB}(\boldsymbol{\eta}(\mathbf{s}, t))) \\ -->
-<!-- \boldsymbol{\eta}_j \left(\mathbf{s}, t \right) & = \beta_{0j} + \mathbf{Z}'\left(\mathbf{s}, t \right) \beta_j  + -->
-<!-- \varepsilon_j(t) \\ -->
-<!-- z(\mathbf{s}, t) & = \mathbf{X}(\mathbf{s}, t) \boldsymbol{\gamma} + \bm{W} \bs{\alpha} \left( \mathbf{s}, t \right) \\ -->
-<!-- \bs{\gamma} & \sim \oN{N} \left( \bs{\mu}_{\gamma}, \bs{\Sigma}_{\gamma} \right) \\ -->
-<!-- \bs{\alpha}(t) & \sim \oN{N} \left( \rho \bs{\alpha}(t-1), \left( \tau^2 \bm{Q} \right)^{-1} \right) \\ -->
-<!-- \bm{Z}(1) & \sim \oN{N} \left( \bm{X}(1) \bs{\gamma} + \bm{W} \bs{\alpha}(1), \sigma^2_0 \bm{I} \right) -->
-<!-- \end{align*}$$ -->
-
-<!-- we assume $\mathbf{X}(t) \equiv \mathbf{X}$ for all $t$ although the model could accommodate temporally varying covariates. -->
-
-<!-- - The same as in model 1 except the additional term $\varepsilon_j(\mathbf{s}, t) \stackrel{iid}{\sim} \oN{N} (0, \sigma^2_j)$ which accounts for additional overdispersion in the counts that is not explained by the multinomial distribution. This could be expanded by accounting for spatio-temporal dependence if desired although this might impact identifiability of the model. -->
-
-<!-- - Spatial basis functions and temporally correlated random effects -->
-
-<!-- The multiresolution process follows **Nychka et al** where there are $M$ different resolutions of the process. For each of the $m = 1, \ldots, M$ levels of the resolution, a grid of $n_m \times n_m$ knot locations are created over the spatial domain $\mathcal{D}$. The interpolated basis $\bm{W}_m$ for resolution $m$ is constructed using Wendland basis functions. **define Wendland functions here** given a fixed radius $r_m$ chosen such that **typically each knot location would have approximately XXX neighbors**. Then, we define the spatial random effect for the $t$th time period as  -->
-
-<!-- $$\begin{align*} -->
-<!-- \sum_{m=1}^M \bm{W}_m \bs{\alpha}_m(t) -->
-<!-- \end{align*}$$ -->
-
-<!-- for $\bs{\alpha}_m(t)$ the time varying random effect for spatial resolution $m$. For each resolution, the random effect $\bs{\alpha}_m(t)$ is assumed to follow a dynamic linear model framework where -->
-
-<!-- $$\begin{align*} -->
-<!-- \bs{\alpha}_m(t) & \sim \oN{N} \left( \bm{A}_m \bs{\alpha}_m(t - 1), \tau^2_m \bm{Q}_m \right). -->
-<!-- \end{align*}$$ -->
-
-<!-- The $m$th resolution precision $\tau^2$ is assigned a $\oN{inverse-gamma}(\alpha_{\tau^2}, \beta_{\tau}^2)$ and $\bm{Q}_m$ is the precision matrix for a first order intrinsic autoregressive model (**cite: On conditional and intrinsic autoregressions**) given a neighborhood structure for the $m$th resolution. We assume that the random effects at each resolution are conditionally independent of those at other resolutions. Combining these into a compact matrix representation gives the spatial random effect at time $t$ of -->
-
-
-<!-- $$\begin{align*} -->
-<!-- \bm{W} \bs{\alpha}(t) -->
-<!-- \end{align*}$$ -->
-
-<!-- with $\bm{W} = \begin{pmatrix} \bm{W}_1 | \cdots | \bm{W}_M \end{pmatrix}$ and $\boldsymbol{\alpha}(t) = \oN{block-diag}\left( \bs{\alpha}_1(t), \ldots, \bs{\alpha}_M(t) \right)$ a block-diagonal matrix. Likewise, the matrix that determines the temporal dynamics is constructed using a block-diagonal form where $\bm{A} = \oN{block-diag} \left( \bm{A}_1, \cdots, \bm{A}_M \right)$. Then thr prior for $\bs{\alpha}(t)$ is -->
-
-<!-- $$\begin{align*} -->
-<!-- \bs{\alpha}(t) & \sim \oN{N} \left( \bm{A} \bs{\alpha}(t - 1), \bm{Q}_{\tau^2} \right), -->
-<!-- \end{align*}$$ -->
-
-<!-- where $\bm{Q}_{\tau^2} = \oN{block-diag} \left( \tau^2_1 \bm{Q}_{1}, \ldots, \tau^2_M \bm{Q}_M \right)$. The key benefit of this representation is that the spatial basis matrix $\bm{W}$, the dynamic evolution matrix $\bm{A}$, and the prior precision matrix $\bm{Q}_{\tau^2}$ are all sparse by construction which enables efficient estiamation that scales to large numbers of observations efficiently in terms of both memory and computation. -->
-
-
-
-<!-- ### Posterior Distribution -->
-
-<!-- $$\begin{align*} -->
-<!-- [\bs{\eta}, \bm{Z}(2:n_t), \bs{\beta}, \bs{\sigma}^2, \bs{\gamma}, \rho, \tau^2, \bs{\theta}, \bs{\omega} | \bm{Y}, \bm{z}(1)] & \propto \left( \prod_{i=1}^N \prod_{t=1}^{n_t} \prod_{j=1}^{J-1} [\eta(\bm{s}, t)_j | \boldsymbol{\beta}, \bm{Z}(\bm{s}, t), \sigma^2_j, \bm{Y}(\bm{s}, t), \omega(\bm{s}, t)_j] [\omega(\bm{s}, t)_j ] \right)  [\bm{z}(1) | \bs{\gamma}, \bs{\alpha}(1), \sigma^2_0]  \\ -->
-<!-- & \hspace{3cm} \times \left( \prod_{t=2}^T [\bs{\alpha}(t) | \bs{\alpha}(t-1), \rho, \tau^2, \bm{Q}] \right) \left( \prod_{j=1}^J [\bs{\beta}_j] [\sigma^2_j] \right) [\bs{\gamma}] [\rho] [\tau^2] [\sigma^2_0] -->
-<!-- \end{align*}$$ -->
-
-<!-- ### Full conditionals -->
-
-<!-- #### Full conditional for $\bs{\eta}_j(t)$ -->
-
-<!-- - For $t = 1,\ldots, n_t$ and $j = 1, \ldots, J-1$ -->
-
-<!-- $$\begin{align*} -->
-<!-- [\boldsymbol{\eta}_j(t) | \cdot] & \propto \oN{N} \left( \beta_{0j} \bm{1} + \mathbf{z}(t) \beta_j, \sigma^2_j \mathbf{I} \right) [\boldsymbol{\omega}_j] \\ -->
-<!-- \end{align*}$$ -->
-
-<!-- which can be sampled from $\oN{N} \left( \mathbf{A}^{-1} \mathbf{b}, \mathbf{A}^{-1} \right)$ where  -->
-
-
-<!-- $$\begin{align*} -->
-<!-- \mathbf{A} & = \frac{1}{\sigma^2_j} \mathbf{I} + \boldsymbol{\Omega}_j(t) \\ -->
-<!-- \mathbf{b} & = \frac{1}{\sigma^2_j} \left( \beta_{0j} \bm{1} + \mathbf{z}(t) \beta_j \right) + \boldsymbol{\kappa}(\mathbf{y})_j(t) -->
-<!-- \end{align*}$$ -->
-
-<!-- where $\boldsymbol{\Omega}_j(t) = \oN{diag}(\boldsymbol{\omega}_j(t))$. -->
-
-<!-- #### Full conditional for $\boldsymbol{\beta}_j = (\beta_{0j}, \beta_{1j})'$ -->
-
-<!-- If only estimating $\boldsymbol{\beta}$ using the modern climate, the product and sums below are only for $t=1$. -->
-
-<!-- $$\begin{align*} -->
-<!-- [\boldsymbol{\beta}_j | \cdot] & \prod_{t=1}^{n_t}\oN{N} \left( \boldsymbol{\eta}_j(t) | \mathbf{z}(t) \boldsymbol{\beta}_j, \sigma^2_j \mathbf{I}\right) \oN{N} \left( \boldsymbol{\beta}_j | \boldsymbol{\mu}_{\beta_j}, \boldsymbol{\Sigma}_{\beta_j} \right) \\ -->
-<!-- & \propto N(\mathbf{A}^{-1}\mathbf{b}, \mathbf{A}^{-1}) -->
-<!-- \end{align*}$$ -->
-
-<!-- where -->
-<!-- $$\begin{align*} -->
-<!-- \mathbf{A} & = \boldsymbol{\Sigma}_{\beta}^{-1} + \sum_{t=1}^{n_t}\frac{1}{\sigma^2_j} \begin{pmatrix} \bm{1} & \mathbf{z}(t) \end{pmatrix}' \begin{pmatrix} \bm{1} & \mathbf{z}(t) \end{pmatrix}\\ -->
-<!-- \mathbf{b} & = \boldsymbol{\Sigma}_{\beta}^{-1} \boldsymbol{\mu}_{\beta} + \sum_{t=1}^{n_t} \frac{1}{\sigma^2_j} \begin{pmatrix} \bm{1} & \mathbf{z}(t) \end{pmatrix}'\boldsymbol{\eta}_j -->
-<!-- \end{align*}$$ -->
-
-<!-- #### Full conditional for $\boldsymbol{\gamma}$ using alternative model specification -->
-
-<!-- If we only fit $\boldsymbol{\gamma}$ using the modern climate data only the sums and products are only evaluated for $t=1$ -->
-
-<!-- $$\begin{align*} -->
-<!-- [\bs{\gamma} | \cdot] & \propto \prod_{t=1}^{n_t} \prod_{j=1}^{J-1} \oN{N} \left( \boldsymbol{\eta}_j(t) | \beta_{0j} \bm{1} + \beta_{1j} \left( \bm{X}(t) \bs{\gamma} + \bm{W} \bs{\alpha}(t) \right), \sigma^2_j \mathbf{I}\right) [\bm{z}(1) | \bs{\gamma}, \bs{\alpha}(1), \sigma^2_0] [\bs{\gamma} | \bs{\mu}_\gamma, \bs{\Sigma}_\gamma] \\ -->
-<!-- & \propto \prod_{t=1}^{n_t} \prod_{j=1}^J \exp\left( -\frac{1}{2} \left( \bs{\eta}_j(t) - \beta_{0j} \bm{1} - \beta_{1j} \left( \bm{X}(t) \bs{\gamma} + \bm{W} \bs{\alpha}(t) \right) \right)' \left( \sigma^2_j \bm{I} \right)^{-1} \left( \bs{\eta}_j(t) - \beta_{0j} \bm{1} - \beta_{1j} \left( \bm{X}(t) \bs{\gamma} + \bm{W} \bs{\alpha}(t) \right) \right) \right) \\ -->
-<!-- & \hspace{3cm} \times \exp\left( -\frac{1}{2} \left( \bm{z}(1) - \bm{X}(1) \bs{\gamma} - \bm{W} \bs{\alpha}(1) \right)' \left( \sigma^2_0 \bm{I} \right)^{-1} \left( \bm{z}(1) - \bm{X}(1) \bs{\gamma} - \bm{W} \bs{\alpha}(1) \right) \right)  \\ -->
-<!-- & \hspace{3cm} \times \exp\left( - \frac{1}{2} (\bs{\gamma} - \bs{\mu}_{\gamma})' \bs{\Sigma}_{\gamma}^{-1} (\bs{\gamma} - \bs{\mu}_{\gamma}) \right) \\  -->
-<!-- & \propto  N(\mathbf{A}^{-1}\mathbf{b}, \mathbf{A}^{-1}) -->
-<!-- \end{align*}$$ -->
-
-<!-- where -->
-<!-- $$\begin{align*} -->
-<!-- \mathbf{A} & = \boldsymbol{\Sigma}_{\gamma}^{-1} + \frac{1}{\sigma^2_0} \bm{X}(1)' \bm{X}(1) + \sum_{t=1}^{n_t} \sum_{j=1}^{J-1} \frac{\beta_{1j}^2}{\sigma^2_j} \bm{X}(t)'\bm{X}(t) \\ -->
-<!-- \mathbf{b} & = \boldsymbol{\Sigma}_{\gamma}^{-1} \boldsymbol{\mu}_{\gamma} + \frac{1}{\sigma^2_0}\bm{X}(1)' \left( \bm{z}(1) - \bm{W} \bs{\alpha}(1) \right) +\sum_{t=1}^{n_t} \sum_{j=1}^{J-1} \frac{\beta_{1j}}{\sigma^2_j} \bm{X}(t)' \left( \boldsymbol{\eta}_j(t) - \beta_{0j} \bm{1} - \beta_{1j} \bm{W} \bm{\alpha}(t) \right)  -->
-<!-- \end{align*}$$ -->
-
-<!-- #### Full conditional for $\bs{\alpha}(t)$  -->
-
-<!-- - For $t=1$, we use the observed value of $\bm{z}(t)$ and the full conditional distribution is -->
-
-<!-- $$\begin{align*} -->
-<!-- [\bs{\alpha}(1) | \cdot] & \propto \prod_{j=1}^{J-1} \oN{N} \left( \boldsymbol{\eta}_j(1) | \beta_{0j} \bm{1} + \beta_{1j} \left( \bm{X}(1) \bs{\gamma} + \bm{W} \bs{\alpha}(1) \right), \sigma^2_j \mathbf{I}\right) [\bm{z}(1) | \bs{\gamma}, \bs{\alpha}(1), \sigma^2_0] [\bs{\alpha}(1) | \bm{Q}_{\tau^2}] [\bs{\alpha}(2) | \rho, \bs{\alpha}(1), \bm{Q}_{\tau^2}] \\ -->
-<!-- & \propto \prod_{t=1}^{n_t} \prod_{j=1}^J \exp\left( -\frac{1}{2} \left( \bs{\eta}_j(t) - \beta_{0j} \bm{1} - \beta_{1j} \left( \bm{X}(t) \bs{\gamma} + \bm{W} \bs{\alpha}(t) \right) \right)' \left( \sigma^2_j \bm{I} \right)^{-1} \left( \bs{\eta}_j(t) - \beta_{0j} \bm{1} - \beta_{1j} \left( \bm{X}(t) \bs{\gamma} + \bm{W} \bs{\alpha}(t) \right) \right) \right) \\ -->
-<!-- & \hspace{3cm} \times \exp\left( -\frac{1}{2} \left( \bm{z}(1) - \bm{X}(1) \bs{\gamma} - \bm{W} \bs{\alpha}(1) \right)' \left( \sigma^2_0 \bm{I} \right)^{-1} \left( \bm{z}(1) - \bm{X}(1) \bs{\gamma} - \bm{W} \bs{\alpha}(1) \right) \right)  \\ -->
-<!-- & \hspace{3cm} \times \exp\left( - \frac{1}{2} \bs{\alpha}(1)' \bm{Q}_{\tau^2} \bs{\alpha}(1) \right) \exp\left( - \frac{1}{2} \left( \bs{\alpha}(2) - \rho \bs{\alpha}(1) \right)' \bm{Q}_{\tau^2} \left( \bs{\alpha}(2) - \rho \bs{\alpha}(1) \right) \right)\\  -->
-<!-- & \propto  N(\mathbf{A}^{-1}\mathbf{b}, \mathbf{A}^{-1}) -->
-<!-- \end{align*}$$ -->
-
-<!-- where  -->
-
-<!-- $$\begin{align*} -->
-<!-- \mathbf{A} & = \frac{1}{\sigma^2_0} \bm{W}' \bm{W} + \sum_{j=1}^{J-1} \frac{\beta_{1j}^2}{\sigma^2_j} \bm{W}' \bm{W} + (1 + \rho^2) \bm{Q}_{\tau^2}\\ -->
-<!-- \mathbf{b} & = \frac{1}{\sigma^2_0} \bm{W}' \left( \bm{z}(1) - \bm{X} \bs{\gamma} \right) + \sum_{j=1}^{J-1} \frac{\beta_{1j}}{\sigma^2_j} \bm{W}' \left( \bs{\eta}_j(t) - \beta_{0j} \bm{1} - \beta_{1j} \bm{X} \bs{\gamma} \right) + \rho \bm{Q}_{\tau^2} \bs{\alpha}(2) -->
-<!-- \end{align*}$$ -->
-
-
-
-<!-- - For $t=2, \ldots, n_t-1$  -->
-
-<!-- $$\begin{align*} -->
-<!-- [\bs{\alpha}(t) | \cdot] & \propto \prod_{j=1}^{J-1} \oN{N} \left( \boldsymbol{\eta}_j(t) | \beta_{0j} \bm{1} + \beta_{1j} \left( \bm{X}(t) \bs{\gamma} + \bm{W} \bs{\alpha}(t) \right), \sigma^2_j \mathbf{I}\right) [\bs{\alpha}(t) | \rho, \bs{\alpha}(t - 1), \bm{Q}_{\tau^2}] [\bs{\alpha}(t + 1) | \rho, \bs{\alpha}(t), \bm{Q}_{\tau^2}] \\ -->
-<!-- & \propto \prod_{j=1}^J \exp\left( -\frac{1}{2} \left( \bs{\eta}_j(t) - \beta_{0j} \bm{1} - \beta_{1j} \left( \bm{X}(t) \bs{\gamma} + \bm{W} \bs{\alpha}(t) \right) \right)' \left( \sigma^2_j \bm{I} \right)^{-1} \left( \bs{\eta}_j(t) - \beta_{0j} \bm{1} - \beta_{1j} \left( \bm{X}(t) \bs{\gamma} + \bm{W} \bs{\alpha}(t) \right) \right) \right) \\ -->
-<!-- & \hspace{3cm} \times \exp\left( - \frac{1}{2} \left( \bs{\alpha}(t) - \rho \bs{\alpha}(t - 1) \right)' \bm{Q}_{\tau^2} \left( \bs{\alpha}(t) - \rho \bs{\alpha}(t - 1) \right) \right) \exp\left( - \frac{1}{2} \left( \bs{\alpha}(t + 1) - \rho \bs{\alpha}(t) \right)' \bm{Q}_{\tau^2} \left( \bs{\alpha}(t + 1) - \rho \bs{\alpha}(t) \right) \right)\\  -->
-<!-- & \propto  N(\mathbf{A}^{-1}\mathbf{b}, \mathbf{A}^{-1}) -->
-<!-- \end{align*}$$ -->
-
-<!-- where  -->
-
-<!-- $$\begin{align*} -->
-<!-- \mathbf{A} & = \sum_{j=1}^{J-1} \frac{\beta_{1j}^2}{\sigma^2_j} \bm{W}' \bm{W} + (1 + \rho^2) \bm{Q}_{\tau^2}\\ -->
-<!-- \mathbf{b} & = \sum_{j=1}^{J-1} \frac{\beta_{1j}}{\sigma^2_j} \bm{W}' \left( \bs{\eta}_j(t) - \beta_{0j} \bm{1} - \beta_{1j} \bm{X}(t) \bs{\gamma} \right) + \rho \bm{Q}_{\tau^2} \left( \bs{\alpha}(t - 1) + \bs{\alpha}(t + 1) \right) -->
-<!-- \end{align*}$$ -->
-
-
-<!-- - For $t = n_t$  -->
-
-<!-- $$\begin{align*} -->
-<!-- [\bs{\alpha}(n_t) | \cdot] & \propto \prod_{j=1}^{J-1} \oN{N} \left( \boldsymbol{\eta}_j(n_t) | \beta_{0j} \bm{1} + \beta_{1j} \left( \bm{X}(n_t) \bs{\gamma} + \bm{W} \bs{\alpha}(n_t) \right), \sigma^2_j \mathbf{I}\right) [\bs{\alpha}(n_t) | \rho, \bs{\alpha}(n_t - 1), \bm{Q}_{\tau^2}] \\ -->
-<!-- & \propto \prod_{j=1}^J \exp\left( -\frac{1}{2} \left( \bs{\eta}_j(t) - \beta_{0j} \bm{1} - \beta_{1j} \left( \bm{X}(t) \bs{\gamma} + \bm{W} \bs{\alpha}(t) \right) \right)' \left( \sigma^2_j \bm{I} \right)^{-1} \left( \bs{\eta}_j(t) - \beta_{0j} \bm{1} - \beta_{1j} \left( \bm{X}(t) \bs{\gamma} + \bm{W} \bs{\alpha}(t) \right) \right) \right) \\ -->
-<!-- & \hspace{3cm} \times \exp\left( - \frac{1}{2} \left( \bs{\alpha}(n_t) - \rho \bs{\alpha}(n_t - 1) \right)' \bm{Q}_{\tau^2} \left( \bs{\alpha}(n_t) - \rho \bs{\alpha}(n_t - 1) \right) \right) \\  -->
-<!-- & \propto N(\mathbf{A}^{-1}\mathbf{b}, \mathbf{A}^{-1}) -->
-<!-- \end{align*}$$ -->
-
-<!-- where  -->
-
-<!-- $$\begin{align*} -->
-<!-- \mathbf{A} & = \sum_{j=1}^{J-1} \frac{\beta_{1j}^2}{\sigma^2_j} \bm{W}' \bm{W} + \bm{Q}_{\tau^2}\\ -->
-<!-- \mathbf{b} & = \sum_{j=1}^{J-1} \frac{\beta_{1j}}{\sigma^2_j} \bm{W}' \left( \bs{\eta}_j(n_t) - \beta_{0j} \bm{1} - \beta_{1j} \bm{X}(n_t) \bs{\gamma} \right) + \rho \bm{Q}_{\tau^2} \left( \bs{\alpha}(t - 1) \right) -->
-<!-- \end{align*}$$ -->
-
-
-<!-- #### Full conditional for $\bs{\tau}^2$ -->
-
-<!-- As the variance parameters are partitioned based on resolution and are conditionally independent, we can update these parameters efficiently.  -->
-
-<!-- $$\begin{align*} -->
-<!-- [\tau^2_m | \cdot] & \propto [\bs{\alpha}(1) | [\bs{\alpha}(1) | \bm{Q}_{\tau^2}] \prod_{t=2}^{n_t}  [\bs{\alpha}(t) | \bs{\alpha}(t - 1), \rho, \bm{Q}_{\tau^2}] [\tau^2] \\ -->
-<!-- & \propto | \bm{Q}_{\tau^2} |^{\frac{1}{2}} \exp\left( -\frac{1}{2} \bs{\alpha}(1)' \bm{Q}_{\tau^2} \bs{\alpha}(1) \right) \\ -->
-<!-- & \hspace{3cm} \times \prod_{t=2}^{n_t} | \bm{Q}_{\tau^2} |^{\frac{1}{2}} \exp\left( -\frac{1}{2} \left( \bs{\alpha}(t) - \rho \bs{\alpha}(t-1) \right)' \bm{Q}_{\tau^2} \left( \bs{\alpha}(t) - \rho \bs{\alpha}(t-1) \right) \right) \\ -->
-<!-- & \hspace{3cm} \times \frac {\beta_{\tau^2} ^{\alpha_{\tau^2}}}{\Gamma (\alpha_{\tau^2} )} {\tau^2}^{-\alpha_{\tau^2} -1} \exp \left(-{\frac {\beta_{\tau^2} }{\tau^2}}\right)  \\ -->
-<!-- & \propto | \bm{Q}_{m \tau^2} |^{\frac{1}{2}} \exp\left( -\frac{1}{2} \bs{\alpha}_m(1)' \bm{Q}_{m \tau^2} \bs{\alpha}_m(1) \right) \\ -->
-<!-- & \hspace{3cm} \times \prod_{t=2}^{n_t} | \bm{Q}_{m \tau^2} |^{\frac{1}{2}} \exp\left( -\frac{1}{2} \left( \bs{\alpha}_m(t) - \bm{A}_m \bs{\alpha}_m(t-1) \right)' \bm{Q}_{m \tau^2} \left( \bs{\alpha}_m(t) - \bm{A}_m \bs{\alpha}_m(t-1) \right) \right) \\ -->
-<!-- & \hspace{3cm} \times \frac {\beta_{\tau^2}^{\alpha_{\tau^2}}}{\Gamma (\alpha_{\tau^2} )} {\tau^2_m}^{-\alpha_{\tau^2} -1} \exp \left(-{\frac {\beta_{\tau^2} }{\tau^2_m}}\right)  \\ -->
-<!-- & \propto {\tau^2_m,}^{-\frac{n_m n_t}{2}} \exp\left( -\frac{1}{2 \tau_m^2} \left( \bs{\alpha}_m(1)' \bm{Q}_m \bs{\alpha}_m(1) + \sum_{t=2}^{n_t} \left( \left( \bs{\alpha}_m(t) - \bm{A}_m \bs{\alpha}_m(t - 1) \right)' \bm{Q}_m \left( \bs{\alpha}_m(t) - \bm{A}_m \bs{\alpha}_m(t - 1) \right) \right) \right) \right) \\ -->
-<!-- & \hspace{3cm} \times \frac {\beta_{\tau^2} ^{\alpha_{\tau^2}}}{\Gamma (\alpha_{\tau^2} )} {\tau^2}^{-\alpha_{\tau^2} -1} \exp \left(-{\frac {\beta_{\tau^2} }{\tau^2}}\right)  \\ -->
-<!-- \end{align*}$$ -->
-
-<!-- which is gamma -->
-
-<!-- $$\begin{align*} -->
-<!-- \oN{gamma}\left( \alpha_{\tau^2} + \frac{n_m n_t}{2}, \beta_{\tau^2} + \frac{1}{2} \left( \bs{\alpha}_m(1)' \bm{Q}_m \bs{\alpha}_m(1) + \sum_{t=2}^{n_t} \left( \left( \bs{\alpha}_m(t) - \bm{A}_m \bs{\alpha}_m(t - 1) \right)' \bm{Q}_m \left( \bs{\alpha}_m(t) - \bm{A}_m \bs{\alpha}_m(t - 1) \right) \right) \right) \right) -->
-<!-- \end{align*}$$ -->
-
-<!-- #### Full conditional for $\sigma^2_j$ -->
-
-<!-- $$\begin{align*} -->
-<!-- [\sigma^2_j | \cdot] & \propto \prod_{t=1}^{n_t} [\bs{\eta}(t)_j | \bs{\gamma}, \bs{\alpha}(t), \bs{\beta}_j, \sigma^2_j] [\sigma^2_j] \\ -->
-<!-- & \propto \prod_{t=1}^{n_t} (\sigma^2_j)^{-\frac{n}{2}} \exp \left( - \frac{1}{2 \sigma^2_j} \left( \bs{\eta}(t) - \beta_{0j} \bm{1} - \beta_{1j} \left( \bm{X}(t) \bs{\gamma} + \bm{W} \bs{\alpha}(t) \right) \right)' \left( \bs{\eta}(t) - \beta_{0j} \bm{1} - \beta_{1j} \left( \bm{X}(t) \bs{\gamma} + \bm{W} \bs{\alpha}(t) \right) \right) \right) \\ -->
-<!-- & \hspace{3cm} \times \frac {\beta_{\sigma^2} ^{\alpha_{\sigma^2}}}{\Gamma (\alpha_{\sigma^2} )} {\sigma^2_j}^{-\alpha_{\sigma^2} -1} \exp \left(-{\frac {\beta_{\sigma^2} }{\sigma^2_j}} \right) \\ -->
-<!-- \end{align*}$$ -->
-
-<!-- which is inverse-gamma -->
-
-<!-- $$\begin{align*} -->
-<!-- \oN{inverse-gamma}\left( \alpha_{\sigma^2} + \frac{n n_t}{2}, \beta_{\sigma^2} + \sum_{t=1}^{n_t}\frac{1}{2} \left( \bs{\eta}(t) - \beta_{0j} \bm{1} - \beta_{1j} \left( \bm{X}(t) \bs{\gamma} + \bm{W} \bs{\alpha}(t) \right) \right)' \left( \bs{\eta}(t) - \beta_{0j} \bm{1} - \beta_{1j} \left( \bm{X}(t) \bs{\gamma} + \bm{W} \bs{\alpha}(t) \right) \right) \right)  -->
-<!-- \end{align*}$$ -->
-
-<!-- # Initialization and computational details -->
-
-<!-- - $\bs{\beta}_j$ are sampled only using the modern climate states. This is equivalent to what is commonly done in climate reconstruction by first fitting a "calibration" model to the observed data only then predicting the unobserved climate state using a "reconstruction" model. -->
-
-<!-- - $\bs{\gamma}$ is initialized by solving the observed data least squares problem $\bm{z}(1) \sim \oN{N} \left(\bm{X} \bs{\gamma} + \bm{W} \bs{\alpha}(t), \sigma^2_0 \bm{I} \right)$ (ignoring other parameters) with the best linear unbiased predictor $\hat{\bs{\gamma}}$. To solve for $\bs{\gamma}$, we first marginalize the random effect $\bs{\alpha}(1)$ out the observed data likelihood to get the model $\bm{z}(1) \sim \oN{N} \left( \bm{X} \bs{\gamma}, \sigma^2_0 \bm{I} + \bm{W} \bm{Q}^{-1} \bm{W}' \right)$. Now, using the Sherman-Morrison-Woodbury equation (**citation**) we can find the inverse  -->
-
-<!-- $$\begin{align*} -->
-<!-- \left(\sigma^2_0 \bm{I} + \bm{W} \bm{Q}^{-1} \bm{W}' \right)^{-1} & = \frac{1}{\sigma^2_0} \left( \bm{I} - \bm{W} \left( \bm{W}' \bm{W} + \sigma^2_0 \bm{Q} \right)^{-1} \bm{W}' \right) -->
-<!-- \end{align*}$$  -->
-
-<!-- where the inner inverse $\left( \bm{W}' \bm{W} + \sigma^2_0 \bm{Q} \right)^{-1}$ is composed of sparse matrices and therefore a sparse Cholesky decomposition can be used to solve the linear system of equations -->
-
-<!-- $$\begin{align*} -->
-<!-- \hat{\bs{\gamma}} & = \left( \bm{X}' \left(\sigma^2_0 \bm{I} + \bm{W}' \bm{Q}^{-1} \bm{W} \right)^{-1} \bm{X} \right)^{-1} \bm{X}' \left(\sigma^2_0 \bm{I} + \bm{W}' \bm{Q}^{-1} \bm{W} \right)^{-1} \bm{z}(1) -->
-<!-- \end{align*}$$ -->
-
-<!-- which is easy to solve as the outer inverse is $q \times q$ -->
 
 # References
 
