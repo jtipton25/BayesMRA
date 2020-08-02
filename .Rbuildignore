@@ -13,3 +13,4 @@
 ^Meta$
 ^cran-comments\.md$
 ^.covrignore$
+^\.github$

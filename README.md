@@ -11,6 +11,8 @@ coverage](https://codecov.io/gh/jtipton25/BayesMRA/branch/master/graph/badge.svg
 status](https://travis-ci.org/jtipton25/BayesMRA.svg?branch=master)](https://travis-ci.org/jtipton25/BayesMRA)
 [![Lifecycle:
 maturing](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
+[![R build
+status](https://github.com/jtipton25/BayesMRA/workflows/R-CMD-check/badge.svg)](https://github.com/jtipton25/BayesMRA/actions)
 <!-- badges: end -->
 
 An R package for Bayesian spatial and spatio-temporal regression using
