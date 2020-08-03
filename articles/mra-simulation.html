@@ -95,7 +95,7 @@
 <div id="defining-the-mra-model" class="section level1">
 <h1 class="hasAnchor">
 <a href="#defining-the-mra-model" class="anchor"></a>Defining the MRA model</h1>
-<p>This package provides a Bayesian implementation of the multi-resolution Gaussian process model presented by <span class="citation">Nychka et al. (2015)</span>. This package is similar to the R package <code>LatticeKrig::LatticeKrig</code> (<span class="citation">Nychka et al. (2016)</span>) and provides an implementation that is suitable for use in MCMC samplers.</p>
+<p>This package provides a Bayesian implementation of the multi-resolution Gaussian process model presented by <span class="citation">Nychka et al. (2015)</span>. This package is similar to the R package <code><a href="https://rdrr.io/pkg/LatticeKrig/man/LatticeKrig.html">LatticeKrig::LatticeKrig</a></code> (<span class="citation">Nychka et al. (2016)</span>) and provides an implementation that is suitable for use in MCMC samplers.</p>
 <p>The model that the function <code><a href="../reference/mcmc_mra.html">mcmc_mra()</a></code> fits is defined below. Let <span class="math inline">\(\mathbf{s}\)</span> be a spatial location in a domain of interest <span class="math inline">\(\mathcal{D}\)</span> and let <span class="math inline">\(y(\mathbf{s})\)</span> be the observation of the spatial process at location <span class="math inline">\(\mathbf{s}\)</span>. Then, we can write the observation as</p>
 <p><span class="math display">\[\begin{align*}
 y(\mathbf{s}) &amp; = \mathbf{x}(\mathbf{s})' \boldsymbol{\beta} + \eta(\mathbf{s}) + \varepsilon(\mathbf{s}),
