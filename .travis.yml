@@ -19,6 +19,7 @@ r_packages:
 
 # only report coverage after build is successful
 after_success:
+  - Rscript -e 'rmarkdown::render("README.Rmd", output_format = "md_document")'
   - Rscript -e 'devtools::install()'
   - Rscript -e 'devtools::build_vignettes()'
   - Rscript -e 'covr::codecov()'
