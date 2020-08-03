@@ -395,9 +395,9 @@ priors <- list(
   Sigma_beta   = 5 * diag(ncol(X_s)))
 ```
 
-Now we can fit the model to the simulated data. Using a [project-oriented workflow](https://www.tidyverse.org/blog/2017/12/workflow-vs-script/), we save the MCMC output that results from `mcmc_mra()` in a folder named `results`.
+Now we can fit the model to the simulated data. Using a [project-oriented workflow](https://www.tidyverse.org/blog/2017/12/workflow-vs-script/), we save the MCMC output that results from `mcmc_mra()` in a folder named `results` in the current project.
 
-## Fitting the MCMC
+## Fitting the model using MCMC
 
 ```{r fit-model}
 set.seed(999)
