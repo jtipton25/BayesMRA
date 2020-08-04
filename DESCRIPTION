@@ -1,7 +1,7 @@
 Package: BayesMRA
 Type: Package
 Title: Bayesian Multi-Resolution Gaussian Process Approximations
-Version: 1.0
+Version: 1.0.0
 Date: 2020-07-31
 Authors@R: person("John", "Tipton", email = "jrtipton@uark.edu", 
     role = c("aut", "cre"))

@@ -15,9 +15,10 @@
   Size of tarball: 5647215 bytes
   
   
-* installed size is  6.5Mb
+* installed size is  6.3Mb
     sub-directories of 1Mb or more:
-    doc    4.3Mb
-    libs   2.1Mb
+      doc    4.1Mb
+      libs   2.1Mb
+
 
     The included vignette includes multiple images that display the spatial process and while resolution of the images could be decreased, having high quality images is informative of the construction of the spatial process.
