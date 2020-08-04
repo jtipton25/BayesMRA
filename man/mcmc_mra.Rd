@@ -2,7 +2,7 @@
 % Please edit documentation in R/mcmc_mra.R
 \name{mcmc_mra}
 \alias{mcmc_mra}
-\title{Bayesian Polya-gamma regression}
+\title{Bayesian Multi-resolution Spatial Regression}
 \usage{
 mcmc_mra(
   y,
@@ -65,5 +65,5 @@ outputs progress messages every 50 iterations.
 \item{n_chain}{is the MCMC chain id. The default is 1.}
 }
 \description{
-this function runs the Bayesian multinomial regression using Polya-gamma data augmentation
+this function runs Markov Chain Monte Carlo to estimate the Bayesian multi-resolution spatial regression model.
 }
