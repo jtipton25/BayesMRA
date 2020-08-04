@@ -7,3 +7,11 @@ docs/*
 docs/
 doc
 Meta
+results/
+development/
+.DS_Store
+scripts/mra-simulation.html
+scripts/mra-simulation_cache/
+scripts/mra-simulation_files/
+vignettes/.DS_Store
+
