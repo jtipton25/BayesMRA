@@ -15,7 +15,7 @@ In this Vignette, we demonstrate how to fit Bayesian spatial models using the mu
 
 ```{r setup, include=FALSE}
 # knitr::opts_chunk$set(fig.width = 8, fig.height = 4.5, dev = 'svglite', dev.args = list(pointsize = 12, dpi = 36))
-knitr::opts_chunk$set(fig.width = 8, fig.height = 4.5, dpi = 300, dev.args = list(type = "cairo"))
+knitr::opts_chunk$set(fig.width = 8, fig.height = 4.5, dpi = 200, dev.args = list(type = "cairo"))
 ```
 
 ```{r, echo = FALSE, message = FALSE}

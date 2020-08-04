@@ -16,3 +16,4 @@
 ^\.github$
 ^figure$
 ^cache$
+^CRAN-RELEASE$
