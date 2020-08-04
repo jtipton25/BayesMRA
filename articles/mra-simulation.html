@@ -5,13 +5,13 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fitting Bayesian multiresolution models with `mcmc_mra()` • BayesMRA</title>
+<title>Fitting Bayesian Multi-resolution Models With `mcmc_mra()` • BayesMRA</title>
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
 <script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
-<script src="../pkgdown.js"></script><meta property="og:title" content="Fitting Bayesian multiresolution models with `mcmc_mra()`">
+<script src="../pkgdown.js"></script><meta property="og:title" content="Fitting Bayesian Multi-resolution Models With `mcmc_mra()`">
 <meta property="og:description" content="BayesMRA">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -54,7 +54,7 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/mra-simulation.html">Fitting Bayesian multiresolution models with `mcmc_mra()`</a>
+      <a href="../articles/mra-simulation.html">Fitting Bayesian Multi-resolution Models With `mcmc_mra()`</a>
     </li>
   </ul>
 </li>
@@ -82,7 +82,7 @@
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1 data-toc-skip>Fitting Bayesian multiresolution models with <code>mcmc_mra()</code>
+      <h1 data-toc-skip>Fitting Bayesian Multi-resolution Models With <code>mcmc_mra()</code>
 </h1>
             
       
@@ -94,7 +94,7 @@
     
     
 
-<p>In this Vignette, we demonstrate how to fit Bayesian spatial models using the multiresolution model using Markov Chain Monte Carlo (MCMC).</p>
+<p>In this Vignette, we demonstrate how to fit Bayesian spatial models using the multi-resolution model using Markov Chain Monte Carlo (MCMC).</p>
 <div id="defining-the-mra-model" class="section level1">
 <h1 class="hasAnchor">
 <a href="#defining-the-mra-model" class="anchor"></a>Defining the MRA model</h1>
@@ -170,13 +170,13 @@ y(\mathbf{s}) &amp; = \mathbf{x}(\mathbf{s})' \boldsymbol{\beta} + \eta(\mathbf{
 <span class="no">y</span> <span class="kw">&lt;-</span> <span class="no">X</span> <span class="kw">%*%</span> <span class="no">beta</span> + <span class="no">W</span> <span class="kw">%*%</span> <span class="no">alpha</span> + <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span>(<span class="no">N</span>, <span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span>(<span class="no">sigma2</span>))</pre></body></html></div>
 <p>Next, the sum-to-one constraint is verified by checking that within each dimension the sum of the <span class="math inline">\(\boldsymbol{\alpha}_m\)</span> parameters is 0.</p>
 <div class="sourceCode" id="cb2"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span>(<span class="no">alpha</span>)</pre></body></html></div>
-<pre><code>## [1] 4.128642e-14</code></pre>
+<pre><code>## [1] 1.98782e-14</code></pre>
 <div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span>(<span class="no">alpha</span>[<span class="no">dims_idx</span> <span class="kw">==</span> <span class="fl">1</span>])</pre></body></html></div>
-<pre><code>## [1] -3.103073e-14</code></pre>
+<pre><code>## [1] 1.450229e-15</code></pre>
 <div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span>(<span class="no">alpha</span>[<span class="no">dims_idx</span> <span class="kw">==</span> <span class="fl">2</span>])</pre></body></html></div>
-<pre><code>## [1] 2.21767e-14</code></pre>
+<pre><code>## [1] 4.22995e-14</code></pre>
 <div class="sourceCode" id="cb8"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span>(<span class="no">alpha</span>[<span class="no">dims_idx</span> <span class="kw">==</span> <span class="fl">3</span>])</pre></body></html></div>
-<pre><code>## [1] 5.014045e-14</code></pre>
+<pre><code>## [1] -2.387153e-14</code></pre>
 <div id="plotting-the-simulated-data" class="section level2">
 <h2 class="hasAnchor">
 <a href="#plotting-the-simulated-data" class="anchor"></a>Plotting the simulated data</h2>
@@ -292,9 +292,9 @@ y(\mathbf{s}) &amp; = \mathbf{x}(\mathbf{s})' \boldsymbol{\beta} + \eta(\mathbf{
   <span class="fu">ggtitle</span>(<span class="st">"Fixed effects"</span>) +
   <span class="kw pkg">colorspace</span><span class="kw ns">::</span><span class="fu">scale_fill_continuous_diverging</span>(<span class="st">"Blue-Red 3"</span>, <span class="kw">limits</span> <span class="kw">=</span> <span class="no">zlims</span>) +
   <span class="fu">theme_bw</span>() +
-  <span class="fu">theme_custom</span>(<span class="fl">0.70</span>)
-
-<span class="no">dat_map</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span>(
+  <span class="fu">theme_custom</span>(<span class="fl">0.70</span>)</pre></body></html></div>
+<pre><code>## Error in ggplot2::continuous_scale(aesthetics, "continuous_diverging", : object 'zlims' not found</code></pre>
+<div class="sourceCode" id="cb16"><html><body><pre class="r"><span class="no">dat_map</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span>(
   <span class="kw">temp</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="no">y</span>),
   <span class="kw">re</span>   <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="no">W</span> <span class="kw">%*%</span> <span class="no">alpha</span>),
   <span class="kw">x</span>    <span class="kw">=</span> <span class="no">locs</span>[, <span class="fl">1</span>],
@@ -309,9 +309,9 @@ y(\mathbf{s}) &amp; = \mathbf{x}(\mathbf{s})' \boldsymbol{\beta} + \eta(\mathbf{
   <span class="fu">ggtitle</span>(<span class="st">"Observed surface"</span>) +
   <span class="kw pkg">colorspace</span><span class="kw ns">::</span><span class="fu">scale_fill_continuous_diverging</span>(<span class="st">"Blue-Red 3"</span>, <span class="kw">limits</span> <span class="kw">=</span> <span class="no">zlims</span>) +
   <span class="fu">theme_bw</span>() +
-  <span class="fu">theme_custom</span>(<span class="fl">0.70</span>)
-
-<span class="no">g_re</span> <span class="kw">&lt;-</span> <span class="no">dat_map</span> <span class="kw">%&gt;%</span>
+  <span class="fu">theme_custom</span>(<span class="fl">0.70</span>)</pre></body></html></div>
+<pre><code>## Error in ggplot2::continuous_scale(aesthetics, "continuous_diverging", : object 'zlims' not found</code></pre>
+<div class="sourceCode" id="cb18"><html><body><pre class="r"><span class="no">g_re</span> <span class="kw">&lt;-</span> <span class="no">dat_map</span> <span class="kw">%&gt;%</span>
   <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="kw">x</span> <span class="kw">=</span> <span class="no">x</span>, <span class="kw">y</span> <span class="kw">=</span> <span class="no">y</span>, <span class="kw">fill</span> <span class="kw">=</span> <span class="no">re</span>)) +
   <span class="fu">geom_raster</span>() +
   <span class="fu">xlab</span>(<span class="st">"x"</span>) +
@@ -320,12 +320,12 @@ y(\mathbf{s}) &amp; = \mathbf{x}(\mathbf{s})' \boldsymbol{\beta} + \eta(\mathbf{
   <span class="kw pkg">colorspace</span><span class="kw ns">::</span><span class="fu">scale_fill_continuous_diverging</span>(<span class="st">"Blue-Red 3"</span>, <span class="kw">limits</span> <span class="kw">=</span> <span class="no">zlims</span>) +
   <span class="fu">theme_bw</span>() +
   <span class="fu">theme</span>(<span class="kw">legend.position</span> <span class="kw">=</span> <span class="st">"none"</span>) +
-  <span class="fu">theme_custom</span>(<span class="fl">0.70</span>)
-
-<span class="no">g_fixed</span> + <span class="no">g_re</span> + <span class="no">g_full</span> + <span class="fu">plot_layout</span>(<span class="kw">guides</span> <span class="kw">=</span> <span class="st">"collect"</span>)</pre></body></html></div>
-<p><img src="plot-data-process-1.png" title="plot of chunk plot-data-process" alt="plot of chunk plot-data-process" style="display: block; margin: auto;"></p>
+  <span class="fu">theme_custom</span>(<span class="fl">0.70</span>)</pre></body></html></div>
+<pre><code>## Error in ggplot2::continuous_scale(aesthetics, "continuous_diverging", : object 'zlims' not found</code></pre>
+<div class="sourceCode" id="cb20"><html><body><pre class="r"><span class="no">g_fixed</span> + <span class="no">g_re</span> + <span class="no">g_full</span> + <span class="fu">plot_layout</span>(<span class="kw">guides</span> <span class="kw">=</span> <span class="st">"collect"</span>)</pre></body></html></div>
+<pre><code>## Error in eval(expr, envir, enclos): object 'g_fixed' not found</code></pre>
 <p>To further examine how the spatial process is constructed, the plot below shows the contribution to the full spatial process (bottom right plot) from each of the different resolutions. The plot shows how the coarsest resolution (top left) produces a coarse process over large spatial resolutions and the finest resolution (lower left) produces a finer-scale process. The three (M) resolutions are added together to produce the full process.</p>
-<div class="sourceCode" id="cb15"><html><body><pre class="r"><span class="co">## MRA spatial process</span>
+<div class="sourceCode" id="cb22"><html><body><pre class="r"><span class="co">## MRA spatial process</span>
 <span class="no">W_alpha_res</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html">unlist</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span>(<span class="fl">1</span>:<span class="no">M</span>, <span class="kw">function</span>(<span class="no">m</span>) <span class="no">W</span>[, <span class="no">dims_idx</span> <span class="kw">==</span> <span class="no">m</span>] <span class="kw">%*%</span> <span class="no">alpha</span>[<span class="no">dims_idx</span> <span class="kw">==</span> <span class="no">m</span>], <span class="kw">simplify</span> <span class="kw">=</span> <span class="st">"matrix"</span>))
 <span class="fu"><a href="https://rdrr.io/r/base/dimnames.html">dimnames</a></span>(<span class="no">W_alpha_res</span>) <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(
   <span class="kw">site</span> <span class="kw">=</span> <span class="fl">1</span>:<span class="no">N</span>,
@@ -352,7 +352,7 @@ y(\mathbf{s}) &amp; = \mathbf{x}(\mathbf{s})' \boldsymbol{\beta} + \eta(\mathbf{
   <span class="fu">facet_wrap</span>( ~ <span class="no">res</span>, <span class="kw">ncol</span> <span class="kw">=</span> <span class="fl">2</span>) +
   <span class="fu">xlab</span>(<span class="st">"x"</span>) +
   <span class="fu">ylab</span>(<span class="st">"y"</span>) +
-  <span class="fu">ggtitle</span>(<span class="st">"Multiresolution process"</span>) +
+  <span class="fu">ggtitle</span>(<span class="st">"Multi-resolution process"</span>) +
   <span class="kw pkg">colorspace</span><span class="kw ns">::</span><span class="fu">scale_fill_continuous_diverging</span>(<span class="st">"Blue-Red 3"</span>) +
   <span class="fu">theme_bw</span>() +
   <span class="fu">theme_custom</span>()
@@ -364,7 +364,7 @@ y(\mathbf{s}) &amp; = \mathbf{x}(\mathbf{s})' \boldsymbol{\beta} + \eta(\mathbf{
 <h1 class="hasAnchor">
 <a href="#fitting-the-mra-model" class="anchor"></a>Fitting the MRA model</h1>
 <p>To explore how well the fitted model can predict out of sample data, we take a sample <span class="math inline">\(s\)</span> of size <span class="math inline">\(n_{sites}\)</span> from the <span class="math inline">\(N\)</span> simulated points and fit the model using <code><a href="../reference/mcmc_mra.html">mcmc_mra()</a></code>.</p>
-<div class="sourceCode" id="cb16"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span>(<span class="fl">111</span>)
+<div class="sourceCode" id="cb23"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span>(<span class="fl">111</span>)
 <span class="no">n_sites</span>   <span class="kw">&lt;-</span> <span class="fl">500</span>
 <span class="no">s</span>         <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span>(<span class="no">N</span>, <span class="no">n_sites</span>)
 <span class="no">y_s</span>       <span class="kw">&lt;-</span> <span class="no">y</span>[<span class="no">s</span>, ]
@@ -374,7 +374,7 @@ y(\mathbf{s}) &amp; = \mathbf{x}(\mathbf{s})' \boldsymbol{\beta} + \eta(\mathbf{
 <span class="no">locs_s</span>    <span class="kw">&lt;-</span> <span class="no">locs</span>[<span class="no">s</span>, ]
 <span class="no">locs_oos</span>  <span class="kw">&lt;-</span> <span class="no">locs</span>[ - <span class="no">s</span>, ]</pre></body></html></div>
 <p>The plot below shows the sampled data to which the model is fit, showing the spatial patterns of the sampled data.</p>
-<div class="sourceCode" id="cb17"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span>(
+<div class="sourceCode" id="cb24"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span>(
   <span class="kw">x</span>     <span class="kw">=</span> <span class="no">locs_s</span>[, <span class="fl">1</span>],
   <span class="kw">y</span>     <span class="kw">=</span> <span class="no">locs_s</span>[, <span class="fl">2</span>],
   <span class="kw">site</span>  <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span>(<span class="fl">1</span>:<span class="no">n_sites</span>),
@@ -387,9 +387,9 @@ y(\mathbf{s}) &amp; = \mathbf{x}(\mathbf{s})' \boldsymbol{\beta} + \eta(\mathbf{
   <span class="fu">theme_bw</span>() +
   <span class="fu">theme_custom</span>() +
   <span class="fu">theme</span>(<span class="kw">legend.position</span> <span class="kw">=</span> <span class="st">"none"</span>)</pre></body></html></div>
-<p><img src="plot-sampled-data-1.png" title="plot of chunk plot-sampled-data" alt="plot of chunk plot-sampled-data" style="display: block; margin: auto;"></p>
+<pre><code>## Error in ggplot2::continuous_scale(aesthetics, "continuous_diverging", : object 'zlims' not found</code></pre>
 <p>To fit the model, we must specify the parameters form model fitting. The parameter <code>params$n_adapt</code> determines the number of warm-up MCMC iterations and these iterations are discarded. The parameter <code>params$n_mcmc</code> determines the number of post warm-up MCMC iterations (i.e., the total number of MCMC iterations is <code>params$n_adapt + params$n_mcmc</code>). The parameter <code>params$n_thin</code> determines the thinning rate for keeping posterior samples which is primarily used when the number of MCMC samples to keep stresses the computer memory usage. The total number of samples kept is <code>params$n_mcmc / params$n_thin</code>. The parameter <code>params$n_message</code> specifies the frequency of messages to display showing the progress of the MCMC algorithm. The object <code>priors</code> defines the priors for fitting the model. If <code>priors</code> is not specified, default priors are used.</p>
-<div class="sourceCode" id="cb18"><html><body><pre class="r"><span class="no">params</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(
+<div class="sourceCode" id="cb26"><html><body><pre class="r"><span class="no">params</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(
   <span class="kw">n_mcmc</span>    <span class="kw">=</span> <span class="fl">500</span>,
   <span class="kw">n_adapt</span>   <span class="kw">=</span> <span class="fl">500</span>,
   <span class="kw">n_thin</span>    <span class="kw">=</span> <span class="fl">1</span>,
@@ -403,11 +403,11 @@ y(\mathbf{s}) &amp; = \mathbf{x}(\mathbf{s})' \boldsymbol{\beta} + \eta(\mathbf{
   <span class="kw">beta_sigma2</span>  <span class="kw">=</span> <span class="fl">1</span>,
   <span class="kw">mu_beta</span>      <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span>(<span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html">ncol</a></span>(<span class="no">X_s</span>)),
   <span class="kw">Sigma_beta</span>   <span class="kw">=</span> <span class="fl">5</span> * <span class="fu"><a href="https://rdrr.io/r/base/diag.html">diag</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/nrow.html">ncol</a></span>(<span class="no">X_s</span>)))</pre></body></html></div>
-<p>Now we can fit the model to the simulated data. Using a <a href="https://www.tidyverse.org/blog/2017/12/workflow-vs-script/">project-oriented workflow</a>, we save the MCMC output that results from <code><a href="../reference/mcmc_mra.html">mcmc_mra()</a></code> in a folder named <code>results</code>.</p>
-<div id="fitting-the-mcmc" class="section level2">
+<p>Now we can fit the model to the simulated data. Using a <a href="https://www.tidyverse.org/blog/2017/12/workflow-vs-script/">project-oriented workflow</a>, we save the MCMC output that results from <code><a href="../reference/mcmc_mra.html">mcmc_mra()</a></code> in a folder named <code>results</code> in the current project.</p>
+<div id="fitting-the-model-using-mcmc" class="section level2">
 <h2 class="hasAnchor">
-<a href="#fitting-the-mcmc" class="anchor"></a>Fitting the MCMC</h2>
-<div class="sourceCode" id="cb19"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span>(<span class="fl">999</span>)
+<a href="#fitting-the-model-using-mcmc" class="anchor"></a>Fitting the model using MCMC</h2>
+<div class="sourceCode" id="cb27"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span>(<span class="fl">999</span>)
 
 <span class="kw">if</span> (<span class="fu"><a href="https://rdrr.io/r/base/files.html">file.exists</a></span>(<span class="kw pkg">here</span><span class="kw ns">::</span><span class="fu">here</span>(<span class="st">"results"</span>, <span class="st">"fit-mra-sim.RData"</span>))) {
   <span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span>(<span class="kw pkg">here</span><span class="kw ns">::</span><span class="fu">here</span>(<span class="st">"results"</span>, <span class="st">"fit-mra-sim.RData"</span>))
@@ -428,14 +428,14 @@ y(\mathbf{s}) &amp; = \mathbf{x}(\mathbf{s})' \boldsymbol{\beta} + \eta(\mathbf{
   <span class="no">runtime</span> <span class="kw">&lt;-</span> <span class="no">end</span> - <span class="no">start</span>
   <span class="fu"><a href="https://rdrr.io/r/base/save.html">save</a></span>(<span class="no">out</span>, <span class="no">runtime</span>, <span class="kw">file</span> <span class="kw">=</span> <span class="kw pkg">here</span><span class="kw ns">::</span><span class="fu">here</span>(<span class="st">"results"</span>, <span class="st">"fit-mra-sim.RData"</span>))
 }</pre></body></html></div>
-<p>The fitting of <code><a href="../reference/mcmc_mra.html">mcmc_mra()</a></code> took 10.89 mins.</p>
+<p>The fitting of <code><a href="../reference/mcmc_mra.html">mcmc_mra()</a></code> took 6.02 mins.</p>
 </div>
 </div>
 <div id="examining-the-mra-mcmc-output" class="section level1">
 <h1 class="hasAnchor">
 <a href="#examining-the-mra-mcmc-output" class="anchor"></a>Examining the MRA MCMC output</h1>
 <p>After fitting the MCMC using <code><a href="../reference/mcmc_mra.html">mcmc_mra()</a></code>, we plot the trace plots of the parameters to check for evidence that the model has not converged and to identify that the parameters have mixed. The first trace plots we examine are for the variance parameters and the regression coefficients. Overall, these trace plots look decent although the effective samples size for the <span class="math inline">\(\tau^2\)</span>s and <span class="math inline">\(\beta\)</span>s might be low and more samples might be needed for making inference with the model.</p>
-<div class="sourceCode" id="cb20"><html><body><pre class="r"><span class="no">dat_tau2</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span>(
+<div class="sourceCode" id="cb28"><html><body><pre class="r"><span class="no">dat_tau2</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span>(
   <span class="kw">tau2</span>      <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="no">out</span>$<span class="no">tau2</span>),
   <span class="kw">iteration</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span>(<span class="fl">1</span>:<span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span>(<span class="no">out</span>$<span class="no">tau2</span>), <span class="kw">times</span> <span class="kw">=</span> <span class="no">M</span>),
   <span class="kw">resolution</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span>(<span class="fl">1</span>:<span class="no">M</span>, <span class="kw">each</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span>(<span class="no">out</span>$<span class="no">tau2</span>)))
@@ -485,7 +485,7 @@ y(\mathbf{s}) &amp; = \mathbf{x}(\mathbf{s})' \boldsymbol{\beta} + \eta(\mathbf{
 (<span class="no">p_tau2</span> + <span class="no">p_lambda</span>) /  (<span class="no">p_sigma2</span> + <span class="no">p_beta</span>)</pre></body></html></div>
 <p><img src="trace-plots-1.png" title="plot of chunk trace-plots" alt="plot of chunk trace-plots" style="display: block; margin: auto;"></p>
 <p>Next, the trace plots for the spatial parameter <span class="math inline">\(\boldsymbol{\alpha}_m\)</span> are shown. Because there are so many parameters, a sample is taken for plotting. These traceplots suggest that perhaps <span class="math inline">\(\boldsymbol{\alpha}\)</span> hasn’t entirely converged. However, as there is a non-identifiability between <span class="math inline">\(\tau^2_m\)</span> and <span class="math inline">\(\boldsymbol{\alpha}_m\)</span>, this is not surprising and might not be remedied with more samples.</p>
-<div class="sourceCode" id="cb21"><html><body><pre class="r"><span class="co">## posterior plots for alpha</span>
+<div class="sourceCode" id="cb29"><html><body><pre class="r"><span class="co">## posterior plots for alpha</span>
 
 <span class="no">dat_alpha</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span>(
   <span class="kw">alpha</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="no">out</span>$<span class="no">alpha</span>),
@@ -512,7 +512,7 @@ y(\mathbf{s}) &amp; = \mathbf{x}(\mathbf{s})' \boldsymbol{\beta} + \eta(\mathbf{
   <span class="fu">theme</span>(<span class="kw">legend.position</span> <span class="kw">=</span> <span class="st">"none"</span>)</pre></body></html></div>
 <p><img src="trace-plots-alpha-1.png" title="plot of chunk trace-plots-alpha" alt="plot of chunk trace-plots-alpha" style="display: block; margin: auto;"></p>
 <p>Because the model was fit to simulated data, the posterior predictions can be compared to the simulated parameters to evaluate the model performance. The following plots show the 95% central credible intervals for different parameters plotted against the simulated parameters. For the regression parameters <span class="math inline">\(\boldsymbol{\beta}\)</span>, the model is doing a reasonable job of recovering these parameters. The parameter estimates for <span class="math inline">\(\tau^2_m\)</span> and <span class="math inline">\(\boldsymbol{\alpha}_m\)</span> show poor performance in estimating the true parameters. This is due to a non-identifiability in the model; however, this is not a concern as the spatial process <span class="math inline">\(\sum_{m=1}^M \mathbf{W}_m \boldsymbol{\alpha}_m\)</span> is well estimated which will be shown later.</p>
-<div class="sourceCode" id="cb22"><html><body><pre class="r"><span class="co">## predicted vs. estimated beta</span>
+<div class="sourceCode" id="cb30"><html><body><pre class="r"><span class="co">## predicted vs. estimated beta</span>
 <span class="no">dat_plot</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span>(
   <span class="kw">truth</span> <span class="kw">=</span> <span class="no">beta</span>,
   <span class="kw">mean</span>  <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html">apply</a></span>(<span class="no">out</span>$<span class="no">beta</span>, <span class="fl">2</span>, <span class="no">mean</span>),
@@ -586,7 +586,7 @@ y(\mathbf{s}) &amp; = \mathbf{x}(\mathbf{s})' \boldsymbol{\beta} + \eta(\mathbf{
 (<span class="no">p_beta</span> + <span class="no">p_sigma2</span>) / (<span class="no">p_tau2</span> + <span class="no">p_alpha</span>)</pre></body></html></div>
 <p><img src="estimated-vs-predicted-1.png" title="plot of chunk estimated-vs-predicted" alt="plot of chunk estimated-vs-predicted" style="display: block; margin: auto;"></p>
 <p>Next, the simulated and estimated <span class="math inline">\(\boldsymbol{\alpha}_m\)</span> are plotted on the spatial grid. The plots show that the <span class="math inline">\(\boldsymbol{\alpha}_m\)</span>s are not being identified.</p>
-<div class="sourceCode" id="cb23"><html><body><pre class="r"><span class="no">fitted_alphas</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span>(
+<div class="sourceCode" id="cb31"><html><body><pre class="r"><span class="no">fitted_alphas</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span>(
     <span class="kw">x</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html">unlist</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span>(<span class="fl">1</span>:<span class="no">M</span>, <span class="kw">function</span>(<span class="no">i</span>) <span class="no">MRA</span>$<span class="no">locs_grid</span><span class="kw">[[</span><span class="no">i</span>]][, <span class="fl">1</span>])),
     <span class="kw">y</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html">unlist</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span>(<span class="fl">1</span>:<span class="no">M</span>, <span class="kw">function</span>(<span class="no">i</span>) <span class="no">MRA</span>$<span class="no">locs_grid</span><span class="kw">[[</span><span class="no">i</span>]][, <span class="fl">2</span>])),
     <span class="kw">res</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/unlist.html">unlist</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span>(<span class="fl">1</span>:<span class="no">M</span>, <span class="kw">function</span>(<span class="no">i</span>) <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span>(<span class="no">i</span>, <span class="kw">each</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span>(<span class="no">MRA</span>$<span class="no">locs_grid</span><span class="kw">[[</span><span class="no">i</span>]]))))),
@@ -613,7 +613,7 @@ y(\mathbf{s}) &amp; = \mathbf{x}(\mathbf{s})' \boldsymbol{\beta} + \eta(\mathbf{
 <span class="no">sim_alphas</span> + <span class="fu">theme_custom</span>(<span class="fl">0.5</span>) + <span class="no">fitted_alphas</span></pre></body></html></div>
 <p><img src="estimated-alphas-1.png" title="plot of chunk estimated-alphas" alt="plot of chunk estimated-alphas" style="display: block; margin: auto;"></p>
 <p>Despite the parameters <span class="math inline">\(\tau^2_m\)</span> and <span class="math inline">\(\boldsymbol{\alpha}_m\)</span> not being identifiable, the following plot shows that the full spatial process <span class="math inline">\(\sum_{m=1}^M \mathbf{W}_m \boldsymbol{\alpha}_m\)</span>. The two figures (simulated on the left, fitted on the right) demonstrate that each of the <span class="math inline">\(m\)</span> resolutions of the process <span class="math inline">\(\mathbf{W}_m \boldsymbol{\alpha}_m\)</span> are also non-identifiable.</p>
-<div class="sourceCode" id="cb24"><html><body><pre class="r"><span class="co">## Estimated MRA spatial proces</span>
+<div class="sourceCode" id="cb32"><html><body><pre class="r"><span class="co">## Estimated MRA spatial proces</span>
 <span class="no">W_alpha_res</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html">unlist</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span>(<span class="fl">1</span>:<span class="no">M</span>, <span class="kw">function</span>(<span class="no">m</span>) <span class="no">W</span>[, <span class="no">dims_idx</span> <span class="kw">==</span> <span class="no">m</span>] <span class="kw">%*%</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html">apply</a></span>(<span class="no">out</span>$<span class="no">alpha</span>, <span class="fl">2</span>, <span class="no">mean</span>)[<span class="no">dims_idx</span> <span class="kw">==</span> <span class="no">m</span>], <span class="kw">simplify</span> <span class="kw">=</span> <span class="st">"matrix"</span>))
 <span class="fu"><a href="https://rdrr.io/r/base/dimnames.html">dimnames</a></span>(<span class="no">W_alpha_res</span>) <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(
   <span class="kw">site</span> <span class="kw">=</span> <span class="fl">1</span>:<span class="no">N</span>,
@@ -640,7 +640,7 @@ y(\mathbf{s}) &amp; = \mathbf{x}(\mathbf{s})' \boldsymbol{\beta} + \eta(\mathbf{
   <span class="fu">facet_wrap</span>( ~ <span class="no">res</span>, <span class="kw">ncol</span> <span class="kw">=</span> <span class="fl">2</span>) +
   <span class="fu">xlab</span>(<span class="st">"Longitude"</span>) +
   <span class="fu">ylab</span>(<span class="st">"Latitude"</span>) +
-  <span class="fu">ggtitle</span>(<span class="st">"Estimated Multiresolution process"</span>) +
+  <span class="fu">ggtitle</span>(<span class="st">"Estimated Multi-resolution process"</span>) +
   <span class="kw pkg">colorspace</span><span class="kw ns">::</span><span class="fu">scale_fill_continuous_diverging</span>(<span class="st">"Blue-Red 3"</span>) +
   <span class="fu">theme_bw</span>() +
   <span class="fu">theme_custom</span>(<span class="fl">0.5</span>)
@@ -648,7 +648,7 @@ y(\mathbf{s}) &amp; = \mathbf{x}(\mathbf{s})' \boldsymbol{\beta} + \eta(\mathbf{
 <span class="no">sim_MRA</span> + <span class="fu">theme_custom</span>(<span class="fl">0.5</span>) + <span class="no">estimated_MRA</span></pre></body></html></div>
 <p><img src="simulated-vs-estimated-process-1.png" title="plot of chunk simulated-vs-estimated-process" alt="plot of chunk simulated-vs-estimated-process" style="display: block; margin: auto;"></p>
 <p>The next plots show the estimated vs. simulated fixed effects, spatial process, and mean response. There is some evidence of non-identifiability between the fixed effects plot and the spatial effects plot (left two plots) as there is a bias in each of the predictions. This is understood to be a consequence of spatial confounding (<span class="citation">Hodges and Reich (2010)</span>, <span class="citation">Hughes and Haran (2013)</span>, <span class="citation">Hanks et al. (2015)</span>).</p>
-<div class="sourceCode" id="cb25"><html><body><pre class="r"><span class="co">## plot estimated mean response</span>
+<div class="sourceCode" id="cb33"><html><body><pre class="r"><span class="co">## plot estimated mean response</span>
 <span class="no">Xbeta_post</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span>(<span class="no">X_s</span> <span class="kw">%*%</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span>(<span class="no">out</span>$<span class="no">beta</span>))
 <span class="no">Walpha_post</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/do.call.html">do.call</a></span>(<span class="no">cbind</span>, <span class="no">out</span>$<span class="no">MRA</span>$<span class="no">W</span>) <span class="kw">%*%</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span>(<span class="no">out</span>$<span class="no">alpha</span>))
 <span class="no">mu_post</span> <span class="kw">&lt;-</span> <span class="no">Xbeta_post</span> + <span class="no">Walpha_post</span>
