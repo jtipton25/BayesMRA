@@ -484,7 +484,7 @@ y(\mathbf{s}) &amp; = \mathbf{x}(\mathbf{s})' \boldsymbol{\beta} + \eta(\mathbf{
 
 (<span class="no">p_tau2</span> + <span class="no">p_lambda</span>) /  (<span class="no">p_sigma2</span> + <span class="no">p_beta</span>)</pre></body></html></div>
 <p><img src="trace-plots-1.png" title="plot of chunk trace-plots" alt="plot of chunk trace-plots" style="display: block; margin: auto;"></p>
-<p>Next, the trace plots for the spatial parameter <span class="math inline">\(\boldsymbol{\alpha}_m\)</span> are shown. Because there are so many parameters, a sample is taken for plotting. These traceplots suggest that perhaps <span class="math inline">\(\boldsymbol{\alpha}\)</span> hasn’t entirely converged. However, as there is a non-identifiability between <span class="math inline">\(\tau^2_m\)</span> and <span class="math inline">\(\boldsymbol{\alpha}_m\)</span>, this is not surprising and might not be remedied with more samples.</p>
+<p>Next, the trace plots for the spatial parameter <span class="math inline">\(\boldsymbol{\alpha}_m\)</span> are shown. Because there are so many parameters, a sample is taken for plotting. These trace plots suggest that perhaps <span class="math inline">\(\boldsymbol{\alpha}\)</span> hasn’t entirely converged. However, as there is a non-identifiability between <span class="math inline">\(\tau^2_m\)</span> and <span class="math inline">\(\boldsymbol{\alpha}_m\)</span>, this is not surprising and might not be remedied with more samples.</p>
 <div class="sourceCode" id="cb29"><html><body><pre class="r"><span class="co">## posterior plots for alpha</span>
 
 <span class="no">dat_alpha</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span>(
