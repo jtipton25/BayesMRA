@@ -1,7 +1,7 @@
 ---
-title: "Fitting Bayesian multiresolution models with `mcmc_mra()`"
+title: "Fitting Bayesian Multi-resolution Models With `mcmc_mra()`"
 vignette: >
-  %\VignetteIndexEntry{Multinomial logistic regression using pgLM}
+  %\VignetteIndexEntry{Fitting Bayesian Multi-resolution Models With `mcmc_mra()`}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 bibliography: mra.bib
@@ -11,7 +11,7 @@ bibliography: mra.bib
 \newcommand{\bm}[1]{\mathbf{#1}}
 \newcommand{\oN}[1]{\operatorname{#1}}
 
-In this Vignette, we demonstrate how to fit Bayesian spatial models using the multiresolution model using Markov Chain Monte Carlo (MCMC).
+In this Vignette, we demonstrate how to fit Bayesian spatial models using the multi-resolution model using Markov Chain Monte Carlo (MCMC).
 
 
 
@@ -107,7 +107,7 @@ sum(alpha)
 ```
 
 ```
-## [1] 4.128642e-14
+## [1] 1.98782e-14
 ```
 
 ```r
@@ -115,7 +115,7 @@ sum(alpha[dims_idx == 1])
 ```
 
 ```
-## [1] -3.103073e-14
+## [1] 1.450229e-15
 ```
 
 ```r
@@ -123,7 +123,7 @@ sum(alpha[dims_idx == 2])
 ```
 
 ```
-## [1] 2.21767e-14
+## [1] 4.22995e-14
 ```
 
 ```r
@@ -131,7 +131,7 @@ sum(alpha[dims_idx == 3])
 ```
 
 ```
-## [1] 5.014045e-14
+## [1] -2.387153e-14
 ```
 
 ## Plotting the simulated data
@@ -276,7 +276,13 @@ g_fixed <- data.frame(
   colorspace::scale_fill_continuous_diverging("Blue-Red 3", limits = zlims) +
   theme_bw() +
   theme_custom(0.70)
+```
 
+```
+## Error in ggplot2::continuous_scale(aesthetics, "continuous_diverging", : object 'zlims' not found
+```
+
+```r
 dat_map <- data.frame(
   temp = c(y),
   re   = c(W %*% alpha),
@@ -293,7 +299,13 @@ g_full <- dat_map %>%
   colorspace::scale_fill_continuous_diverging("Blue-Red 3", limits = zlims) +
   theme_bw() +
   theme_custom(0.70)
+```
 
+```
+## Error in ggplot2::continuous_scale(aesthetics, "continuous_diverging", : object 'zlims' not found
+```
+
+```r
 g_re <- dat_map %>%
   ggplot(aes(x = x, y = y, fill = re)) +
   geom_raster() +
@@ -304,11 +316,19 @@ g_re <- dat_map %>%
   theme_bw() +
   theme(legend.position = "none") +
   theme_custom(0.70)
+```
 
+```
+## Error in ggplot2::continuous_scale(aesthetics, "continuous_diverging", : object 'zlims' not found
+```
+
+```r
 g_fixed + g_re + g_full + plot_layout(guides = "collect")
 ```
 
-<img src="plot-data-process-1.png" title="plot of chunk plot-data-process" alt="plot of chunk plot-data-process" style="display: block; margin: auto;" />
+```
+## Error in eval(expr, envir, enclos): object 'g_fixed' not found
+```
 
 To further examine how the spatial process is constructed, the plot below shows the contribution to the full spatial process (bottom right plot) from each of the different resolutions. The plot shows how the coarsest resolution (top left) produces a coarse process over large spatial resolutions and the finest resolution (lower left) produces a finer-scale process. The three (M) resolutions are added together to produce the full process.
 
@@ -341,7 +361,7 @@ sim_MRA <- rbind(
   facet_wrap( ~ res, ncol = 2) +
   xlab("x") +
   ylab("y") +
-  ggtitle("Multiresolution process") +
+  ggtitle("Multi-resolution process") +
   colorspace::scale_fill_continuous_diverging("Blue-Red 3") +
   theme_bw() +
   theme_custom()
@@ -386,7 +406,9 @@ data.frame(
   theme(legend.position = "none")
 ```
 
-<img src="plot-sampled-data-1.png" title="plot of chunk plot-sampled-data" alt="plot of chunk plot-sampled-data" style="display: block; margin: auto;" />
+```
+## Error in ggplot2::continuous_scale(aesthetics, "continuous_diverging", : object 'zlims' not found
+```
 
 
 To fit the model, we must specify the parameters form model fitting. The parameter `params$n_adapt` determines the number of warm-up MCMC iterations and these iterations are discarded. The parameter `params$n_mcmc` determines the number of post warm-up MCMC iterations (i.e., the total number of MCMC iterations is `params$n_adapt + params$n_mcmc`). The parameter `params$n_thin` determines the thinning rate for keeping posterior samples which is primarily used when the number of MCMC samples to keep stresses the computer memory usage. The total number of samples kept is `params$n_mcmc / params$n_thin`. The parameter `params$n_message` specifies the frequency of messages to display showing the progress of the MCMC algorithm. The object `priors` defines the priors for fitting the model. If `priors` is not specified, default priors are used.
@@ -409,9 +431,9 @@ priors <- list(
   Sigma_beta   = 5 * diag(ncol(X_s)))
 ```
 
-Now we can fit the model to the simulated data. Using a [project-oriented workflow](https://www.tidyverse.org/blog/2017/12/workflow-vs-script/), we save the MCMC output that results from `mcmc_mra()` in a folder named `results`.
+Now we can fit the model to the simulated data. Using a [project-oriented workflow](https://www.tidyverse.org/blog/2017/12/workflow-vs-script/), we save the MCMC output that results from `mcmc_mra()` in a folder named `results` in the current project.
 
-## Fitting the MCMC
+## Fitting the model using MCMC
 
 
 ```r
@@ -439,7 +461,7 @@ if (file.exists(here::here("results", "fit-mra-sim.RData"))) {
 ```
 
 
-The fitting of `mcmc_mra()` took 10.89 mins.
+The fitting of `mcmc_mra()` took 6.02 mins.
 
 
 # Examining the MRA MCMC output
@@ -679,7 +701,7 @@ estimated_MRA <- rbind(
   facet_wrap( ~ res, ncol = 2) +
   xlab("Longitude") +
   ylab("Latitude") +
-  ggtitle("Estimated Multiresolution process") +
+  ggtitle("Estimated Multi-resolution process") +
   colorspace::scale_fill_continuous_diverging("Blue-Red 3") +
   theme_bw() +
   theme_custom(0.5)

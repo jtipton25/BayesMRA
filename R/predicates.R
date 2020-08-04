@@ -45,7 +45,7 @@ is_numeric_matrix <- function(x, n, m) {
 
 #' Check if a symmetric positive definite numeric matrix of dimension \eqn{n \times n}{n x n}
 #'
-#' this function checks if the input is a symmetrix positive definite matrix
+#' this function checks if the input is a symmetric positive definite matrix
 #' @param x is the input
 #' @param n is the input matrix dimension (assuming a square matrix)
 #' @keywords internal

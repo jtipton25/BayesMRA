@@ -11,8 +11,6 @@ coverage](https://codecov.io/gh/jtipton25/BayesMRA/branch/master/graph/badge.svg
 status](https://travis-ci.org/jtipton25/BayesMRA.svg?branch=master)](https://travis-ci.org/jtipton25/BayesMRA)
 [![Lifecycle:
 maturing](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
-[![R build
-status](https://github.com/jtipton25/BayesMRA/workflows/R-CMD-check/badge.svg)](https://github.com/jtipton25/BayesMRA/actions)
 <!-- badges: end -->
 
 An R package for Bayesian spatial and spatio-temporal regression using
@@ -33,8 +31,8 @@ the appropriate compiler](#make-sure-you-have-the-appropriate-compiler).
 
 To install the package from gitHub, [make sure you have the appropriate
 compiler](#make-sure-you-have-the-appropriate-compiler). Next, make sure
-you have the `devtools` packge installed. You can install the `devtools`
-package using
+you have the `devtools` package installed. You can install the
+`devtools` package using
 
 ``` r
 install.packages("devtools")
@@ -47,7 +45,7 @@ library using
 devtools::install_github("jtipton25/BayesMRA")
 ```
 
-**Note: It is recommended to reguarly check for updates by using
+**Note: It is recommended to regularly check for updates by using
 `devtools::install_github("jtipton25/BayesMRA")` frequently as this
 package is in active development and regularly undergoes large changes**
 

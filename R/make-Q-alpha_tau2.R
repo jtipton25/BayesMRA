@@ -1,13 +1,13 @@
 #' Title
 #'
-#' @param Q_alpha a list of length M composed of matrices that are the correlation structure of the CAR prior on beta
-#' @param tau2 a vector of length M that contains the CAR prior precisions
-#' @param use_spam a boolean that determines if the output matrix is of class "spam" (\code{use_spam = TRUE}) or of class "dgCMatrix" (\code{use_spam = FALSE}; see Matrix package for details)
+#' @param Q_alpha a list of length M composed of matrices that are the correlation structure of the CAR prior on beta.
+#' @param tau2 a vector of length M that contains the CAR prior precision matrices.
+#' @param use_spam a boolean that determines if the output matrix is of class "spam" (\code{use_spam = TRUE}) or of class "dgCMatrix" (\code{use_spam = FALSE}; see Matrix package for details).
 #'
 #' @importFrom spam bdiag.spam
 #' @importFrom Matrix bdiag
 #'
-#' @return A sparse block diagonal matrix representing the precisions for all of the resolutions of the random effects
+#' @return A sparse block diagonal matrix representing the precisions for all of the resolutions of the random effects.
 #' @export
 make_Q_alpha_tau2 <- function(Q_alpha, tau2, use_spam = TRUE) {
 

@@ -2,7 +2,7 @@
 #'
 #' @param locs The location variables in 2 dimensions over which to construct the basis function representation in the fitting stage.
 #' @param locs_pred The location variables in 2 dimensions over which to construct the basis function representation in the prediction stage.
-#' @param MRA The multiresolution basis expansion at the observed locations. This object is the output of `mra_wendland-2d()` and is of class "mra_wendland_2d".
+#' @param MRA The multi-resolution basis expansion at the observed locations. This object is the output of `mra_wendland-2d()` and is of class "mra_wendland_2d".
 #' @param use_spam is a boolean flag to determine whether the output is a list of spam matrix objects (`use_spam = TRUE`) or a an \eqn{n \times n}{n x n} sparse Matrix of class "dgCMatrix" `use_spam = FALSE` (see spam and Matrix packages for details).
 #'
 #' @importFrom fields rdist

@@ -1,7 +1,7 @@
 ---
-title: "Fitting Bayesian multiresolution models with `mcmc_mra()`"
+title: "Fitting Bayesian Multi-resolution Models With `mcmc_mra()`"
 vignette: >
-  %\VignetteIndexEntry{Multinomial logistic regression using pgLM}
+  %\VignetteIndexEntry{Fitting Bayesian Multi-resolution Models With `mcmc_mra()`}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 bibliography: mra.bib
@@ -11,7 +11,7 @@ bibliography: mra.bib
 \newcommand{\bm}[1]{\mathbf{#1}}
 \newcommand{\oN}[1]{\operatorname{#1}}
 
-In this Vignette, we demonstrate how to fit Bayesian spatial models using the multiresolution model using Markov Chain Monte Carlo (MCMC).
+In this Vignette, we demonstrate how to fit Bayesian spatial models using the multi-resolution model using Markov Chain Monte Carlo (MCMC).
 
 ```{r setup, include=FALSE}
 # knitr::opts_chunk$set(fig.width = 8, fig.height = 4.5, dev = 'svglite', dev.args = list(pointsize = 12, dpi = 36))
@@ -334,7 +334,7 @@ sim_MRA <- rbind(
   facet_wrap( ~ res, ncol = 2) +
   xlab("x") +
   ylab("y") +
-  ggtitle("Multiresolution process") +
+  ggtitle("Multi-resolution process") +
   colorspace::scale_fill_continuous_diverging("Blue-Red 3") +
   theme_bw() +
   theme_custom()
@@ -652,7 +652,7 @@ estimated_MRA <- rbind(
   facet_wrap( ~ res, ncol = 2) +
   xlab("Longitude") +
   ylab("Latitude") +
-  ggtitle("Estimated Multiresolution process") +
+  ggtitle("Estimated Multi-resolution process") +
   colorspace::scale_fill_continuous_diverging("Blue-Red 3") +
   theme_bw() +
   theme_custom(0.5)
