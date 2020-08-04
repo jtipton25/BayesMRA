@@ -5,7 +5,7 @@
 \alias{BayesMRA}
 \title{BayesMRA}
 \description{
-Software for fitting sparse multiresolution spatial models
+Software for fitting sparse multi-resolution spatial models
 }
 \author{
 John Tipton

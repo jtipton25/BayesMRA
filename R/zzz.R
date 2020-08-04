@@ -1,6 +1,6 @@
 #' BayesMRA
 #'
-#'  Software for fitting sparse multiresolution spatial models
+#'  Software for fitting sparse multi-resolution spatial models
 #'
 #' @docType package
 #' @author John Tipton

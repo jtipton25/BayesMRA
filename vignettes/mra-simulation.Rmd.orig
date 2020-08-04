@@ -483,7 +483,7 @@ p_beta  <- ggplot(dat_beta, aes(x = iteration, y = beta, group = covariate, colo
 (p_tau2 + p_lambda) /  (p_sigma2 + p_beta)
 ```
 
-Next, the trace plots for the spatial parameter $\boldsymbol{\alpha}_m$ are shown. Because there are so many parameters, a sample is taken for plotting. These traceplots suggest that perhaps $\boldsymbol{\alpha}$ hasn't entirely converged. However, as there is a non-identifiability between $\tau^2_m$ and $\boldsymbol{\alpha}_m$, this is not surprising and might not be remedied with more samples.
+Next, the trace plots for the spatial parameter $\boldsymbol{\alpha}_m$ are shown. Because there are so many parameters, a sample is taken for plotting. These trace plots suggest that perhaps $\boldsymbol{\alpha}$ hasn't entirely converged. However, as there is a non-identifiability between $\tau^2_m$ and $\boldsymbol{\alpha}_m$, this is not surprising and might not be remedied with more samples.
 
 
 ```{r trace-plots-alpha, fig.align = 'center'}

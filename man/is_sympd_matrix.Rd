@@ -12,6 +12,6 @@ is_sympd_matrix(x, n)
 \item{n}{is the input matrix dimension (assuming a square matrix)}
 }
 \description{
-this function checks if the input is a symmetrix positive definite matrix
+this function checks if the input is a symmetric positive definite matrix
 }
 \keyword{internal}
