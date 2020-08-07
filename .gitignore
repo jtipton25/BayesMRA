@@ -14,4 +14,5 @@ scripts/mra-simulation.html
 scripts/mra-simulation_cache/
 scripts/mra-simulation_files/
 vignettes/.DS_Store
-
+manuscript/*_cache
+manuscript/*_files
