@@ -24,11 +24,13 @@ keywords:
 preamble: >
   \usepackage{amsmath}
 output: rticles::jss_article
+header-includes:
+  - \usepackage{subfigure}
 bibliography: mra.bib
 ---
 
 ```{r setup, echo = FALSE}
-knitr::opts_chunk$set(fig.width = 8, fig.height = 4.5, dpi = 300, dev.args = list(type = "cairo"), dev = 'png')
+knitr::opts_chunk$set(fig.width = 16, fig.height = 9, dpi = 300, dev.args = list(type = "cairo"), dev = 'png', fig.align = 'center')
 ```
 
 # Introduction
@@ -194,7 +196,8 @@ sum(alpha[dims_idx == 3])
 
 To explore the structure of the precision matrix of the spatial random effects, we plot the pattern of nonzero elements in the precision matrices $\mathbf{Q}_{m}$ for each resolution $m$. The sparse, banded structure in the precision matrices at each resolution are what enable efficient computation.
 
-```{r plot-precision-matrices, warning = FALSE, cache = TRUE, dependson = "simulate_data", fig.align = 'center', dev.args = list(pointsize = 4)}
+
+```{r plot-precision-matrices, warning = FALSE, cache = TRUE, dependson = "simulate_data", dev.args = list(pointsize = 4), fig.cap = "Plot showing the locations of nonzero elements of the precision matrix at each resolution."}
 ## plot Q_alpha_tau2 structure
 ## note: the display function gives a warning about the default cex setting
 layout(matrix(1:4, 2, 2, byrow = TRUE))
@@ -204,9 +207,10 @@ for (m in 1:M) {
 }
 ```
 
+
 The MRA approach requires a set of grid point at each resolution. The set of grid points at each resolution extends beyond the spatial domain that is highlighted in the black box.
 
-```{r MRA-grid, cache = TRUE, dependson = "simulate_data", fig.height = 4.5, fig.width = 4.5, fig.align = 'center'}
+```{r MRA-grid, cache = TRUE, dependson = "simulate_data", fig.height = 4.5, fig.width = 4.5, fig.cap = "MRA gridpoints"}
 data.frame(
     x = unlist(sapply(1:M, function(i) MRA$locs_grid[[i]][, 1])),
     y = unlist(sapply(1:M, function(i) MRA$locs_grid[[i]][, 2])),
@@ -233,7 +237,7 @@ data.frame(
 
 At each internal grid cell, we expect there to be 68 neighbors where the Wendland basis is nonzero. The plot below shows the number of neighbors at each grid point for each resolution.
 
-```{r plot-neighbors, cache = TRUE, dependson = "simulate_data", fig.align = 'center', warning = FALSE}
+```{r plot-neighbors, cache = TRUE, dependson = "simulate_data", warning = FALSE}
 nnn <- sapply(1:M, function(i) {
   D <- rdist(MRA$locs_grid[[i]])
   sapply(1:nrow(MRA$locs_grid[[i]]), function(j) {
@@ -269,7 +273,7 @@ data.frame(
 
 The next plot shows the simulated spatial random effects $\boldsymbol{\alpha}_m$ at each of the grid points. Notice that the variation is largest for the coarse resolution and the variability decreases for each finer resolution.
 
-```{r plot-random-effects, cache = TRUE, dependson = "simulate_data", fig.align = 'center', warning = FALSE}
+```{r plot-random-effects, cache = TRUE, dependson = "simulate_data", warning = FALSE}
 sim_alphas <- data.frame(
     x = unlist(sapply(1:M, function(i) MRA$locs_grid[[i]][, 1])),
     y = unlist(sapply(1:M, function(i) MRA$locs_grid[[i]][, 2])),
@@ -300,7 +304,7 @@ sim_alphas
 
 Next, we show a simulated realization of the model. The left figure below shows the fixed effects in the model, the middle figure shows the simulated spatial process, and the right plot shows the observed surface.
 
-```{r plot-data-process, cache = TRUE, dependson = "simulate_data", fig.align = 'center'}
+```{r plot-data-process, cache = TRUE, dependson = "simulate_data"}
 zlims <- c(
   min(c(X %*% beta), c(y), c(W %*% alpha)),
   max(c(X %*% beta), c(y), c(W %*% alpha))
@@ -353,7 +357,7 @@ g_fixed + g_re + g_full + plot_layout(guides = "collect")
 
 To further examine how the spatial process is constructed, the plot below shows the contribution to the full spatial process (bottom right plot) from each of the different resolutions. The plot shows how the coarsest resolution (top left) produces a coarse process over large spatial resolutions and the finest resolution (lower left) produces a finer-scale process. The three (M) resolutions are added together to produce the full process.
 
-```{r plot-multiresolution-process, cache = TRUE, dependson = "simulate_data", fig.align = 'center'}
+```{r plot-multiresolution-process, cache = TRUE, dependson = "simulate_data"}
 ## MRA spatial process
 W_alpha_res = unlist(sapply(1:M, function(m) W[, dims_idx == m] %*% alpha[dims_idx == m], simplify = "matrix"))
 dimnames(W_alpha_res) <- list(
@@ -406,7 +410,7 @@ locs_oos  <- locs[ - s, ]
 
 The plot below shows the sampled data to which the model is fit, showing the spatial patterns of the sampled data.
 
-```{r plot-sampled-data, cache = TRUE, dependson = "simulate_data", fig.align = 'center', fig.height = 4.5, fig.width = 4.5}
+```{r plot-sampled-data, cache = TRUE, dependson = "simulate_data", fig.height = 4.5, fig.width = 4.5}
 data.frame(
   x     = locs_s[, 1],
   y     = locs_s[, 2],
@@ -499,7 +503,7 @@ The fitting of `mcmc_mra()` took `r format(runtime, nsmall = 2, digits = 2)`.
 
 After fitting the MCMC using `mcmc_mra()`, we plot the trace plots of the parameters to check for evidence that the model has not converged and to identify that the parameters have mixed. The first trace plots we examine are for the variance parameters and the regression coefficients. Overall, these trace plots look decent although the effective samples size for the $\tau^2$s and $\beta$s might be low and more samples might be needed for making inference with the model.
 
-```{r trace-plots, cache = TRUE, dependson = c("simulate_data", "fit-model"), fig.align = 'center'}
+```{r trace-plots, cache = TRUE, dependson = c("simulate_data", "fit-model")}
 
 dat_tau2 <- data.frame(
   tau2      = c(out$tau2),
@@ -554,7 +558,7 @@ p_beta  <- ggplot(dat_beta, aes(x = iteration, y = beta, group = covariate, colo
 Next, the trace plots for the spatial parameter $\boldsymbol{\alpha}_m$ are shown. Because there are so many parameters, a sample is taken for plotting. These trace plots suggest that perhaps $\boldsymbol{\alpha}$ hasn't entirely converged. However, as there is a non-identifiability between $\tau^2_m$ and $\boldsymbol{\alpha}_m$, this is not surprising and might not be remedied with more samples.
 
 
-```{r trace-plots-alpha, cache = TRUE, dependson = c("simulate_data", "fit-model"), fig.align = 'center'}
+```{r trace-plots-alpha, cache = TRUE, dependson = c("simulate_data", "fit-model")}
 ## posterior plots for alpha
 
 dat_alpha <- data.frame(
@@ -584,7 +588,7 @@ dat_alpha %>%
 
 Because the model was fit to simulated data, the posterior predictions can be compared to the simulated parameters to evaluate the model performance. The following plots show the 95\% central credible intervals for different parameters plotted against the simulated parameters. For the regression parameters $\boldsymbol{\beta}$, the model is doing a reasonable job of recovering these parameters. The parameter estimates for $\tau^2_m$ and $\boldsymbol{\alpha}_m$ show poor performance in estimating the true parameters. This is due to a non-identifiability in the model; however, this is not a concern as the spatial process $\sum_{m=1}^M \mathbf{W}_m \boldsymbol{\alpha}_m$ is well estimated which will be shown later.
 
-```{r estimated-vs-predicted, cache = TRUE, dependson = c("simulate_data", "fit-model"), fig.align = 'center'}
+```{r estimated-vs-predicted, cache = TRUE, dependson = c("simulate_data", "fit-model")}
 ## predicted vs. estimated beta
 dat_plot <- data.frame(
   truth = beta,
@@ -662,7 +666,7 @@ p_alpha <- dat_plot %>%
 
 Next, the simulated and estimated $\boldsymbol{\alpha}_m$ are plotted on the spatial grid. The plots show that the $\boldsymbol{\alpha}_m$s are not being identified.
 
-```{r estimated-alphas, cache = TRUE, dependson = c("simulate_data", "fit-model"), fig.align = 'center', warning = FALSE}
+```{r estimated-alphas, cache = TRUE, dependson = c("simulate_data", "fit-model"), warning = FALSE}
 fitted_alphas <- data.frame(
     x = unlist(sapply(1:M, function(i) MRA$locs_grid[[i]][, 1])),
     y = unlist(sapply(1:M, function(i) MRA$locs_grid[[i]][, 2])),
@@ -692,8 +696,9 @@ sim_alphas + theme_custom(0.5) + fitted_alphas
 
 Despite the parameters $\tau^2_m$ and $\boldsymbol{\alpha}_m$ not being identifiable, the following plot shows that the full spatial process $\sum_{m=1}^M \mathbf{W}_m \boldsymbol{\alpha}_m$. The two figures (simulated on the left, fitted on the right) demonstrate that each of the $m$ resolutions of the process $\mathbf{W}_m \boldsymbol{\alpha}_m$ are also non-identifiable.
 
-```{r simulated-vs-estimated-process, cache = TRUE, dependson = c("simulate_data", "fit-model"), fig.align = 'center'}
-## Estimated MRA spatial proces
+```{r simulated-vs-estimated-process, cache = TRUE, dependson = c("simulate_data", "fit-model"), fig.cap = "Simulated and estimated MRA processes"} 
+
+## Estimated MRA spatial process
 W_alpha_res = unlist(sapply(1:M, function(m) W[, dims_idx == m] %*% apply(out$alpha, 2, mean)[dims_idx == m], simplify = "matrix"))
 dimnames(W_alpha_res) <- list(
   site = 1:N,
@@ -730,7 +735,7 @@ sim_MRA + theme_custom(0.5) + estimated_MRA
 
 The next plots show the estimated vs. simulated fixed effects, spatial process, and mean response. There is some evidence of non-identifiability between the fixed effects plot and the spatial effects plot (left two plots) as there is a bias in each of the predictions. This is understood to be a consequence of spatial confounding (@hodges2010adding, @hughes2013dimension, @hanks2015restricted).
 
-```{r plot-sim-vs-fitted-effects, cache = TRUE, dependson = c("simulate_data", "fit-model"), fig.align = 'center'}
+```{r plot-sim-vs-fitted-effects, cache = TRUE, dependson = c("simulate_data", "fit-model")}
 ## plot estimated mean response
 Xbeta_post <- t(X_s %*% t(out$beta))
 Walpha_post <- t(do.call(cbind, out$MRA$W) %*% t(out$alpha))
