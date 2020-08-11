@@ -22,7 +22,7 @@ rmvn_arma <- function(A, b) {
 #' @param A_chol \code{A} A \eqn{d \times d} \code{matrix} for the Gaussian full conditional distribution precision matrix Cholesky factor.
 #' @param b \code{b} A \eqn{d} \code{vector} for the Gaussian full conditional distribution mean.
 #'
-#'//' @examples
+#' @examples
 #' set.seed(111)
 #' A <- diag(4)
 #' A_chol <- chol(A)
