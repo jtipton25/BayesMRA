@@ -143,7 +143,13 @@
     </tr>
     <tr>
       <th>b</th>
-      <td><p><code>b</code> A \(d\) <code>vector</code> for the Gaussian full conditional distribution mean.</p></td>
+      <td><p><code>b</code> A \(d\) <code>vector</code> for the Gaussian full conditional distribution mean.</p>
+<p>//' @examples
+set.seed(111)
+A &lt;- diag(4)
+A_chol &lt;- chol(A)
+b &lt;- rnorm(4)
+sample &lt;- rmvn_arma_chol(A_chol, b)</p></td>
     </tr>
     </table>
 
