@@ -16,3 +16,7 @@ scripts/mra-simulation_files/
 vignettes/.DS_Store
 manuscript/*_cache
 manuscript/*_files
+CRAN-RELEASE
+manuscript/bayesMRA.pdf
+manuscript/bayesMRA.tex
+vignettes/mra-simulation.html
