@@ -14,3 +14,10 @@ rmvn_arma_scalar(a, b)
 \description{
 A function for sampling from conditional multivariate normal distributions with mean A^{-1}b and covariance matrix A^{-1}.
 }
+\examples{
+set.seed(111)
+a <- 4
+b <- rnorm(1)
+sample <- rmvn_arma_scalar(a, b)
+
+}

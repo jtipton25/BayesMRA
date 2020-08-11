@@ -6,6 +6,12 @@
 #' @param A \code{A} A \eqn{d \times d} \code{matrix} for the Gaussian full conditional distribution precision matrix.
 #' @param b \code{b} A \eqn{d} \code{vector} for the Gaussian full conditional distribution mean.
 #'
+#' @examples
+#' set.seed(111)
+#' A <- diag(4)
+#' b <- rnorm(4)
+#' sample <- rmvn_arma(A, b)
+#'
 #' @export
 rmvn_arma <- function(A, b) {
     .Call('_BayesMRA_rmvn_arma', PACKAGE = 'BayesMRA', A, b)
@@ -16,6 +22,13 @@ rmvn_arma <- function(A, b) {
 #' @param A_chol \code{A} A \eqn{d \times d} \code{matrix} for the Gaussian full conditional distribution precision matrix Cholesky factor.
 #' @param b \code{b} A \eqn{d} \code{vector} for the Gaussian full conditional distribution mean.
 #'
+#'//' @examples
+#' set.seed(111)
+#' A <- diag(4)
+#' A_chol <- chol(A)
+#' b <- rnorm(4)
+#' sample <- rmvn_arma_chol(A_chol, b)
+#'
 #' @export
 rmvn_arma_chol <- function(A_chol, b) {
     .Call('_BayesMRA_rmvn_arma_chol', PACKAGE = 'BayesMRA', A_chol, b)
@@ -25,6 +38,12 @@ rmvn_arma_chol <- function(A_chol, b) {
 #'
 #' @param a \code{a} A scalar for the Gaussian full conditional distribution precision.
 #' @param b \code{b} A \eqn{d} \code{vector} for the Gaussian full conditional distribution mean.
+#'
+#' @examples
+#' set.seed(111)
+#' a <- 4
+#' b <- rnorm(1)
+#' sample <- rmvn_arma_scalar(a, b)
 #'
 #' @export
 rmvn_arma_scalar <- function(a, b) {

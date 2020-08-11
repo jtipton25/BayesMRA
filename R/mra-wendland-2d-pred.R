@@ -10,6 +10,19 @@
 #' @importFrom Matrix Matrix
 #' @return A list of objects including the MRA knots locations `locs_grid`,
 #' the Wendland basis representation matrix `W_pred` at the prediction locations, and the basis radius `radius`
+#'
+#' @examples
+#' set.seed(111)
+#' locs <- matrix(runif(20), 10, 2)
+#' locs_pred <- matrix(runif(20), 10, 2)
+#' MRA <- mra_wendland_2d(locs, M = 2, n_coarse_grid = 4)
+#' MRA_pred <- mra_wendland_2d_pred(locs, locs_pred, MRA)
+#'
+#' ## plot the MRA prediction grid at different resolutions
+#' layout(matrix(1:2, 1, 2))
+#' plot(MRA_pred$locs_grid[[1]])
+#' plot(MRA_pred$locs_grid[[2]])
+#'
 #' @export
 mra_wendland_2d_pred <- function(
     locs,

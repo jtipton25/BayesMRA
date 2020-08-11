@@ -26,6 +26,74 @@
 #' @param use_spam is a boolean flag to determine whether the output is a list of spam matrix objects (\code{use_spam = TRUE}) or a an \eqn{n \times n}{n x n} sparse Matrix of class "dgCMatrix" \code{use_spam = FALSE} (see spam and Matrix packages for details).
 #' @param n_chain is the MCMC chain id. The default is 1.
 #'
+#' @examples
+#' set.seed(111)
+#' ## genereate the locations
+#' locs <- matrix(runif(20), 10, 2)
+#' ## generate some covariates and regression coefficients
+#' X <- cbind(1, matrix(rnorm(30), 10, 3))
+#' beta <- rnorm(ncol(X))
+#'
+#' ## simulate the MRA process
+#' M <- 2
+#' MRA <- mra_wendland_2d(locs, M = M, n_coarse_grid = 4)
+#' W <- do.call(cbind, MRA$W)
+#'
+#' n_dims   <- rep(NA, length(MRA$W))
+#' dims_idx <- NULL
+#' for (i in 1:M) {
+#'     n_dims[i] <- ncol(MRA$W[[i]])
+#'     dims_idx  <- c(dims_idx, rep(i, n_dims[i]))
+#' }
+#' ## set up the process precision matrices
+#' Q_alpha <- make_Q_alpha_2d(sqrt(n_dims), c(0.9, 0.8))
+#' Q_alpha_tau2 <- make_Q_alpha_tau2(Q_alpha, tau2 = c(2, 4))
+#'
+#' ## add in constraints so each resolution has random effects that sum to 0
+#' A_constraint <- sapply(1:M, function(i){
+#'     tmp = rep(0, sum(n_dims))
+#'     tmp[dims_idx == i] <- 1
+#'     return(tmp)
+#' })
+#' a_constraint <- rep(0, M)
+#' alpha <- as.vector(spam::rmvnorm.prec.const(
+#'     n = 1,
+#'     mu = rep(0, nrow(W)),
+#'     Q = Q_alpha_tau2,
+#'     A = t(A_constraint),
+#'     a = a_constraint))
+#' ## define the data
+#' y <-  as.vector(X %*% beta + W %*% alpha + rnorm(10))
+#'
+#' ## define the params for MCMC fitting
+#' params <- list(
+#'     n_mcmc    = 5,
+#'     n_adapt   = 5,
+#'     n_thin    = 1,
+#'     n_message = 5)
+#'
+#' ## define the model priors
+#' priors <- list(
+#'     alpha_tau2   = 1,
+#'     beta_tau2    = 1,
+#'     alpha_sigma2 = 1,
+#'     beta_sigma2  = 1,
+#'     mu_beta      = rep(0, ncol(X)),
+#'     Sigma_beta   = 5 * diag(ncol(X)))
+#'
+#' ## Fit the MRA model using MCMC
+#' out     <- mcmc_mra(
+#'     y             = y,
+#'     X             = X,
+#'     locs          = locs,
+#'     params        = params,
+#'     priors        = priors,
+#'     M             = 2,
+#'     n_coarse_grid = 4,
+#'     n_cores       = 1L,
+#'     verbose       = FALSE
+#' )
+#'
 #' @export
 #'
 #' @importFrom mvnfast rmvn

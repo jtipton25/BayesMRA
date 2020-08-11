@@ -11,6 +11,15 @@
 #' @importFrom Matrix Diagonal colSums
 #' @importFrom spam spam
 #'
+#' @examples
+#' n_dims <- c(4, 8)
+#' phi <- c(0.8, 0.9)
+#' Q_alpha <- make_Q_alpha_2d(n_dims, phi)
+#' ## plot the precision matrix structure at each resolution
+#' layout(matrix(1:2, 1, 2))
+#' spam::display(Q_alpha[[1]])
+#' spam::display(Q_alpha[[2]])
+#'
 #' @export
 
 make_Q_alpha_2d <- function(n_dims, phi, use_spam = TRUE, prec_model = "CAR") {
@@ -50,7 +59,7 @@ make_Q_alpha_2d <- function(n_dims, phi, use_spam = TRUE, prec_model = "CAR") {
             Q_alpha[[m]] <- as.spam.dgCMatrix(Q_alpha[[m]])
         }
     }
-    class(Q_alpha) <- "Q_alpha"
+    class(Q_alpha) <- c("Q_alpha")
 
     return(Q_alpha)
 }

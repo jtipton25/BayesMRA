@@ -38,3 +38,13 @@ and the setting \code{use_spam} which determines whether the MRA output uses the
 \description{
 Code to construct the mutli-resolution sparse basis function representation for fitting spatial processes
 }
+\examples{
+set.seed(111)
+locs <- matrix(runif(20), 10, 2)
+MRA <- mra_wendland_2d(locs, M = 2, n_coarse_grid = 4)
+## plot the MRA grid at different resolutions
+layout(matrix(1:2, 1, 2))
+plot(MRA$locs_grid[[1]])
+plot(MRA$locs_grid[[2]])
+
+}

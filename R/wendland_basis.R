@@ -4,6 +4,12 @@
 #' @param radius The effective radius over which the Wendland basis is defined
 #'
 #' @return The output of the Wendland basis applied to the distance `d` for a given radius `radius`.
+#'
+#' @examples
+#' layout(matrix(1:2, 1, 2))
+#' curve(wendland_basis(sqrt(x^2), radius = 1), from = -2, to = 2)
+#' curve(wendland_basis(sqrt(x^2), radius = 2), from = -2, to = 2)
+#'
 #' @export
 #'
 wendland_basis <- function(d, radius) {

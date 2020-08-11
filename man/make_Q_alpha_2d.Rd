@@ -21,3 +21,13 @@ a list of  \eqn{n \times n}{n x n} sparse spam matrices or Matrix matrices of cl
 \description{
 A function for setting up a conditional autoregressive (CAR) or simultaneous autoregressive (SAR) precision matrix for use as a prior in Bayesian models
 }
+\examples{
+n_dims <- c(4, 8)
+phi <- c(0.8, 0.9)
+Q_alpha <- make_Q_alpha_2d(n_dims, phi)
+## plot the precision matrix structure at each resolution
+layout(matrix(1:2, 1, 2))
+spam::display(Q_alpha[[1]])
+spam::display(Q_alpha[[2]])
+
+}

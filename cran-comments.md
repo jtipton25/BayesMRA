@@ -1,11 +1,7 @@
 ## Resubmission
 This is a resubmission. In this version I have:
 
-- Reduced figure file size in the vignette to get total package size less than 5MB.
-
-    The included vignette includes multiple images that display the spatial process and while resolution of the images could be decreased, having high quality images is informative of the construction of the spatial process.
-
-- There is not a DOI to add to the description as this method is not published. The vignette does include a citation to a similar CRAN package LatticeKrig and associated paper that fits similar models in a non-Bayesian framework.
+- Added in examples to the documentation for all of the functions
 
 
 ## Test environments

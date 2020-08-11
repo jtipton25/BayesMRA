@@ -22,3 +22,16 @@ the Wendland basis representation matrix \code{W_pred} at the prediction locatio
 \description{
 Code to construct the mutli-resolution sparse basis function representation for fitting spatial processes
 }
+\examples{
+set.seed(111)
+locs <- matrix(runif(20), 10, 2)
+locs_pred <- matrix(runif(20), 10, 2)
+MRA <- mra_wendland_2d(locs, M = 2, n_coarse_grid = 4)
+MRA_pred <- mra_wendland_2d_pred(locs, locs_pred, MRA)
+
+## plot the MRA prediction grid at different resolutions
+layout(matrix(1:2, 1, 2))
+plot(MRA_pred$locs_grid[[1]])
+plot(MRA_pred$locs_grid[[2]])
+
+}

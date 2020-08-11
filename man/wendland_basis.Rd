@@ -17,3 +17,9 @@ The output of the Wendland basis applied to the distance \code{d} for a given ra
 \description{
 calculate the Wendland basis function
 }
+\examples{
+layout(matrix(1:2, 1, 2))
+curve(wendland_basis(sqrt(x^2), radius = 1), from = -2, to = 2)
+curve(wendland_basis(sqrt(x^2), radius = 2), from = -2, to = 2)
+
+}

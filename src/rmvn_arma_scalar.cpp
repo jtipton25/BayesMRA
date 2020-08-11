@@ -11,6 +11,12 @@ using namespace arma;
 //' @param a \code{a} A scalar for the Gaussian full conditional distribution precision.
 //' @param b \code{b} A \eqn{d} \code{vector} for the Gaussian full conditional distribution mean.
 //'
+//' @examples
+//' set.seed(111)
+//' a <- 4
+//' b <- rnorm(1)
+//' sample <- rmvn_arma_scalar(a, b)
+//'
 //' @export
 //[[Rcpp::export]]
 double rmvn_arma_scalar(const double & a, const double & b) {

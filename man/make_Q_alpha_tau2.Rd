@@ -19,3 +19,13 @@ A sparse block diagonal matrix representing the precision matrices for all of th
 \description{
 Title
 }
+\examples{
+n_dims <- c(4, 8)
+phi <- c(0.8, 0.9)
+tau2 <- c(3, 4)
+Q_alpha <- make_Q_alpha_2d(n_dims, phi)
+Q_alpha_tau2 <- make_Q_alpha_tau2(Q_alpha, tau2)
+## plot the full precision matrix structure
+spam::display(Q_alpha_tau2)
+
+}
