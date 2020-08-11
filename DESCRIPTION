@@ -2,7 +2,7 @@ Package: BayesMRA
 Type: Package
 Title: Bayesian Multi-Resolution Gaussian Process Approximations
 Version: 1.0.0
-Date: 2020-07-31
+Date: 2020-08-11
 Authors@R: person("John", "Tipton", email = "jrtipton@uark.edu", 
     role = c("aut", "cre"))
 Description: Software for fitting sparse Bayesian multi-resolution spatial models using Markov Chain Monte Carlo.
