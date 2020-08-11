@@ -143,17 +143,17 @@
     </tr>
     <tr>
       <th>b</th>
-      <td><p><code>b</code> A \(d\) <code>vector</code> for the Gaussian full conditional distribution mean.</p>
-<p>//' @examples
-set.seed(111)
-A &lt;- diag(4)
-A_chol &lt;- chol(A)
-b &lt;- rnorm(4)
-sample &lt;- rmvn_arma_chol(A_chol, b)</p></td>
+      <td><p><code>b</code> A \(d\) <code>vector</code> for the Gaussian full conditional distribution mean.</p></td>
     </tr>
     </table>
 
 
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span>(<span class='fl'>111</span>)
+<span class='no'>A</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/diag.html'>diag</a></span>(<span class='fl'>4</span>)
+<span class='no'>A_chol</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/chol.html'>chol</a></span>(<span class='no'>A</span>)
+<span class='no'>b</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span>(<span class='fl'>4</span>)
+<span class='no'>sample</span> <span class='kw'>&lt;-</span> <span class='fu'>rmvn_arma_chol</span>(<span class='no'>A_chol</span>, <span class='no'>b</span>)</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
