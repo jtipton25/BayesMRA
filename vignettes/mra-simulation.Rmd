@@ -461,7 +461,7 @@ if (file.exists(here::here("results", "fit-mra-sim.RData"))) {
 ```
 
 
-The fitting of `mcmc_mra()` took 6.02 mins.
+The fitting of `mcmc_mra()` took 6.04 mins.
 
 
 # Examining the MRA MCMC output

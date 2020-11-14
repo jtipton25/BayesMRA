@@ -399,7 +399,7 @@ Now we can fit the model to the simulated data. Using a [project-oriented workfl
 
 ## Fitting the model using MCMC
 
-```{r fit-model}
+```{r fit-model, message = FALSE}
 set.seed(999)
 
 if (file.exists(here::here("results", "fit-mra-sim.RData"))) {
@@ -585,7 +585,7 @@ p_alpha <- dat_plot %>%
   geom_point(alpha = 0.5) +
   geom_linerange(aes(ymin = lower, ymax = upper)) +
   geom_abline(intercept = 0, slope = 1, col = "red") +
-  ggtitle("Estimated vs. predicted alpha /nnon-identifialbe but not really a concern") +
+  ggtitle("Estimated vs. predicted alpha /n non-identifialbe but not really a concern") +
   ylab("estimate")
 
 (p_beta + p_sigma2) / (p_tau2 + p_alpha)
