@@ -102,7 +102,7 @@
 #' @importFrom stats lm rgamma
 #' @import spam
 
-mcmc_mra <- function(
+mcmc_mra_integrated <- function(
     y,
     X,
     locs,
@@ -207,15 +207,6 @@ mcmc_mra <- function(
         }
     }
 
-    sample_lambda <- TRUE
-    if (!is.null(config)) {
-        if (!is.null(config[['sample_lambda']])) {
-            sample_lambda <- config[['sample_lambda']]
-            if (!is.logical(sample_lambda) | is.na(sample_lambda))
-                stop('If specified, sample_lambda must be TRUE or FALSE')
-        }
-    }
-
     ## do we sample the nugger variance parameter
     sample_sigma2 <- TRUE
     if (!is.null(config)) {
@@ -223,16 +214,6 @@ mcmc_mra <- function(
             sample_sigma2 <- config[['sample_sigma2']]
             if (!is.logical(sample_sigma2) | is.na(sample_sigma2))
                 stop('If specified, sample_sigma2 must be TRUE or FALSE')
-        }
-    }
-
-    ## do we sample the latent intensity parameter alpha
-    sample_alpha <- TRUE
-    if (!is.null(config)) {
-        if (!is.null(config[['sample_alpha']])) {
-            sample_alpha <- config[['sample_alpha']]
-            if (!is.logical(sample_alpha) | is.na(sample_alpha))
-                stop('If specified, sample_alpha must be TRUE or FALSE')
         }
     }
 
@@ -343,13 +324,7 @@ mcmc_mra <- function(
 
     Q_alpha <- make_Q_alpha_2d(sqrt(n_dims), rep(0.999, length(n_dims)), use_spam = use_spam)
 
-    ## prior for lambda is scale_lambda
-    ## fix this so it can be set by the user
-    # scale_lambda <- 0.5
-    scale_lambda <- 500
-
-    lambda <- rgamma(M, 0.5, scale_lambda)
-    tau2   <- rep(1, M)
+    tau2   <- rep(500, M)
 
     alpha_tau2 <- 0.01
     beta_tau2  <- 0.01
@@ -373,6 +348,10 @@ mcmc_mra <- function(
 
 
     Q_alpha_tau2 <- make_Q_alpha_tau2(Q_alpha, tau2, use_spam = use_spam)
+
+    ## initialize the cholesky structure
+    G       <- Q_alpha_tau2 + tWW / sigma2
+    Rstruct <- chol(G)
 
     ##
     ## initialize rho
@@ -406,45 +385,16 @@ mcmc_mra <- function(
     sigma2  <- pmax(pmin(1 / rgamma(1, alpha_sigma2, beta_sigma2), 5), 0.1)
     sigma   <- sqrt(sigma2)
 
-    ##
-    ## initialize alpha
-    ##
-
-    alpha <- NULL
-    if (use_spam) {
-        A_alpha <- 1 / sigma2 * tWW + Q_alpha_tau2
-        ## precalculate the sparse cholesky structure for faster Gibbs updates
-        Rstruct <- chol(A_alpha)
-        b_alpha <- 1 / sigma2 * tW %*% (y - X_beta)
-        # alpha   <- as.vector(rmvnorm.canonical(1, b_alpha, A_alpha, Rstruct = Rstruct))
-        alpha  <- rep(0, sum(n_dims))
-    } else {
-        stop("The only sparse matrix pacakage available is spam")
-    }
-
-    ## define the constraint matrices to ensure each resolution has random effects with mean 0
-    A_constraint <- t(
-        sapply(1:M, function(i){
-            tmp = rep(0, sum(n_dims))
-            tmp[dims_idx == i] <- 1
-            return(tmp)
-        })
-    )
-    a_constraint <- rep(0, M)
-
-
     ## intialize an ICAR structure for fitting alpha
-    Q_alpha      <- make_Q_alpha_2d(sqrt(n_dims), rep(1, length(n_dims)), use_spam = use_spam)
+    Q_alpha      <- make_Q_alpha_2d(sqrt(n_dims), rep(0.9, length(n_dims)), use_spam = use_spam)
+    # Q_alpha      <- make_Q_alpha_2d(sqrt(n_dims), rep(1, length(n_dims)), use_spam = use_spam)
     Q_alpha_tau2 <- make_Q_alpha_tau2(Q_alpha, tau2, use_spam = use_spam)
-
-
-    W_alpha <- W %*% alpha
 
     ##
     ## sampler config options -- to be added later
     ##
-    #
 
+    ##
     ## check for initial values
     ##
 
@@ -463,15 +413,6 @@ mcmc_mra <- function(
             stop("initial value for sigma2 must be a positive numeric value")
         if (all(!is.na(inits[['sigma2']]))) {
             sigma2 <- inits[['sigma2']]
-        }
-    }
-
-    ## initial values for alpha
-    if (!is.null(inits[['alpha']])) {
-        if(!is_numeric_vector(inits[['alpha']], length(alpha)))
-            stop("initial value for alpha must be positive numeric vector of length equal to the number of all grid points")
-        if (all(!is.na(inits[['alpha']]))) {
-            alpha <- inits[['alpha']]
         }
     }
 
@@ -502,12 +443,32 @@ mcmc_mra <- function(
     # rho_save     <- rep(0, n_save)
     tau2_save    <- matrix(0, n_save, M)
     sigma2_save  <- rep(0, n_save)
-    alpha_save   <- matrix(0, n_save, sum(n_dims))
-    lambda_save    <- matrix(0, n_save, M)
+    lambda_save  <- matrix(0, n_save, M)
 
     ##
     ## initialize tuning
     ##
+
+    # tuning for sigma2
+    sigma2_accept       <- 0
+    sigma2_accept_batch <- 0
+    sigma2_tune         <- 0.25
+
+    # tuning for tau2
+    tau2_accept       <- 0
+    tau2_accept_batch <- 0
+    tau2_batch        <- matrix(0, 50, M)
+    lambda_tau2_tune     <- 1.0 / 3.0^0.8
+    Sigma_tau2_tune      <- diag(p)
+    Sigma_tau2_tune_chol <- chol(Sigma_tau2_tune)
+
+    # tuning for beta
+    beta_accept          <- 0.0
+    beta_accept_batch    <- 0.0
+    beta_batch           <- matrix(0, 50, p)
+    lambda_beta_tune     <- 1.0 / 3.0^0.8
+    Sigma_beta_tune      <- diag(p)
+    Sigma_beta_tune_chol <- chol(Sigma_beta_tune)
 
     ##
     ## tuning variables for adaptive MCMC
@@ -544,49 +505,97 @@ mcmc_mra <- function(
             if (verbose)
                 message("sample sigma2")
 
-            devs <- y - X_beta - W_alpha
-            SS        <- sum(devs^2)
-            sigma2 <- 1 / rgamma(1, N / 2 + alpha_sigma2, SS / 2 + beta_sigma2)
-            sigma     <- sqrt(sigma2)
+            # devs <- y - X_beta - W_alpha
+            # SS        <- sum(devs^2)
+            # sigma2 <- 1 / rgamma(1, N / 2 + alpha_sigma2, SS / 2 + beta_sigma2)
+            # sigma     <- sqrt(sigma2)
+
+            sigma2_star <- rnorm(1, sigma2, sigma2_tune)
+            if (sigma2_star > 0) {
+                mh1 <- dmvn_smw(y, X, beta, tW, tWW, Q_alpha_tau2, sigma2_star, Rstruct = Rstruct) +
+                    dgamma(1 / sigma2_star, alpha_sigma2, beta_sigma2, log = TRUE)
+                mh2 <- dmvn_smw(y, X, beta, tW, tWW, Q_alpha_tau2, sigma2, Rstruct = Rstruct) +
+                    dgamma(1 / sigma2, alpha_sigma2, beta_sigma2, log = TRUE)
+                mh <- exp(mh1 - mh2)
+                if (mh > runif(1, 0.0, 1.0)) {
+                    sigma2 <- sigma2_star
+                    if (k <= params$n_adapt) {
+                        sigma2_accept_batch <- sigma2_accept_batch + 1.0 / 50.0
+                    } else {
+                        sigma2_accept <- sigma2_accept + 1.0 / params$n_mcmc
+                    }
+                }
+            }
+
+            ## update tuning
+            if (k <= params$n_adapt) {
+                if (k %% 50 == 0){
+                    out_tuning <- update_tuning(
+                        k,
+                        sigma2_accept_batch,
+                        sigma2_tune
+                    )
+                    sigma2_tune         <- out_tuning$tune
+                    sigma2_accept_batch <- out_tuning$accept
+                }
+            }
         }
 
         ##
-        ## sample beta -- double check these values
+        ## sample beta using block Metropolis Hastings
         ##
 
         if (sample_beta) {
             if (verbose)
                 message("sample beta")
 
-            ## only use the modern climate state to update beta
-            A      <- 1 / sigma2 * tXX + Sigma_beta_inv
-            b      <- 1 / sigma2 * tX %*% (y - W_alpha) + Sigma_beta_inv %*% mu_beta
-            ## guarantee a symmetric matrix
-            A      <- (A + t(A)) / 2
-            beta   <- rmvn_arma(A, b)
+            beta_star <- c(
+                rmvn(
+                    n      = 1,
+                    mu     = beta,
+                    sigma  = lambda_beta_tune * Sigma_beta_tune_chol,
+                    isChol = TRUE
+                )
+            )
 
-            ## update X_beta
-            X_beta <- X %*% beta
+            mh1 <- dmvn_smw(y, X, beta_star, tW, tWW, Q_alpha_tau2, sigma2, Rstruct = Rstruct) +
+                dmvn(beta_star, mu_beta, Sigma_beta_chol, isChol = TRUE, log = TRUE)
+            mh2 <- dmvn_smw(y, X, beta, tW, tWW, Q_alpha_tau2, sigma2, Rstruct = Rstruct) +
+                dmvn(beta, mu_beta, Sigma_beta_chol, isChol = TRUE, log = TRUE)
+            mh <- exp(mh1 - mh2)
+            if (mh > runif(1, 0, 1)) {
+                beta   <- beta_star
+                if (k <= params$n_adapt) {
+                    beta_accept_batch <- beta_accept_batch + 1 / 50
+                } else {
+                    beta_accept <- beta_accept + 1 / params$n_mcmc
+                }
+            }
+
+            ##
+            ## Update tuning for beta
+            ##
+
+            if (k <= params$n_adapt) {
+                ## update tuning
+                beta_batch[k %% 50, ] <- t(beta)
+                if (k %% 50 == 0) {
+                    out_tuning <- update_tuning_mv(
+                        k               = k,
+                        accept          = beta_accept_batch,
+                        lambda          = lambda_beta_tune,
+                        batch_samples   = beta_batch,
+                        Sigma_tune      = Sigma_beta_tune,
+                        Sigma_tune_chol = Sigma_beta_tune_chol
+                    )
+                    beta_accept_batch    <- out_tuning$accept
+                    lambda_beta_tune     <- out_tuning$lambda
+                    beta_batch           <- out_tuning$batch_samples
+                    Sigma_beta_tune      <- out_tuning$Sigma_tune
+                    Sigma_beta_tune_chol <- out_tuning$Sigma_tune_chol
+                }
+            }
         }
-
-        ##
-        ## sample alpha
-        ##
-
-        if (sample_alpha) {
-            if (verbose)
-                message("sample alpha")
-            A_alpha <- 1 / sigma2 * tWW + Q_alpha_tau2
-            # A_alpha_chol <- chol.spam(A_alpha, Rstruct = Rstruct)
-            b_alpha <- 1 / sigma2 * tW %*% (y - X_beta)
-            # alpha   <- as.vector(rmvnorm.canonical(1, b_alpha, A_alpha, Rstruct = Rstruct))
-            ## sample constrained to sum to 1
-            alpha   <- as.vector(rmvnorm.canonical.const(1, b_alpha, A_alpha, Rstruct = Rstruct,
-                                                         A = A_constraint, a = a_constraint))
-            ## update W_alpha
-            W_alpha <- W %*% alpha
-        }
-
 
         ##
         ## sample rho
@@ -618,30 +627,60 @@ mcmc_mra <- function(
         if (sample_tau2) {
             if (verbose)
                 message("sample tau2")
-            for (m in 1:M) {
-                devs    <- alpha[dims_idx == m]
-                SS      <- as.numeric(devs %*% (Q_alpha[[m]] %*% devs))
-                tau2[m] <- rgamma(1, alpha_tau2 + n_dims[m] / 2, beta_tau2 + SS / 2)
-                # tau2[m] <- 1 / rgamma(1, 0.5 + n_dims[m] / 2, lambda[m] + SS / 2)
-                # tau2_inv[m] <- 1 / rgamma(1, 0.5 + n_dims[m] / 2, lambda[m] + SS / 2)
-                # tau2[m]     <- 1 / tau2_inv[m]
+
+            tau2_star <- c(
+                rmvn(
+                    n      = 1,
+                    mu     = tau2,
+                    sigma  = lambda_tau2_tune * Sigma_tau2_tune_chol,
+                    isChol = TRUE
+                )
+            )
+
+            if (all(tau2_star > 0)) {
+                Q_alpha_tau2_star <- make_Q_alpha_tau2(Q_alpha, tau2_star, use_spam = use_spam)
+                mh1 <- dmvn_smw(y, X, beta, tW, tWW, Q_alpha_tau2_star, sigma2, Rstruct = Rstruct) +
+                    sum(dgamma(tau2_star, alpha_tau2, beta_tau2, log = TRUE))
+                mh2 <- dmvn_smw(y, X, beta, tW, tWW, Q_alpha_tau2, sigma2, Rstruct = Rstruct) +
+                    sum(dgamma(tau2, alpha_tau2, beta_tau2, log = TRUE))
+                mh <- exp(mh1 - mh2)
+                if (mh > runif(1, 0.0, 1.0)) {
+                    tau2         <- tau2_star
+                    Q_alpha_tau2 <- Q_alpha_tau2_star
+                    if (k <= params$n_adapt) {
+                        tau2_accept_batch <- tau2_accept_batch + 1.0 / 50.0
+                    } else {
+                        tau2_accept <- tau2_accept + 1.0 / params$n_mcmc
+                    }
+                }
+            }
+
+            ##
+            ## Update tuning for tau2
+            ##
+
+            if (k <= params$n_adapt) {
+                ## update tuning
+                tau2_batch[k %% 50, ] <- t(tau2)
+                if (k %% 50 == 0) {
+                    out_tuning <- update_tuning_mv(
+                        k               = k,
+                        accept          = beta_accept_batch,
+                        lambda          = lambda_tau2_tune,
+                        batch_samples   = tau2_batch,
+                        Sigma_tune      = Sigma_tau2_tune,
+                        Sigma_tune_chol = Sigma_tau2_tune_chol
+                    )
+                    tau2_accept_batch    <- out_tuning$accept
+                    lambda_tau2_tune     <- out_tuning$lambda
+                    tau2_batch           <- out_tuning$batch_samples
+                    Sigma_tau2_tune      <- out_tuning$Sigma_tune
+                    Sigma_tau2_tune_chol <- out_tuning$Sigma_tune_chol
+                }
             }
         }
 
         Q_alpha_tau2 <- make_Q_alpha_tau2(Q_alpha, tau2, use_spam = use_spam)
-
-        ##
-        ## sample lambda
-        ##
-
-        if (sample_lambda) {
-            if (verbose)
-                message("sample lambda")
-            for (m in 1:M) {
-                lambda[m]     <- rgamma(1, 1, scale_lambda + 1 / tau2[m])
-                # lambda[m]     <- rgamma(1, 1, scale_lambda + tau2[m])
-            }
-        }
 
         ##
         ## save variables
@@ -654,8 +693,6 @@ mcmc_mra <- function(
                 # rho_save[save_idx]       <- rho
                 tau2_save[save_idx, ]   <- tau2
                 sigma2_save[save_idx]   <- sigma2
-                alpha_save[save_idx, ]  <- alpha
-                lambda_save[save_idx, ] <- lambda
             }
         }
 
@@ -665,6 +702,9 @@ mcmc_mra <- function(
     }
 
     ## print out acceptance rates -- no tuning in this model
+    message("Average acceptance rate for beta is ", mean(beta_accept))
+    message("Average acceptance rate for sigma2 is ", mean(sigma2_accept))
+    message("Average acceptance rate for tau2 is ", mean(tau2_accept))
 
 
     if (num_chol_failures > 0)
@@ -679,12 +719,10 @@ mcmc_mra <- function(
         # rho      = rho_save,
         tau2     = tau2_save,
         sigma2   = sigma2_save,
-        alpha    = alpha_save,
-        lambda   = lambda_save,
         MRA      = MRA
     )
 
-    class(out) <- "mcmc_mra"
+    class(out) <- "mcmc_mra_integrated"
 
     return(out)
 }
