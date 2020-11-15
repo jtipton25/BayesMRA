@@ -438,20 +438,6 @@ p_tau2 <- ggplot(dat_tau2, aes(x = iteration, y = tau2, group = resolution, colo
   theme_bw() +
   theme_custom(0.7)
 
-dat_lambda <- data.frame(
-  lambda      = c(out$lambda),
-  iteration = rep(1:nrow(out$lambda), times = M),
-  resolution = factor(rep(1:M, each = nrow(out$lambda)))
-)
-
-p_lambda <- ggplot(dat_lambda, aes(x = iteration, y = lambda, group = resolution, color = resolution)) +
-  geom_line() +
-  scale_color_viridis_d(end = 0.8) +
-  ggtitle("Trace plots for lambda") +
-  theme_bw() +
-  theme_custom(0.7)
-
-
 p_sigma2 <- data.frame(sigma2 = c(out$sigma2), iteration = 1:length(out$sigma2)) %>%
   ggplot(aes(x = iteration, y = sigma2)) +
   geom_line() +
@@ -472,13 +458,55 @@ p_beta  <- ggplot(dat_beta, aes(x = iteration, y = beta, group = covariate, colo
   theme_bw() +
   theme_custom(0.7)
 
-(p_tau2 + p_lambda) /  (p_sigma2 + p_beta)
+p_tau2 / p_sigma2 / p_beta
 ```
 
 Next, the trace plots for the spatial parameter $\boldsymbol{\alpha}_m$ are shown. Because there are so many parameters, a sample is taken for plotting. These traceplots suggest that perhaps $\boldsymbol{\alpha}$ hasn't entirely converged. However, as there is a non-identifiability between $\tau^2_m$ and $\boldsymbol{\alpha}_m$, this is not surprising and might not be remedied with more samples.
 
 
+* Recovering $\boldsymbol{\alpha}$ using composition sampling
+
 ```{r trace-plots-alpha, cache = TRUE, cache.extra = tools::md5sum(here::here("results", "fit-mra-sim.RData")), fig.align = 'center'}
+
+##
+## composition sampling to extract alpha
+##
+
+W_fit <- do.call(cbind, out$MRA$W)
+tW_fit <- t(W_fit)
+tWW_fit <- tW_fit %*% W_fit
+n_dims_fit   <- rep(NA, length(out$MRA$W))
+dims_idx_fit <- NULL
+for (i in 1:M) {
+  n_dims_fit[i] <- ncol(out$MRA$W[[i]])
+  dims_idx_fit  <- c(dims_idx_fit, rep(i, n_dims_fit[i]))
+}
+
+alpha_post <- matrix(0, nrow(out$beta), ncol(W_fit))
+## set up a linear constraint so that each resolution sums to one
+A_constraint <- sapply(1:out$MRA$M, function(i){
+        tmp = rep(0, sum(n_dims_fit))
+        tmp[dims_idx_fit == i] <- 1
+        return(tmp)
+    })
+
+a_constraint <- rep(0, M)
+Q_alpha_fit <- make_Q_alpha_2d(sqrt(n_dims_fit), rep(1, out$MRA$M))
+
+Q_alpha_tau2_fit <- make_Q_alpha_tau2(Q_alpha_fit, out$tau2[1, ])
+A      <- tWW_fit / out$sigma2[1] + Q_alpha_tau2_fit
+A_chol <- chol(A)
+
+tmp <- backsolve(A_chol, forwardsolve(A_chol, b) + rnorm(nrow(A_chol)))
+
+
+for (k in 1:nrow(out$beta)) {
+  Q_alpha_tau2_fit <- make_Q_alpha_tau2(Q_alpha_fit, out$tau2[k, ])
+  A                <- tWW_fit / out$sigma2[k] + Q_alpha_tau2_fit
+  b                <- as.vector(tW_fit %*% (y_s - X_s %*% out$beta[k, ]))
+  alpha_post[k, ]   <- as.vector(rmvnorm.canonical.const(n = 1, mu = b, Q = A, A = t(A_constraint), a = a_constraint, Rstruct = A_chol))  
+}
+
 ## posterior plots for alpha
 
 dat_alpha <- data.frame(

@@ -129,11 +129,26 @@ mra_wendland_2d <- function(
         }
     }
 
+    ## calculate the basis dimensions
+    ## n_dims is the number of columns in the basis matrix for each resolution
+    ## dims_idx is a vector of which
+    n_dims   <- rep(NA, length(W))
+    dims_idx <- c()
+    for (i in 1:M) {
+        n_dims[i] <- ncol(W[[i]])
+        dims_idx  <- c(dims_idx, rep(i, n_dims[i]))
+    }
+
+    ## flatten the list of basis functions W to a single matrix
+    W <- do.call(cbind, W)
+
     out <- list(
         locs_grid     = locs_grid,
         W             = W,
         radius        = radius,
         M             = M,
+        n_dims        = n_dims,
+        dims_idx      = dims_idx,
         n_neighbors   = n_neighbors,
         n_coarse_grid = n_coarse_grid,
         n_padding     = n_padding,
