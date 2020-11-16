@@ -660,7 +660,7 @@ mcmc_mra_integrated <- function(
                 if (k %% 50 == 0) {
                     out_tuning <- update_tuning_mv(
                         k               = k,
-                        accept          = beta_accept_batch,
+                        accept          = tau2_accept_batch,
                         lambda          = lambda_tau2_tune,
                         batch_samples   = tau2_batch,
                         Sigma_tune      = Sigma_tau2_tune,
