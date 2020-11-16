@@ -237,26 +237,9 @@ mcmc_mra_integrated <- function(
         use_spam      = use_spam
     )
 
-    # MRA      <- mra_wendland_2d(locs, M, n_max_fine_grid = n_max_fine_grid, use_spam = use_spam)
-    W_list   <- MRA$W
-    tW_list  <- vector(mode = 'list', length = M)
-    tWW_list <- vector(mode = 'list', length = M)
-    for (m in 1:M) {
-        if (use_spam) {
-            tW_list[[m]] <- t(W_list[[m]])
-        } else {
-            stop("Only support use_spam = TRUE")
-            # tW_list[[m]] <- Matrix::t(W_list[[m]])
-        }
-        tWW_list[[m]] <- tW_list[[m]] %*% W_list[[m]]
-    }
-    n_dims <- rep(NA, length(W_list))
-    dims_idx <- c()
-    for (i in 1:M) {
-        n_dims[i] <- ncol(W_list[[i]])
-        dims_idx <- c(dims_idx, rep(i, n_dims[i]))
-    }
-    W <- do.call(cbind, W_list)
+    W        <- MRA$W
+    n_dims   <- MRA$n_dims
+    dims_idx <- MRA$dims_idx
 
     tW <- NULL
     if (use_spam) {
@@ -324,7 +307,7 @@ mcmc_mra_integrated <- function(
 
     Q_alpha <- make_Q_alpha_2d(sqrt(n_dims), rep(0.999, length(n_dims)), use_spam = use_spam)
 
-    tau2   <- rep(500, M)
+    tau2   <- 10*2^(1:M - 1)
 
     alpha_tau2 <- 0.01
     beta_tau2  <- 0.01
@@ -423,7 +406,6 @@ mcmc_mra_integrated <- function(
         if (all(!is.na(inits[['tau2']]))) {
             tau2 <- inits[['tau2']]
         }
-
     }
 
     ## initial values for rho
@@ -433,6 +415,11 @@ mcmc_mra_integrated <- function(
     #     }
     # }
 
+    ##
+    ## initialize the log likelihood
+    ##
+
+    ll_current <- dmvn_smw(y, X, beta, tW, tWW, Q_alpha_tau2, sigma2, Rstruct = Rstruct)
 
     ##
     ## setup save variables
@@ -443,7 +430,7 @@ mcmc_mra_integrated <- function(
     # rho_save     <- rep(0, n_save)
     tau2_save    <- matrix(0, n_save, M)
     sigma2_save  <- rep(0, n_save)
-    lambda_save  <- matrix(0, n_save, M)
+    ll_save      <- rep(0, n_save)
 
     ##
     ## initialize tuning
@@ -459,7 +446,7 @@ mcmc_mra_integrated <- function(
     tau2_accept_batch <- 0
     tau2_batch        <- matrix(0, 50, M)
     lambda_tau2_tune     <- 1.0 / 3.0^0.8
-    Sigma_tau2_tune      <- diag(p)
+    Sigma_tau2_tune      <- diag(M)
     Sigma_tau2_tune_chol <- chol(Sigma_tau2_tune)
 
     # tuning for beta
@@ -512,13 +499,15 @@ mcmc_mra_integrated <- function(
 
             sigma2_star <- rnorm(1, sigma2, sigma2_tune)
             if (sigma2_star > 0) {
-                mh1 <- dmvn_smw(y, X, beta, tW, tWW, Q_alpha_tau2, sigma2_star, Rstruct = Rstruct) +
+                ll_proposal <- dmvn_smw(y, X, beta, tW, tWW, Q_alpha_tau2, sigma2_star, Rstruct = Rstruct)
+                mh1 <- ll_proposal +
                     dgamma(1 / sigma2_star, alpha_sigma2, beta_sigma2, log = TRUE)
-                mh2 <- dmvn_smw(y, X, beta, tW, tWW, Q_alpha_tau2, sigma2, Rstruct = Rstruct) +
+                mh2 <- ll_current +
                     dgamma(1 / sigma2, alpha_sigma2, beta_sigma2, log = TRUE)
                 mh <- exp(mh1 - mh2)
                 if (mh > runif(1, 0.0, 1.0)) {
-                    sigma2 <- sigma2_star
+                    sigma2     <- sigma2_star
+                    ll_current <- ll_proposal
                     if (k <= params$n_adapt) {
                         sigma2_accept_batch <- sigma2_accept_batch + 1.0 / 50.0
                     } else {
@@ -558,13 +547,15 @@ mcmc_mra_integrated <- function(
                 )
             )
 
-            mh1 <- dmvn_smw(y, X, beta_star, tW, tWW, Q_alpha_tau2, sigma2, Rstruct = Rstruct) +
+            ll_proposal <- dmvn_smw(y, X, beta_star, tW, tWW, Q_alpha_tau2, sigma2, Rstruct = Rstruct)
+            mh1 <- ll_proposal +
                 dmvn(beta_star, mu_beta, Sigma_beta_chol, isChol = TRUE, log = TRUE)
-            mh2 <- dmvn_smw(y, X, beta, tW, tWW, Q_alpha_tau2, sigma2, Rstruct = Rstruct) +
+            mh2 <- ll_current +
                 dmvn(beta, mu_beta, Sigma_beta_chol, isChol = TRUE, log = TRUE)
             mh <- exp(mh1 - mh2)
             if (mh > runif(1, 0, 1)) {
-                beta   <- beta_star
+                beta       <- beta_star
+                ll_current <- ll_proposal
                 if (k <= params$n_adapt) {
                     beta_accept_batch <- beta_accept_batch + 1 / 50
                 } else {
@@ -639,14 +630,18 @@ mcmc_mra_integrated <- function(
 
             if (all(tau2_star > 0)) {
                 Q_alpha_tau2_star <- make_Q_alpha_tau2(Q_alpha, tau2_star, use_spam = use_spam)
-                mh1 <- dmvn_smw(y, X, beta, tW, tWW, Q_alpha_tau2_star, sigma2, Rstruct = Rstruct) +
+
+                ll_proposal <- dmvn_smw(y, X, beta, tW, tWW, Q_alpha_tau2_star, sigma2, Rstruct = Rstruct)
+
+                mh1 <- ll_proposal +
                     sum(dgamma(tau2_star, alpha_tau2, beta_tau2, log = TRUE))
-                mh2 <- dmvn_smw(y, X, beta, tW, tWW, Q_alpha_tau2, sigma2, Rstruct = Rstruct) +
+                mh2 <- ll_current +
                     sum(dgamma(tau2, alpha_tau2, beta_tau2, log = TRUE))
                 mh <- exp(mh1 - mh2)
                 if (mh > runif(1, 0.0, 1.0)) {
                     tau2         <- tau2_star
                     Q_alpha_tau2 <- Q_alpha_tau2_star
+                    ll_current   <- ll_proposal
                     if (k <= params$n_adapt) {
                         tau2_accept_batch <- tau2_accept_batch + 1.0 / 50.0
                     } else {
@@ -680,7 +675,7 @@ mcmc_mra_integrated <- function(
             }
         }
 
-        Q_alpha_tau2 <- make_Q_alpha_tau2(Q_alpha, tau2, use_spam = use_spam)
+        # Q_alpha_tau2 <- make_Q_alpha_tau2(Q_alpha, tau2, use_spam = use_spam)
 
         ##
         ## save variables
@@ -693,6 +688,7 @@ mcmc_mra_integrated <- function(
                 # rho_save[save_idx]       <- rho
                 tau2_save[save_idx, ]   <- tau2
                 sigma2_save[save_idx]   <- sigma2
+                ll_save[save_idx]       <- ll_current
             }
         }
 
@@ -719,6 +715,7 @@ mcmc_mra_integrated <- function(
         # rho      = rho_save,
         tau2     = tau2_save,
         sigma2   = sigma2_save,
+        ll       = ll_save,
         MRA      = MRA
     )
 

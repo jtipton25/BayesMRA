@@ -103,14 +103,9 @@ n_coarse <- 10
 MRA    <- mra_wendland_2d(locs, M = M, n_coarse = n_coarse, use_spam = TRUE)
 
 # MRA    <- mra_wendland_2d(locs, M = M, n_max_fine_grid = 2^8, use_spam = TRUE)
-W_list   <- MRA$W
-n_dims   <- rep(NA, length(W_list))
-dims_idx <- NULL
-for (i in 1:M) {
-  n_dims[i] <- ncol(W_list[[i]])
-  dims_idx  <- c(dims_idx, rep(i, n_dims[i]))
-}
-W <- do.call(cbind, W_list)
+W        <- MRA$W
+n_dims   <- MRA$n_dims
+dims_idx <- MRA$dims_idx
     
 Q_alpha      <- make_Q_alpha_2d(sqrt(n_dims), rep(0.999, length(n_dims)), prec_model = "CAR")
 
@@ -401,7 +396,7 @@ if (file.exists(here::here("results", "fit-mra-integrated-sim.RData"))) {
   load(here::here("results", "fit-mra-integrated-sim.RData"))
 } else {
   start   <- Sys.time()
-  out     <- mcmc_mra_integrated(
+  out <- mcmc_mra_integrated(
     y             = y_s, 
     X             = X_s, 
     locs          = locs_s, 
@@ -461,7 +456,7 @@ p_beta  <- ggplot(dat_beta, aes(x = iteration, y = beta, group = covariate, colo
 p_tau2 / p_sigma2 / p_beta
 ```
 
-Next, the trace plots for the spatial parameter $\boldsymbol{\alpha}_m$ are shown. Because there are so many parameters, a sample is taken for plotting. These traceplots suggest that perhaps $\boldsymbol{\alpha}$ hasn't entirely converged. However, as there is a non-identifiability between $\tau^2_m$ and $\boldsymbol{\alpha}_m$, this is not surprising and might not be remedied with more samples.
+Next, the trace plots for the spatial parameter $\boldsymbol{\alpha}_m$ are shown. Because there are so many parameters, a sample is taken for plotting. These trace plots suggest that perhaps $\boldsymbol{\alpha}$ hasn't entirely converged. However, as there is a non-identifiability between $\tau^2_m$ and $\boldsymbol{\alpha}_m$, this is not surprising and might not be remedied with more samples.
 
 
 * Recovering $\boldsymbol{\alpha}$ using composition sampling
@@ -472,15 +467,12 @@ Next, the trace plots for the spatial parameter $\boldsymbol{\alpha}_m$ are show
 ## composition sampling to extract alpha
 ##
 
-W_fit <- do.call(cbind, out$MRA$W)
-tW_fit <- t(W_fit)
-tWW_fit <- tW_fit %*% W_fit
-n_dims_fit   <- rep(NA, length(out$MRA$W))
-dims_idx_fit <- NULL
-for (i in 1:M) {
-  n_dims_fit[i] <- ncol(out$MRA$W[[i]])
-  dims_idx_fit  <- c(dims_idx_fit, rep(i, n_dims_fit[i]))
-}
+W_fit        <- out$MRA$W
+tW_fit       <- t(W_fit)
+tWW_fit      <- tW_fit %*% W_fit
+n_dims_fit   <- out$MRA$n_dims
+dims_idx_fit <- out$MRA$dims_idx
+
 
 alpha_post <- matrix(0, nrow(out$beta), ncol(W_fit))
 ## set up a linear constraint so that each resolution sums to one
@@ -496,15 +488,19 @@ Q_alpha_fit <- make_Q_alpha_2d(sqrt(n_dims_fit), rep(1, out$MRA$M))
 Q_alpha_tau2_fit <- make_Q_alpha_tau2(Q_alpha_fit, out$tau2[1, ])
 A      <- tWW_fit / out$sigma2[1] + Q_alpha_tau2_fit
 A_chol <- chol(A)
-
+b                <- as.vector(tW_fit %*% (y_s - X_s %*% out$beta[1, ]))
+  
 tmp <- backsolve(A_chol, forwardsolve(A_chol, b) + rnorm(nrow(A_chol)))
 
 
 for (k in 1:nrow(out$beta)) {
+  if (k %% 10 == 0) {
+    message("On iteration ", k, " out of ", nrow(out$beta))
+  }
   Q_alpha_tau2_fit <- make_Q_alpha_tau2(Q_alpha_fit, out$tau2[k, ])
   A                <- tWW_fit / out$sigma2[k] + Q_alpha_tau2_fit
   b                <- as.vector(tW_fit %*% (y_s - X_s %*% out$beta[k, ]))
-  alpha_post[k, ]   <- as.vector(rmvnorm.canonical.const(n = 1, mu = b, Q = A, A = t(A_constraint), a = a_constraint, Rstruct = A_chol))  
+  alpha_post[k, ]  <- as.vector(rmvnorm.canonical.const(n = 1, mu = b, Q = A, A = t(A_constraint), a = a_constraint, Rstruct = A_chol))  
 }
 
 ## posterior plots for alpha
