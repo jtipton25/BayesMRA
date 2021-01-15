@@ -103,14 +103,9 @@ n_coarse <- 10
 MRA    <- mra_wendland_2d(locs, M = M, n_coarse = n_coarse, use_spam = TRUE)
 
 # MRA    <- mra_wendland_2d(locs, M = M, n_max_fine_grid = 2^8, use_spam = TRUE)
-W_list   <- MRA$W
-n_dims   <- rep(NA, length(W_list))
-dims_idx <- NULL
-for (i in 1:M) {
-  n_dims[i] <- ncol(W_list[[i]])
-  dims_idx  <- c(dims_idx, rep(i, n_dims[i]))
-}
-W <- do.call(cbind, W_list)
+W <- MRA$W
+n_dims <- MRA$n_dims
+dims_idx <- MRA$dims_idx
     
 Q_alpha      <- make_Q_alpha_2d(sqrt(n_dims), rep(0.999, length(n_dims)), prec_model = "CAR")
 
@@ -388,7 +383,20 @@ priors <- list(
   alpha_sigma2 = 1,
   beta_sigma2  = 1, 
   mu_beta      = rep(0, ncol(X_s)),
-  Sigma_beta   = 5 * diag(ncol(X_s)))
+  Sigma_beta   = 100 * diag(ncol(X_s)))
+
+inits <- list(
+  alpha = alpha,
+  tau2  = tau2,
+  sigma2 = sigma2, 
+  beta   = beta 
+)
+config <- list(
+  sample_alpha   = TRUE,
+  sample_tau2   = FALSE,
+  sample_sigma2 = TRUE,
+  sample_beta = TRUE
+)
 ```
 
 Now we can fit the model to the simulated data. Using a [project-oriented workflow](https://www.tidyverse.org/blog/2017/12/workflow-vs-script/), we save the MCMC output that results from `mcmc_mra()` in a folder named `results`. 
@@ -410,6 +418,8 @@ if (file.exists(here::here("results", "fit-mra-sim.RData"))) {
     M             = M,
     n_coarse_grid = n_coarse,
     n_cores       = 1L, 
+    inits         = inits,
+    config        = config,
     verbose       = FALSE
   )
   end     <- Sys.time()
@@ -481,12 +491,20 @@ Next, the trace plots for the spatial parameter $\boldsymbol{\alpha}_m$ are show
 ```{r trace-plots-alpha, cache = TRUE, cache.extra = tools::md5sum(here::here("results", "fit-mra-sim.RData")), fig.align = 'center'}
 ## posterior plots for alpha
 
+## double check this...
+
 dat_alpha <- data.frame(
   alpha = c(out$alpha),
-  iteration = rep(1:nrow(out$alpha), each = ncol(out$alpha)),
+  iteration = rep(1:nrow(out$alpha), times = ncol(out$alpha)),
+  par_id    = rep(1:ncol(out$alpha), each = nrow(out$alpha)))
+
+dat_levels <- data.frame(
+  par_id = 1:ncol(out$alpha)  ,
   knot      = factor(unlist(sapply(1:M, function(m) 1:n_dims[m]))),
   resolution = factor(paste("resolution", dims_idx))
 )
+
+dat_alpha <- merge(dat_alpha, dat_levels)
 
 plot_idx <- sapply(1:M, function(m) sample(n_dims[m], 10))
 
@@ -617,9 +635,18 @@ sim_alphas + theme_custom(0.5) + fitted_alphas
 Despite the parameters $\tau^2_m$ and $\boldsymbol{\alpha}_m$ not being identifiable, the following plot shows that the full spatial process $\sum_{m=1}^M \mathbf{W}_m \boldsymbol{\alpha}_m$. The two figures (simulated on the left, fitted on the right) demonstrate that each of the $m$ resolutions of the process $\mathbf{W}_m \boldsymbol{\alpha}_m$ are also non-identifiable.
 
 ```{r simulated-vs-estimated-process, , cache = TRUE, cache.extra = tools::md5sum(here::here("results", "fit-mra-sim.RData")), fig.align = 'center'}
+
+# simulated MRA process
+W_alpha_res_sim <- unlist(sapply(1:M, function(m) W[, dims_idx == m] %*% alpha[dims_idx == m], simplify = "matrix"))
+dimnames(W_alpha_res_sim) <- list(
+  site = 1:N, 
+  res  = paste("resolution", 1:M)
+)
+
 ## Estimated MRA spatial proces
-W_alpha_res = unlist(sapply(1:M, function(m) W[, dims_idx == m] %*% apply(out$alpha, 2, mean)[dims_idx == m], simplify = "matrix"))
-dimnames(W_alpha_res) <- list(
+W_pred <- mra_wendland_2d_pred(locs, out$MRA)$W_pred
+W_alpha_res_fit <- unlist(sapply(1:M, function(m) W_pred[, out$MRA$dims_idx == m] %*% apply(out$alpha, 2, mean)[out$MRA$dims_idx == m], simplify = "matrix"))
+dimnames(W_alpha_res_fit) <- list(
   site = 1:N, 
   res  = paste("resolution", 1:M)
 )
@@ -629,13 +656,38 @@ dat_locs <- data.frame(
   lon  = locs[, 1]
 )
 
+zlims <- range(c(
+  apply(W_alpha_res_sim, 1, sum), 
+  apply(W_alpha_res_fit, 1, sum)))
+
+
+sim_MRA <- rbind(
+  merge(dat_locs, as.data.frame.table(W_alpha_res_sim, responseName = "W_alpha")),
+  data.frame(  
+    site    = 1:N,
+    lat     = locs[, 2],
+    lon     = locs[, 1],
+    W_alpha = apply(W_alpha_res_sim, 1, sum),
+    res     = "full process"
+  )
+) %>%
+  ggplot(aes(x = lon, y = lat, fill = W_alpha)) +
+  geom_raster() +
+  facet_wrap( ~ res, ncol = 2) +
+  xlab("Longitude") + 
+  ylab("Latitude") + 
+  ggtitle("Simulated Multiresolution process") +
+  colorspace::scale_fill_continuous_diverging("Blue-Red 3", limits = zlims) +
+  theme_bw() +
+  theme_custom(0.5)
+
 estimated_MRA <- rbind(
-  merge(dat_locs, as.data.frame.table(W_alpha_res, responseName = "W_alpha")),
+  merge(dat_locs, as.data.frame.table(W_alpha_res_fit, responseName = "W_alpha")),
   data.frame(  
     site = 1:N,
     lat  = locs[, 2],
     lon  = locs[, 1],
-    W_alpha = W %*% alpha,
+    W_alpha = apply(W_alpha_res_fit, 1, sum),
     res = "full process"
   )
 ) %>%
@@ -645,11 +697,11 @@ estimated_MRA <- rbind(
   xlab("Longitude") + 
   ylab("Latitude") + 
   ggtitle("Estimated Multiresolution process") +
-  colorspace::scale_fill_continuous_diverging("Blue-Red 3") +
+  colorspace::scale_fill_continuous_diverging("Blue-Red 3", limits = zlims) +
   theme_bw() +
   theme_custom(0.5)
 
-sim_MRA + theme_custom(0.5) + estimated_MRA 
+sim_MRA + estimated_MRA 
 ```
 
 The next plots show the estimated vs. simulated fixed effects, spatial process, and mean response. There is some evidence of non-identifiability between the fixed effects plot and the spatial effects plot (left two plots) as there is a bias in each of the predictions. This is understood to be a consequence of spatial confounding (@hodges2010adding, @hughes2013dimension, @hanks2015restricted).
@@ -657,7 +709,7 @@ The next plots show the estimated vs. simulated fixed effects, spatial process, 
 ```{r plot-sim-vs-fitted-effects, cache = TRUE, cache.extra = tools::md5sum(here::here("results", "fit-mra-sim.RData"))}
 ## plot estimated mean response
 Xbeta_post <- t(X_s %*% t(out$beta))
-Walpha_post <- t(do.call(cbind, out$MRA$W) %*% t(out$alpha))
+Walpha_post <- t(out$MRA$W %*% t(out$alpha))
 mu_post <- Xbeta_post + Walpha_post
 
 dat_plot <- data.frame(

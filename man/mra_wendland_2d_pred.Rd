@@ -4,11 +4,9 @@
 \alias{mra_wendland_2d_pred}
 \title{Code to construct the mutli-resolution sparse basis function representation for fitting spatial processes}
 \usage{
-mra_wendland_2d_pred(locs, locs_pred, MRA, use_spam = TRUE)
+mra_wendland_2d_pred(locs_pred, MRA, use_spam = TRUE)
 }
 \arguments{
-\item{locs}{The location variables in 2 dimensions over which to construct the basis function representation in the fitting stage.}
-
 \item{locs_pred}{The location variables in 2 dimensions over which to construct the basis function representation in the prediction stage.}
 
 \item{MRA}{The multi-resolution basis expansion at the observed locations. This object is the output of \verb{mra_wendland-2d()} and is of class "mra_wendland_2d".}

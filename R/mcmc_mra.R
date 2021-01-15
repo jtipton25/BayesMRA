@@ -316,7 +316,7 @@ mcmc_mra <- function(
     ##
 
     # beta   <- as.vector(rmvn(1, mu_beta, Sigma_beta_chol, isChol = TRUE))
-    beta   <- as.vector(lm (y ~ X - 1)$coeff)
+    beta   <- as.vector(lm(y ~ X - 1)$coeff)
     X_beta <- X %*% beta
 
     ##
@@ -438,6 +438,7 @@ mcmc_mra <- function(
             beta <- inits[['beta']]
         }
     }
+    X_beta <- X %*% beta
 
     ## intial values for sigma2
     if (!is.null(inits[['sigma2']])) {
@@ -456,6 +457,7 @@ mcmc_mra <- function(
             alpha <- inits[['alpha']]
         }
     }
+    W_alpha <- W %*% alpha
 
     ## initial values for tau2
     if (!is.null(inits[['tau2']])) {
@@ -464,8 +466,8 @@ mcmc_mra <- function(
         if (all(!is.na(inits[['tau2']]))) {
             tau2 <- inits[['tau2']]
         }
-
     }
+    Q_alpha_tau2 <- make_Q_alpha_tau2(Q_alpha, tau2, use_spam = use_spam)
 
     ## initial values for rho
     # if (!is.null(inits[['rho']])) {
@@ -540,7 +542,6 @@ mcmc_mra <- function(
             if (verbose)
                 message("sample beta")
 
-            ## only use the modern climate state to update beta
             A      <- 1 / sigma2 * tXX + Sigma_beta_inv
             b      <- 1 / sigma2 * tX %*% (y - W_alpha) + Sigma_beta_inv %*% mu_beta
             ## guarantee a symmetric matrix
