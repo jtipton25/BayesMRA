@@ -318,7 +318,7 @@ fitted_alphas <- data.frame(
     theme_custom(0.5)
 fitted_alphas
 
-# Plot fitted MRA resoultions -------------------------------------------------
+# Plot fitted MRA resolutions -------------------------------------------------
 
 W_alpha_res = unlist(sapply(1:M, function(m) W_pred[, out$MRA$dims_idx == m] %*% apply(out$alpha, 2, mean)[out$MRA$dims_idx == m], simplify = "matrix"))
 dimnames(W_alpha_res) <- list(

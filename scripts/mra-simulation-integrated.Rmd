@@ -389,7 +389,7 @@ priors <- list(
 Now we can fit the model to the simulated data. Using a [project-oriented workflow](https://www.tidyverse.org/blog/2017/12/workflow-vs-script/), we save the MCMC output that results from `mcmc_mra_integrated()` in a folder named `results`. 
 
 
-```{r fit-model}
+```{r fit-model, message = FALSE}
 set.seed(999)
 
 if (file.exists(here::here("results", "fit-mra-integrated-sim.RData"))) {

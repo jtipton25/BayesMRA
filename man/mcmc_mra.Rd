@@ -19,6 +19,7 @@ mcmc_mra(
   config = NULL,
   verbose = FALSE,
   use_spam = TRUE,
+  center_process = TRUE,
   n_chain = 1
 )
 }

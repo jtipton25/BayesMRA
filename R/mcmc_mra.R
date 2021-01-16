@@ -117,6 +117,7 @@ mcmc_mra <- function(
     config        = NULL,
     verbose       = FALSE,
     use_spam      = TRUE, ## use spam or Matrix for sparse matrix operations
+    center_process = TRUE,
     n_chain       = 1
 ) {
 
@@ -405,13 +406,29 @@ mcmc_mra <- function(
     }
 
     ## define the constraint matrices to ensure each resolution has random effects with mean 0
-    A_constraint <- t(
-        sapply(1:M, function(i){
-            tmp = rep(0, sum(n_dims))
-            tmp[dims_idx == i] <- 1
-            return(tmp)
-        })
-    )
+    # A_constraint <- t(
+    #     sapply(1:M, function(i){
+    #         tmp = rep(0, sum(n_dims))
+    #         tmp[dims_idx == i] <- 1
+    #         return(tmp)
+    #     })
+    # )
+    # a_constraint <- rep(0, M)
+
+    ## overall constraint on random effect
+    # A_constraint <- rep(1, N) %*% W
+    # a_constraint <- 0
+
+    ## resolution level constraint on random effect W_m %*% alpha_m
+    A_constraint_tmp <- sapply(1:M, function(i){
+        tmp <- rep(1, N) %*% W[, dims_idx == i]
+        return(tmp)
+    })
+    A_constraint <- matrix(0, M, sum(n_dims))
+    for (i in 1:M) {
+        A_constraint[i, dims_idx == i] <- A_constraint_tmp[[i]]
+    }
+
     a_constraint <- rep(0, M)
 
 
@@ -563,13 +580,12 @@ mcmc_mra <- function(
             # A_alpha_chol <- chol.spam(A_alpha, Rstruct = Rstruct)
             b_alpha <- 1 / sigma2 * tW %*% (y - X_beta)
             # alpha   <- as.vector(rmvnorm.canonical(1, b_alpha, A_alpha, Rstruct = Rstruct))
-            ## sample constrained to sum to 1
+            ## sample constrained to sum to 0
             alpha   <- as.vector(rmvnorm.canonical.const(1, b_alpha, A_alpha, Rstruct = Rstruct,
                                                          A = A_constraint, a = a_constraint))
             ## update W_alpha
             W_alpha <- W %*% alpha
         }
-
 
         ##
         ## sample rho

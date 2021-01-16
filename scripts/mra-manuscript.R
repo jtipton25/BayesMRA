@@ -8,6 +8,15 @@ library(spam)
 library(fields)
 library(spBayes)
 library(coda)
+library(here)
+
+# setup the project folder directories
+if (!dir.exists(here::here("results"))) {
+    dir.create(here::here("results"))
+}
+if (!dir.exists(here::here("images"))) {
+    dir.create(here::here("images"))
+}
 
 res <- 100 # can increase before submission to have better resolution figures
 
@@ -75,25 +84,47 @@ Q_alpha_tau2 <- make_Q_alpha_tau2(Q_alpha, tau2)
 
 ## initialize the random effect
 ## set up a linear constraint so that each resolution sums to one
-A_constraint <- sapply(1:M, function(i){
-    tmp = rep(0, sum(n_dims))
-    tmp[dims_idx == i] <- 1
+# A_constraint <- sapply(1:M, function(i){
+#     tmp = rep(0, sum(n_dims))
+#     tmp[dims_idx == i] <- 1
+#     return(tmp)
+# })
+# a_constraint <- rep(0, M)
+
+# constraint on full effect Walpha
+# A_constraint <- drop(rep(1, N) %*% W)
+# a_constraint <- 0
+
+## constraint on each resolution of Walpha
+A_constraint_tmp <- sapply(1:M, function(i){
+    tmp <- rep(1, N) %*% W[, dims_idx == i]
     return(tmp)
 })
+A_constraint <- matrix(0, M, sum(n_dims))
+for (i in 1:M) {
+    A_constraint[i, dims_idx == i] <- A_constraint_tmp[[i]]
+}
 
 a_constraint <- rep(0, M)
-alpha   <- as.vector(rmvnorm.prec.const(n = 1, mu = rep(0, sum(n_dims)), Q = Q_alpha_tau2, A = t(A_constraint), a = a_constraint))
+
+alpha   <- as.vector(rmvnorm.prec.const(n = 1, mu = rep(0, sum(n_dims)), Q = Q_alpha_tau2, A = A_constraint, a = a_constraint))
+
+
+## verify that the parameters sum to 0
+sum(alpha)
+sum(alpha[dims_idx == 1])
+sum(alpha[dims_idx == 2])
+sum(alpha[dims_idx == 3])
+
+sum(W %*% alpha)
+sum(W[, dims_idx == 1] %*% alpha[dims_idx == 1])
+sum(W[, dims_idx == 2] %*% alpha[dims_idx == 2])
+sum(W[, dims_idx == 3] %*% alpha[dims_idx == 3])
 
 sigma2 <- runif(1, 0.25, 0.5)
 
 y <- X %*% beta + W %*% alpha + rnorm(N, 0, sqrt(sigma2))
 
-
-## verify that the parameters sume to 0
-sum(alpha)
-sum(alpha[dims_idx == 1])
-sum(alpha[dims_idx == 2])
-sum(alpha[dims_idx == 3])
 
 # Plot the simulated data -----------------------------------------------------
 
@@ -222,6 +253,7 @@ if (!file.exists(here::here("images", "MRA-simulated-data.png"))) {
         min(c(X %*% beta), c(y), c(W %*% alpha)),
         max(c(X %*% beta), c(y), c(W %*% alpha))
     )
+
 
     g_fixed <- data.frame(
         temp = c(X %*% beta),
@@ -385,6 +417,13 @@ if (file.exists(here::here("results", "fit-mra-sim.RData"))) {
 }
 
 # The fitting of `mcmc_mra()` took `r format(runtime, nsmall = 2, digits = 2)`.
+
+## Check the output to make sure the sum to 0 constraints are satisfied
+iter_idx <- 224
+sum(out$MRA$W %*% out$alpha[iter_idx, ])
+sum(out$MRA$W[, out$MRA$dims_idx == 1] %*% out$alpha[iter_idx, out$MRA$dims_idx == 1])
+sum(out$MRA$W[, out$MRA$dims_idx == 2] %*% out$alpha[iter_idx, out$MRA$dims_idx == 2])
+sum(out$MRA$W[, out$MRA$dims_idx == 3] %*% out$alpha[iter_idx, out$MRA$dims_idx == 3])
 
 
 # Examining the MRA MCMC output -----------------------------------------------
@@ -579,7 +618,9 @@ dev.off()
 
 png(file = here::here("images", "fitted-process.png"), width = 16, height = 9, units = "in", res = res)
 ## Estimated MRA spatial proces
-W_alpha_res = unlist(sapply(1:M, function(m) W[, dims_idx == m] %*% apply(out$alpha, 2, mean)[dims_idx == m], simplify = "matrix"))
+W_alpha_res <- unlist(sapply(1:M, function(m)
+    W[, dims_idx == m] %*% apply(out$alpha, 2, mean)[dims_idx == m],
+    simplify = "matrix"))
 dimnames(W_alpha_res) <- list(
     site = 1:N,
     res  = paste("resolution", 1:M)
@@ -596,7 +637,7 @@ estimated_MRA <- rbind(
         site = 1:N,
         lat  = locs[, 2],
         lon  = locs[, 1],
-        W_alpha = W %*% alpha,
+        W_alpha = apply(W %*% t(out$alpha), 1, mean),
         res = "full process"
     )
 ) %>%
@@ -619,7 +660,7 @@ png(file = here::here("images", "sim-vs-fitted-process.png"), width = 16, height
 
 ## plot estimated mean response
 Xbeta_post <- t(X_s %*% t(out$beta))
-Walpha_post <- t(do.call(cbind, out$MRA$W) %*% t(out$alpha))
+Walpha_post <- t(out$MRA$W %*% t(out$alpha))
 mu_post <- Xbeta_post + Walpha_post
 
 dat_plot <- data.frame(
@@ -726,12 +767,16 @@ if (file.exists(here::here("results", "fit-pp.RData"))) {
     save(fit, runtime, file = here::here("results", "fit-pp.RData"))
 }
 
-if (!file.exists(here::here("results", "fit-pp-recover.RData"))) {
+if (file.exists(here::here("results", "fit-pp-recover.RData"))) {
+    load(here::here("results", "fit-pp-recover.RData"))
+} else {
     fit_out <- spRecover(fit, start = 2500, thin = 2, verbose = FALSE)
     save(fit_out, file = here::here("results", "fit-pp-recover.RData"))
 }
 
-if (!file.exists(here::here("results", "predict-pp-recover.RData"))) {
+if (file.exists(here::here("results", "predict-pp-recover.RData"))) {
+    load(here::here("results", "predict-pp-recover.RData"))
+} else {
     ## predict using the tuned Matern fit
     preds <- spPredict(
         fit_out,
@@ -820,7 +865,7 @@ png(file = here::here("images", "sim-vs-fitted-pp-process.png"), width = 16, hei
 ## plot estimated mean response
 Xbeta_post <- t(X_s %*% t(beta.samps[[1]]))
 W_post <- t(fit_out$p.w.recover.samples)
-mu_post <- Xbeta_post + Walpha_post
+mu_post <- Xbeta_post + W_post
 
 dat_plot <- data.frame(
     mean_Xbeta   = apply(Xbeta_post, 2, mean),

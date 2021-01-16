@@ -9,6 +9,22 @@ author:
       Fayetteville, AR 72701
     email: \email{jrtipton@uark.edu}
     url: http://www.johnrtipton.com
+  - name: Jean Remy
+    affiliation: University of Arkansas
+    address: >
+      309 SCEN
+      University of Arkansas
+      Fayetteville, AR 72701
+      email: \email{jrhabima@uark.edu}
+      url: 
+  - name: Thuy Scanlon
+    affiliation: University of Arkansas
+    address: >
+      309 SCEN
+      University of Arkansas
+      Fayetteville, AR 72701
+    email: \email{tvscanlo@uark.edu}
+    url:
 title:
   formatted: "Bayesian Multi-resolution Spatial Regression: Fitting large spatial models using \\pkg{BayesMRA}"
   # If you use tex in the formatted title, also supply version without
@@ -33,6 +49,23 @@ bibliography: mra.bib
 knitr::opts_chunk$set(fig.width = 16, fig.height = 9, dpi = 300, dev.args = list(type = "cairo"), dev = 'png', fig.align = 'center')
 ```
 
+# Todos
+
+- Thuy: edit the file  scripts/mra-maunscript.R to get better figure formats. Proofread the spelling and text size. See [https://ggplot2.tidyverse.org/reference/ggtheme.html](https://ggplot2.tidyverse.org/reference/ggtheme.html) for some example themes that make it easy to change all font sizes simultaneously.
+
+# Outline and writing goals
+
+- Thuy: Write up 2-3 paragraphs about the importance of effective sample size per second.
+
+- Thuy: Write out the model statement and priors. Follow Nychka et. al. Multiresolution where applicable and use your best judgement for the priors on $\mathbf{\tau}^2$ and $\mathbf{\beta}$. From the model statement, write out the posterior distribution.
+
+
+- Jean Remy: work out the full conditionals for the updates of $\boldsymbol{\beta}$, $\boldsymbol{\alpha}$, $\mathbf{\tau}^2$ and $\sigma^2$
+
+- Jean Remy: Focus on the writing of the spatial models in the ** Defining the MRA model** section. Pay attention to how Nychka et. al. Multiresolution... writes the model statement. 
+
+
+
 # Introduction
 
 Fitting spatial models in a Bayesian framework is computationally challenging because of the curse of dimensionality where the computational cost for fitting full-rank spatial models scales with $O(n^3)$. Instead, a number of reduced rank spatial approximations have been developed **citations**. There is a variety of software in `R` for fitting reduced-rank spatial models in the frequentist paradigm, including **list packages** and for fitting reduced-rank models in the Bayesian paradigm **list packages**. This work provides a set of tools in `R` for efficiently fitting a multiresolution basis function spatial model similar to @nychka2015multiresolution. The goal of this work is twofold; first, to provide software for fitting the multiresolution approximation using Markov Chain Monte Carlo; second, to make available a set of functions for developing the multiresolution process for other developers wishing to fit spatial and spatio-temporal models in `R` using the multiresolution approach.
@@ -43,66 +76,6 @@ Fitting spatial models in a Bayesian framework is computationally challenging be
 
 
 
-# Defining the MRA model
-
-This package provides a Bayesian implementation of the multi-resolution Gaussian process model presented by @nychka2015multiresolution. This package is similar to the R package `LatticeKrig::LatticeKrig` (@LatticeKrig) and provides an implementation that is suitable for use in MCMC samplers.
-
-The model that the function `mcmc_mra()` fits is defined below. Let $\mathbf{s}$ be a spatial location in a domain of interest $\mathcal{D}$ and let $y(\mathbf{s})$ be the observation of the spatial process at location $\mathbf{s}$. Then, we can write the observation as
-
-\begin{align*}
-y(\mathbf{s}) & = \mathbf{x}(\mathbf{s})' \boldsymbol{\beta} + \eta(\mathbf{s}) + \varepsilon(\mathbf{s}),
-\end{align*}
-
-where $\mathbf{x}(s)$ is a vector of covariates at site $\mathbf{s}$, $\boldsymbol{\beta}$ are regression coefficients, $\boldsymbol{\eta}(\mathbf{s})$ is the realization of a correlated Gaussian process at location $\mathbf{s}$ and $\varepsilon(\mathbf{s})$ is the realization of an uncorrelated Gaussian error process. The model can be written in matrix form where
-
-\begin{align*}
-\mathbf{y} & = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\eta} + \boldsymbol{\varepsilon}.
-\end{align*}
-
-In matrix form, the spatially correlated random process has the distribution $\boldsymbol{\eta} \sim \operatorname{N}(\mathbf{0}, \mathbf{C})$ where the $\mathbf{C}_{ij}$ (the $i$th row and $j$th column of $\mathbf{C}$) is defined as the output of the covariance function $cov(\mathbf{s}_i, \mathbf{s}_j)$ at sites $\mathbf{s}_i$ and $\mathbf{s}_j$. The residual process $\boldsymbol{\varepsilon} \sim \operatorname{N}(\mathbf{0}, \sigma^2 \mathbf{I})$ models measurement error, commonly referred to as the nugget in the spatial statistics literature.
-
-Directly specifying a functional form for the covariance function $cov(\mathbf{s}_i, \mathbf{s}_j)$ is commonly done in the geostatistical literature; however, there are many drawbacks to specifying 
-
-Rather than specifying a parametric form for the covariance function $cov(\mathbf{s}_i, \mathbf{s}_j)$, we approximate the covariance function effect with a multi-resolution approximation. This approximation gives $\boldsymbol{\eta} \approx \sum_{m=1}^M \mathbf{W}_m \boldsymbol{\alpha}_m$ where $\mathbf{W}_m$ is the Wendland basis expansion at the $m$th resolution and $\boldsymbol{\alpha}_m$ are the $m$th resolution random effect.
-
-# Simulating data from the model
-
-First, we simulate some data from the process of interest. We simulate a spatially explicit set of fired effects X that represent spatial variables like elevation, latitude, etc. Next, the spatial process is initialized
-
-
-```{r, echo = FALSE, message = FALSE}
-library(tidyverse)
-library(BayesMRA)
-library(mvnfast)
-# library(MCMCpack)
-library(tidyverse)
-library(patchwork)
-library(spam)
-library(fields)
-
-theme_custom <- function(scale_text = 1) {
-  theme(
-    plot.title = element_text(
-      size  = 24 * scale_text,
-      face  = "bold",
-      hjust = 0.5
-    ),
-    axis.text.x  = element_text(size = 14 * scale_text),
-    axis.text.y  = element_text(size = 14 * scale_text),
-    strip.text.x = element_text(size = 10 * scale_text),
-    axis.title.x = element_text(
-      size   = 16 * scale_text,
-      margin = margin(t = 10, r = 0, b = 0, l = 0)
-    ),
-    axis.title.y = element_text(
-      size   = 16 * scale_text,
-      margin = margin(t = 0, r = 10, b = 0, l = 0)
-    ),
-    legend.text  = element_text(size = 10 * scale_text),
-    legend.title = element_text(size = 14 * scale_text)
-  )
-}
-```
 
 # Defining the MRA model
 
@@ -124,11 +97,12 @@ In matrix form, the spatially correlated random process has the distribution $\b
 
 Rather than specifying a parametric form for the covariance function $cov(\mathbf{s}_i, \mathbf{s}_j)$, we approximate the covariance function effect with a multi-resolution approximation. This approximation gives $\boldsymbol{\eta} \approx \sum_{m=1}^M \mathbf{W}_m \boldsymbol{\alpha}_m$ where $\mathbf{W}_m$ is the Wendland basis expansion at the $m$th resolution and $\boldsymbol{\alpha}_m$ are the $m$th resolution random effect.
 
-# Simulating data from the model
+# A Simulated Data Example 
 
 First, we simulate some data from the process of interest. We simulate a spatially explicit set of fired effects X that represent spatial variables like elevation, latitude, etc. Next, the spatial process is initialized
 
-```{r, simulate_data, cache = TRUE}
+**simulated data code**
+```{r, simulate_data, eval = FALSE, echo = FALSE}
 set.seed(11)
 
 N <- 40^2
@@ -182,7 +156,8 @@ y <- X %*% beta + W %*% alpha + rnorm(N, 0, sqrt(sigma2))
 
 Next, the sum-to-one constraint is verified by checking that within each dimension the sum of the $\boldsymbol{\alpha}_m$ parameters is 0.
 
-```{r, show = "hold"}
+**sum-to-zero check**
+```{r, eval = FALSE, echo = FALSE}
 sum(alpha)
 sum(alpha[dims_idx == 1])
 sum(alpha[dims_idx == 2])
@@ -194,14 +169,8 @@ sum(alpha[dims_idx == 3])
 To explore the structure of the precision matrix of the spatial random effects, we plot the pattern of nonzero elements in the precision matrices $\mathbf{Q}_{m}$ for each resolution $m$. The sparse, banded structure in the precision matrices at each resolution are what enable efficient computation.
 
 
-```{r plot-precision-matrices, warning = FALSE, cache = TRUE, dev.args = list(pointsize = 4), fig.cap = "Plot showing the locations of nonzero elements of the precision matrix at each resolution."}
-## plot Q_alpha_tau2 structure
-## note: the display function gives a warning about the default cex setting
-layout(matrix(1:4, 2, 2, byrow = TRUE))
-for (m in 1:M) {
-  display(Q_alpha_tau2[which(dims_idx == m), which(dims_idx == m)])
-  title(main = paste("Nonzero elements of \n precision matrix; resolution", m))
-}
+```{r, out.width = "49%", echo = FALSE, fig.align = "center", fig.show = "hold", fig.cap = "Sparsity of MRA precision matrices"}
+knitr::include_graphics(here::here("images", "precision-matrix-sparsity.png"))
 ```
 
 
@@ -415,11 +384,12 @@ knitr::include_graphics(here::here("images", "MRA-resolutions.png"))
 
 
 
-# Fitting the MRA model
+## Fitting the MRA model to simulated data
 
 To explore how well the fitted model can predict out of sample data, we take a sample $s$ of size $n_{sites}$ from the $N$ simulated points and fit the model using `mcmc_mra()`.
 
-```{r, sample_data, dependson = "simulate_data"}
+**subsample data code**
+```{r, sample_data, eval = FALSE, echo = FALSE}
 set.seed(111)
 n_sites   <- 500
 s         <- sample(N, n_sites)
@@ -457,7 +427,8 @@ knitr::include_graphics(here::here("images", "sample-data.png"))
 
 To fit the model, we must specify the parameters form model fitting. The parameter `params$n_adapt` determines the number of warm-up MCMC iterations and these iterations are discarded. The parameter `params$n_mcmc` determines the number of post warm-up MCMC iterations (i.e., the total number of MCMC iterations is `params$n_adapt + params$n_mcmc`). The parameter `params$n_thin` determines the thinning rate for keeping posterior samples which is primarily used when the number of MCMC samples to keep stresses the computer memory usage. The total number of samples kept is `params$n_mcmc / params$n_thin`. The parameter `params$n_message` specifies the frequency of messages to display showing the progress of the MCMC algorithm. The object `priors` defines the priors for fitting the model. If `priors` is not specified, default priors are used.
 
-```{r params-MCMC}
+**fit model code**
+```{r params-MCMC, eval = FALSE, echo = FALSE}
 params <- list(
   n_mcmc    = 500,
   n_adapt   = 500,
@@ -503,8 +474,8 @@ Now we can fit the model to the simulated data. Using a [project-oriented workfl
 <!-- ``` -->
 
 
-
-```{r fit-model, eval = FALSE}
+**fitting the model**
+```{r fit-model, eval = FALSE, echo = FALSE}
 set.seed(999)
 
 start   <- Sys.time()
@@ -551,7 +522,7 @@ if (file.exists(here::here("results", "fit-mra-sim.RData"))) {
 The fitting of `mcmc_mra()` took `r format(runtime, nsmall = 2, digits = 2)`.
 
 
-# Examining the MRA MCMC output
+## Examining the MRA MCMC output
 
 After fitting the MCMC using `mcmc_mra()`, we plot the trace plots of the parameters to check for evidence that the model has not converged and to identify that the parameters have mixed. The first trace plots we examine are for the variance parameters and the regression coefficients. Overall, these trace plots look decent although the effective samples size for the $\tau^2$s and $\beta$s might be low and more samples might be needed for making inference with the model.
 
@@ -771,7 +742,7 @@ Despite the parameters $\tau^2_m$ and $\boldsymbol{\alpha}_m$ not being identifi
 
 
 ```{r, out.width = "49%", echo = FALSE, fig.align = "center", fig.show = "hold"}
-knitr::include_graphics(here::here("images", "fitted-process.png"))
+knitr::include_graphics(here::here("images", c("MRA-resolutions.png", "fitted-process.png")))
 ```
 
 
@@ -871,6 +842,9 @@ knitr::include_graphics(here::here("images", "sim-vs-fitted-process.png"))
 <!-- ``` -->
 
 
+# A real data example
+* Use data of Heaton et. al.
+* Calculate the effective sample size per second
 
 
 
