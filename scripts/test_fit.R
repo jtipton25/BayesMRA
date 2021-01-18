@@ -1,4 +1,8 @@
 library(spam)
+library(tidyverse)
+library(patchwork)
+library(BayesMRA)
+
 load(here::here("data", "SmallTestData.RData"))
 
 str(code.test)
@@ -11,8 +15,7 @@ locs <- cbind(code.test$Lat, code.test$Lon)
 ## create a mask in the upper corner
 code.test$MaskTemp[code.test$Lat > 0.60 & code.test$Lon > 0.60] <- NA
 
-library(tidyverse)
-library(patchwork)
+
 
 theme_custom <- function(scale_text = 1) {
     theme(
@@ -50,7 +53,7 @@ plot_mask + plot_full
 
 dat_fit <- code.test %>%
     filter(!is.na(MaskTemp))
-library(BayesMRA)
+
 y <- dat_fit$MaskTemp
 X <- model.matrix(~ Lon + Lat, data = dat_fit)
 locs <- cbind(dat_fit$Lat, dat_fit$Lon)
@@ -123,6 +126,8 @@ if (file.exists(here::here("results", "test-fit-integrated.RData"))) {
     save(out, runtime_integrated, file = here::here("results", "test-fit-integrated.RData"))
 }
 
+pushoverr::pushover(message = "Finished fitting integrated model")
+
 ## Recover alpha with posterior samples
 
 tW <- t(out$MRA$W)
@@ -154,6 +159,8 @@ if (file.exists(here::here("results", "fit-integrated-alphas.RData"))) {
     save(alpha_post, file = here::here("results", "fit-integrated-alphas.RData"))
 }
 out$alpha = alpha_post
+
+pushoverr::pushover(message = "Finished predicting alpha")
 
 ## Check the output to make sure the sum to 0 constraints are satisfied
 iter_idx <- 224
@@ -487,6 +494,7 @@ if (file.exists(here::here("results", "fit-integrated-alphas-constraint.RData"))
 
 out$alpha_constraint <- alpha_post_const
 
+pushoverr::pushover(message = "Finished predicting constrained alpha")
 
 ## Check the output to make sure the sum to 0 constraints are satisfied
 iter_idx <- 224
