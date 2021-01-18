@@ -12,10 +12,10 @@
 #'
 #' @return The (log) density of a normal distribution with mean \eqn{\mathbf{X} \boldsymbol{\beta}} and covariance matrix \eqn{\sigma^2 \mathbf{I} + \mathbf{W} \mathbf{Q}_{\alpha_{\tau^2}} \mathbf{W}'}
 #' @import spam
+#' @import spam64
 #' @export
 dmvn_smw <- function(y, X, beta, tW, tWW, Q_alpha_tau2, sigma2, Rstruct = NULL, logd = TRUE) {
     n <- length(y)
-    I <- spam_diag(n)
 
     devs <- y - X %*% beta
     ## calculate the Sherman-Morrison-Woodbury inverse

@@ -37,7 +37,7 @@ test_that("illegal input for mra_wendland_2d", {
 
     locs <- matrix(1:6, 3, 2)
     expect_s3_class(mra_wendland_2d(locs, M = 2), "mra_wendland_2d")
-    expect_s3_class(mra_wendland_2d(locs, M = 2, use_spam = FALSE), "mra_wendland_2d")
+    # expect_s3_class(mra_wendland_2d(locs, M = 2, use_spam = FALSE), "mra_wendland_2d")
 
 })
 
@@ -46,25 +46,23 @@ test_that("illegal input for mra_wendland_2d_pred", {
     locs <- matrix(1:20, 10, 2)
     MRA <- mra_wendland_2d(locs)
     locs_pred <- matrix(NA, 20, 2)
-    expect_error(mra_wendland_2d_pred(locs, locs_pred, MRA), "locs_pred must be a numeric matrix with N rows and 2 columns")
+    expect_error(mra_wendland_2d_pred(locs_pred, MRA), "locs_pred must be a numeric matrix with N rows and 2 columns")
 
     locs_pred <- matrix(1:30, 10, 3)
-    expect_error(mra_wendland_2d_pred(locs, locs_pred, MRA), "locs_pred must be a numeric matrix with N rows and 2 columns")
+    expect_error(mra_wendland_2d_pred(locs_pred, MRA), "locs_pred must be a numeric matrix with N rows and 2 columns")
 
     locs_pred <- matrix("11", 10, 2)
-    expect_error(mra_wendland_2d_pred(locs, locs_pred, MRA), "locs_pred must be a numeric matrix with N rows and 2 columns")
+    expect_error(mra_wendland_2d_pred(locs_pred, MRA), "locs_pred must be a numeric matrix with N rows and 2 columns")
 
     locs_pred <- 1:10
-    expect_error(mra_wendland_2d_pred(locs, locs_pred, MRA), "locs_pred must be a numeric matrix with N rows and 2 columns")
+    expect_error(mra_wendland_2d_pred(locs_pred, MRA), "locs_pred must be a numeric matrix with N rows and 2 columns")
 
-    locs <- matrix(1:30, 10, 3)
-    expect_error(mra_wendland_2d_pred(locs, locs_pred, MRA), "locs must be a numeric matrix with N rows and 2 columns")
 
     locs <- matrix(1:20, 10, 2)
     locs_pred <- matrix(1:20, 10, 2)
-    expect_error(mra_wendland_2d_pred(locs, locs_pred, MRA, use_spam = 3.5), "use_spam must be either TRUE or FALSE")
-    expect_error(mra_wendland_2d_pred(locs, locs_pred, MRA, use_spam = NA), "use_spam must be either TRUE or FALSE")
-    expect_error(mra_wendland_2d_pred(locs, locs_pred, MRA, use_spam = "aaa"), "use_spam must be either TRUE or FALSE")
+    expect_error(mra_wendland_2d_pred(locs_pred, MRA, use_spam = 3.5), "use_spam must be either TRUE or FALSE")
+    expect_error(mra_wendland_2d_pred(locs_pred, MRA, use_spam = NA), "use_spam must be either TRUE or FALSE")
+    expect_error(mra_wendland_2d_pred(locs_pred, MRA, use_spam = "aaa"), "use_spam must be either TRUE or FALSE")
 
     class(MRA) <- NULL
     expect_error(mra_wendland_2d_pred(locs, locs_pred, MRA), 'MRA must be of class "mra_wendland_2d"')

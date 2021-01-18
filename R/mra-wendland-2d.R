@@ -5,11 +5,13 @@
 #' @param n_coarse_grid The number of basis functions in one direction (e.g. `n_coarse_grid = 10` results in a \eqn{10 \times 10}{10x10} course grid which is further extended by the number of additional padding basis functions given by `n_padding`.
 #' @param n_padding The number of additional boundary points to add on each boundary. For example, n_padding = 5 will add 5 boundary knots to the both the left  and right side of the grid).
 #' @param n_neighbors The expected number of neighbors for each interior basis function. This determines the basis radius parameter.
+#' @param max_points The expected number of pairs less than or equal to the radius. Default is `nrow(locs)` * `num_neighbors`.
 #' @param use_spam is a boolean flag to determine whether the output is a list of `spam::spam` matrix objects (`use_spam = TRUE`) or a an \eqn{n \times n}{n x n} sparse Matrix of class `Matrix::dgCMatrix` `use_spam = FALSE` (see spam and Matrix packages for details).
 #'
 #' @importFrom fields rdist
-#' @importFrom spam spam
 #' @importFrom Matrix Matrix
+#' @import spam
+#' @import spam64
 #' @return A list of objects including the MRA knots locations `locs_grid`,
 #' the Wendland basis representation matrix `W` at the observed locations,
 #' the basis radius `radius`, the numbers of resolutions `M`,
@@ -34,6 +36,7 @@ mra_wendland_2d <- function(
     n_coarse_grid = 10,
     n_padding     = 5L,
     n_neighbors   = 68,
+    max_points    = NULL,
     # n_max_fine_grid = 2^12,
     # radius      = 25,
     use_spam      = TRUE
@@ -62,12 +65,22 @@ mra_wendland_2d <- function(
     if (!is_positive_integer(n_padding, 1)) {
         stop("n_padding must be a positive integer")
     }
+    if (!(is.null(max_points) | is_positive_integer(max_points, 1))) {
+        stop("max_points must be either NULL or a positive numeric integer")
+    }
     if (!is.logical(use_spam) || length(use_spam) != 1 || is.na(use_spam)) {
         stop("use_spam must be either TRUE or FALSE")
     }
-
+    if (use_spam == FALSE) {
+        stop("The Matrix package is not currently supported")
+    }
 
     N <- nrow(locs)
+
+    ## Define max_points parameter
+    if (is.null(max_points)) {
+        max_points <- N * n_neighbors
+    }
     ## Assign as many gridpoints (approximately) as data
     # n_grid <- ceiling(sqrt(N / 2^(M:1 - 1)))
 
@@ -92,7 +105,10 @@ mra_wendland_2d <- function(
     out          <- vector(mode = "list", length = M)
     W            <- vector(mode = "list", length = M)
 
+    # guess the max_points variable
+
     for (m in 1:M) {
+
         ## right now assuming a 2D grid -- can generalize later
         seq_x <- seq(
             range(locs[, 1])[1],
@@ -119,11 +135,17 @@ mra_wendland_2d <- function(
 
         locs_grid[[m]] <- expand.grid(seq_x, seq_y)
 
-        D <- rdist(locs, locs_grid[[m]])
+        # D <- rdist(locs, locs_grid[[m]])
+        D <- fields.rdist.near(locs, locs_grid[[m]], delta = radius[m],
+                               max.points = max_points)
+
+        D$ra <- wendland_basis(D$ra, radius[m])
         if (use_spam) {
             ## use the spam sparse matrix package
-            W[[m]] <- spam(c(wendland_basis(D, radius[m])), nrow = nrow(D), ncol = ncol(D))
+            # W[[m]] <- spam(c(wendland_basis(D, radius[m])), nrow = nrow(D), ncol = ncol(D))
+            W[[m]] <- spam(D[c("ind", "ra")], nrow = D$da[1], ncol = D$da[2])
         } else {
+            stop("The Matrix package is not currently supported")
             ## use the Matrix sparse matrix package
             W[[m]] <- Matrix(wendland_basis(D, radius[m]), sparse = TRUE)
         }

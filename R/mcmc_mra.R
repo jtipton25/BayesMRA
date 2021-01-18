@@ -23,6 +23,7 @@
 #' @param inits is the list of initial values if the user wishes to specify initial values. If these values are not specified, then the initial values will be randomly sampled from the prior.
 #' @param config is the list of configuration values if the user wishes to specify initial values. If these values are not specified, then default a configuration will be used.
 #' @param verbose Should verbose output be printed? Typically this is only useful for troubleshooting.
+#' @param joint Should the spatial parameters alpha be sampled jointly or by each resolution
 #' @param use_spam is a boolean flag to determine whether the output is a list of spam matrix objects (\code{use_spam = TRUE}) or a an \eqn{n \times n}{n x n} sparse Matrix of class "dgCMatrix" \code{use_spam = FALSE} (see spam and Matrix packages for details).
 #' @param n_chain is the MCMC chain id. The default is 1.
 #'
@@ -97,10 +98,11 @@
 #' @export
 #'
 #' @importFrom mvnfast rmvn
-#' @importFrom fields rdist
+#' @importFrom fields fields.rdist.near
 #' @importFrom Matrix Cholesky
 #' @importFrom stats lm rgamma
 #' @import spam
+#' @import spam64
 
 mcmc_mra <- function(
     y,
@@ -117,7 +119,7 @@ mcmc_mra <- function(
     config        = NULL,
     verbose       = FALSE,
     use_spam      = TRUE, ## use spam or Matrix for sparse matrix operations
-    center_process = TRUE,
+    joint         = TRUE,
     n_chain       = 1
 ) {
 
@@ -208,14 +210,14 @@ mcmc_mra <- function(
         }
     }
 
-    sample_lambda <- TRUE
-    if (!is.null(config)) {
-        if (!is.null(config[['sample_lambda']])) {
-            sample_lambda <- config[['sample_lambda']]
-            if (!is.logical(sample_lambda) | is.na(sample_lambda))
-                stop('If specified, sample_lambda must be TRUE or FALSE')
-        }
-    }
+    # sample_lambda <- TRUE
+    # if (!is.null(config)) {
+    #     if (!is.null(config[['sample_lambda']])) {
+    #         sample_lambda <- config[['sample_lambda']]
+    #         if (!is.logical(sample_lambda) | is.na(sample_lambda))
+    #             stop('If specified, sample_lambda must be TRUE or FALSE')
+    #     }
+    # }
 
     ## do we sample the nugger variance parameter
     sample_sigma2 <- TRUE
@@ -260,16 +262,31 @@ mcmc_mra <- function(
     W        <- MRA$W
     n_dims   <- MRA$n_dims
     dims_idx <- MRA$dims_idx
+    W_list   <- vector(mode = "list", length = M)
+    for (m in 1:M) {
+        W_list[[m]] <- W[, dims_idx == m]
+    }
 
     tW <- NULL
+    tWW <- NULL
+    tW_list <- vector(mode = "list", length = M)
+    tWW_list <- vector(mode = "list", length = M)
     if (use_spam) {
-        tW <- t(W)
+        if (joint) {
+            tW <- t(W)
+            tWW <- tW %*% W
+        } else {
+            for (m in 1:M) {
+                tW_list[[m]] <- t(W_list[[m]])
+                tWW_list[[m]] <- tW_list[[m]] %*% W_list[[m]]
+            }
+        }
     } else {
         stop ('Only support use_spam = TRUE')
         # tW <- Matrix::t(W)
     }
 
-    tWW <- tW %*% W
+
 
     ##
     ## initial values
@@ -329,9 +346,9 @@ mcmc_mra <- function(
     ## prior for lambda is scale_lambda
     ## fix this so it can be set by the user
     # scale_lambda <- 0.5
-    scale_lambda <- 500
-
-    lambda <- rgamma(M, 0.5, scale_lambda)
+    # scale_lambda <- 500
+    #
+    # lambda <- rgamma(M, 0.5, scale_lambda)
     tau2   <- rep(1, M)
 
     alpha_tau2 <- 0.01
@@ -353,7 +370,6 @@ mcmc_mra <- function(
         }
     }
     #100 * pmin(pmax(1 / rgamma(M, 0.5, lambda), 1), 100)
-
 
     Q_alpha_tau2 <- make_Q_alpha_tau2(Q_alpha, tau2, use_spam = use_spam)
 
@@ -393,14 +409,24 @@ mcmc_mra <- function(
     ## initialize alpha
     ##
 
-    alpha <- NULL
+    alpha  <- rep(0, sum(n_dims))
+    A_alpha_list <- vector(mode = "list", length = M)
+    Rstruct_list <- vector(mode = "list", length = M)
+    b_alpha_list <- vector(mode = "list", length = M)
     if (use_spam) {
-        A_alpha <- 1 / sigma2 * tWW + Q_alpha_tau2
-        ## precalculate the sparse cholesky structure for faster Gibbs updates
-        Rstruct <- chol(A_alpha)
-        b_alpha <- 1 / sigma2 * tW %*% (y - X_beta)
-        # alpha   <- as.vector(rmvnorm.canonical(1, b_alpha, A_alpha, Rstruct = Rstruct))
-        alpha  <- rep(0, sum(n_dims))
+        if (joint) {
+            A_alpha <- 1 / sigma2 * tWW + Q_alpha_tau2
+            ## precalculate the sparse cholesky structure for faster Gibbs updates
+            Rstruct <- chol(A_alpha)
+            b_alpha <- 1 / sigma2 * tW %*% (y - X_beta)
+            # alpha   <- as.vector(rmvnorm.canonical(1, b_alpha, A_alpha, Rstruct = Rstruct))
+        } else {
+            for (m in 1:M) {
+                A_alpha_list[[m]] <- 1 / sigma2 * tWW_list[[m]] + tau2[m] * Q_alpha[[m]]
+                Rstruct_list[[m]] <- chol(A_alpha_list[[m]])
+                b_alpha_list[[m]] <- 1 / sigma2 * tW_list[[m]] %*% (y - X_beta)
+            }
+        }
     } else {
         stop("The only sparse matrix pacakage available is spam")
     }
@@ -420,24 +446,30 @@ mcmc_mra <- function(
     # a_constraint <- 0
 
     ## resolution level constraint on random effect W_m %*% alpha_m
-    A_constraint_tmp <- sapply(1:M, function(i){
-        tmp <- rep(1, N) %*% W[, dims_idx == i]
-        return(tmp)
-    })
-    A_constraint <- matrix(0, M, sum(n_dims))
-    for (i in 1:M) {
-        A_constraint[i, dims_idx == i] <- A_constraint_tmp[[i]]
+    A_constraint_list <- vector(mode = "list", length = M)
+    a_constraint <- NULL
+    if (joint) {
+        A_constraint_tmp <- sapply(1:M, function(i){
+            tmp <- rep(1, N) %*% W[, dims_idx == i]
+            return(tmp)
+        })
+        A_constraint <- matrix(0, M, sum(n_dims))
+        for (i in 1:M) {
+            A_constraint[i, dims_idx == i] <- A_constraint_tmp[[i]]
+        }
+
+        a_constraint <- rep(0, M)
+    } else {
+        for (m in 1:M) {
+            A_constraint_list[[m]] <- rep(1, N) %*% W_list[[m]]
+        }
+        a_constraint <- 0
     }
-
-    a_constraint <- rep(0, M)
-
 
     ## intialize an ICAR structure for fitting alpha
     Q_alpha      <- make_Q_alpha_2d(sqrt(n_dims), rep(1, length(n_dims)), use_spam = use_spam)
     Q_alpha_tau2 <- make_Q_alpha_tau2(Q_alpha, tau2, use_spam = use_spam)
 
-
-    W_alpha <- W %*% alpha
 
     ##
     ## sampler config options -- to be added later
@@ -474,7 +506,15 @@ mcmc_mra <- function(
             alpha <- inits[['alpha']]
         }
     }
-    W_alpha <- W %*% alpha
+
+    if (joint) {
+        W_alpha <- W %*% alpha
+    } else {
+        W_alpha <- matrix(0, N, M)
+        for (m in 1:M) {
+            W_alpha[, m] <- W_list[[m]] %*% alpha[dims_idx == m]
+        }
+    }
 
     ## initial values for tau2
     if (!is.null(inits[['tau2']])) {
@@ -504,7 +544,7 @@ mcmc_mra <- function(
     tau2_save    <- matrix(0, n_save, M)
     sigma2_save  <- rep(0, n_save)
     alpha_save   <- matrix(0, n_save, sum(n_dims))
-    lambda_save    <- matrix(0, n_save, M)
+    # lambda_save    <- matrix(0, n_save, M)
 
     ##
     ## initialize tuning
@@ -544,8 +584,12 @@ mcmc_mra <- function(
         if (sample_sigma2) {
             if (verbose)
                 message("sample sigma2")
-
-            devs <- y - X_beta - W_alpha
+            devs <- NULL
+            if (joint) {
+                devs <- y - X_beta - W_alpha
+            } else {
+                devs <- y - X_beta - apply(W_alpha, 1, sum)
+            }
             SS        <- sum(devs^2)
             sigma2 <- 1 / rgamma(1, N / 2 + alpha_sigma2, SS / 2 + beta_sigma2)
             sigma     <- sqrt(sigma2)
@@ -559,8 +603,13 @@ mcmc_mra <- function(
             if (verbose)
                 message("sample beta")
 
-            A      <- 1 / sigma2 * tXX + Sigma_beta_inv
-            b      <- 1 / sigma2 * tX %*% (y - W_alpha) + Sigma_beta_inv %*% mu_beta
+            A <- 1 / sigma2 * tXX + Sigma_beta_inv
+            b <- NULL
+            if (joint) {
+                b <- 1 / sigma2 * tX %*% (y - W_alpha) + Sigma_beta_inv %*% mu_beta
+            } else{
+                b <- 1 / sigma2 * tX %*% (y - apply(W_alpha, 1, sum)) + Sigma_beta_inv %*% mu_beta
+            }
             ## guarantee a symmetric matrix
             A      <- (A + t(A)) / 2
             beta   <- rmvn_arma(A, b)
@@ -576,15 +625,27 @@ mcmc_mra <- function(
         if (sample_alpha) {
             if (verbose)
                 message("sample alpha")
-            A_alpha <- 1 / sigma2 * tWW + Q_alpha_tau2
-            # A_alpha_chol <- chol.spam(A_alpha, Rstruct = Rstruct)
-            b_alpha <- 1 / sigma2 * tW %*% (y - X_beta)
-            # alpha   <- as.vector(rmvnorm.canonical(1, b_alpha, A_alpha, Rstruct = Rstruct))
-            ## sample constrained to sum to 0
-            alpha   <- as.vector(rmvnorm.canonical.const(1, b_alpha, A_alpha, Rstruct = Rstruct,
-                                                         A = A_constraint, a = a_constraint))
-            ## update W_alpha
-            W_alpha <- W %*% alpha
+            if (joint) {
+                A_alpha <- 1 / sigma2 * tWW + Q_alpha_tau2
+                # A_alpha_chol <- chol.spam(A_alpha, Rstruct = Rstruct)
+                b_alpha <- 1 / sigma2 * tW %*% (y - X_beta)
+                # alpha   <- as.vector(rmvnorm.canonical(1, b_alpha, A_alpha, Rstruct = Rstruct))
+                ## sample constrained to sum to 0
+                alpha   <- as.vector(rmvnorm.canonical.const(1, b_alpha, A_alpha, Rstruct = Rstruct,
+                                                             A = A_constraint, a = a_constraint))
+                ## update W_alpha
+                W_alpha <- W %*% alpha
+            } else {
+                for (m in 1:M) {
+                    A_alpha_list[[m]] <- 1 / sigma2 * tWW_list[[m]] + tau2[m] * Q_alpha[[m]]
+                    b_alpha_list[[m]] <- 1 / sigma2 * tW_list[[m]] %*% (y - X_beta - apply(W_alpha[, -m], 1, sum))
+                    alpha[dims_idx == m]   <- as.vector(rmvnorm.canonical.const(1, b_alpha_list[[m]], A_alpha_list[[m]], Rstruct = Rstruct_list[[m]],
+                                                                 A = A_constraint_list[[m]], a = a_constraint))
+                    for (m in 1:M) {
+                        W_alpha[, m] <- W_list[[m]] %*% alpha[dims_idx == m]
+                    }
+                }
+            }
         }
 
         ##
@@ -633,14 +694,14 @@ mcmc_mra <- function(
         ## sample lambda
         ##
 
-        if (sample_lambda) {
-            if (verbose)
-                message("sample lambda")
-            for (m in 1:M) {
-                lambda[m]     <- rgamma(1, 1, scale_lambda + 1 / tau2[m])
-                # lambda[m]     <- rgamma(1, 1, scale_lambda + tau2[m])
-            }
-        }
+        # if (sample_lambda) {
+        #     if (verbose)
+        #         message("sample lambda")
+        #     for (m in 1:M) {
+        #         lambda[m]     <- rgamma(1, 1, scale_lambda + 1 / tau2[m])
+        #         # lambda[m]     <- rgamma(1, 1, scale_lambda + tau2[m])
+        #     }
+        # }
 
         ##
         ## save variables
@@ -654,7 +715,7 @@ mcmc_mra <- function(
                 tau2_save[save_idx, ]   <- tau2
                 sigma2_save[save_idx]   <- sigma2
                 alpha_save[save_idx, ]  <- alpha
-                lambda_save[save_idx, ] <- lambda
+                # lambda_save[save_idx, ] <- lambda
             }
         }
 
@@ -679,7 +740,7 @@ mcmc_mra <- function(
         tau2     = tau2_save,
         sigma2   = sigma2_save,
         alpha    = alpha_save,
-        lambda   = lambda_save,
+        # lambda   = lambda_save,
         MRA      = MRA
     )
 

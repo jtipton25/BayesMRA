@@ -96,7 +96,7 @@
 #'
 #' @export
 #'
-#' @importFrom mvnfast rmvn
+#' @importFrom mvnfast rmvn dmvn
 #' @importFrom fields rdist
 #' @importFrom Matrix Cholesky
 #' @importFrom stats lm rgamma
@@ -260,6 +260,32 @@ mcmc_mra_integrated <- function(
     tXX <- tX %*% X
 
     ##
+    ## initialize sigma2
+    ##
+
+    alpha_sigma2 <- 1
+    beta_sigma2  <- 1
+    ## check if priors for alpha_sigma2 are specified
+    if (!is.null(priors[['alpha_sigma2']])) {
+        if (!is_positive_numeric(priors[['alpha_sigma2']], 1))
+            stop("If specified, the parameter alpha_sigma2 in priors must be a positive numeric value.")
+        if (all(!is.na(priors[['alpha_sigma2']]))) {
+            alpha_sigma2 <- priors[['alpha_sigma2']]
+        }
+    }
+    ## check if priors for beta_sigma2 are specified
+    if (!is.null(priors[['beta_sigma2']])) {
+        if (!is_positive_numeric(priors[['beta_sigma2']], 1))
+            stop("If specified, the parameter beta_sigma2 in priors must be a positive numeric value.")
+        if (all(!is.na(priors[['beta_sigma2']]))) {
+            beta_sigma2 <- priors[['beta_sigma2']]
+        }
+    }
+
+    sigma2  <- pmax(pmin(1 / rgamma(1, alpha_sigma2, beta_sigma2), 5), 0.1)
+    sigma   <- sqrt(sigma2)
+
+    ##
     ## priors for beta
     ##
 
@@ -342,31 +368,6 @@ mcmc_mra_integrated <- function(
 
     # rho      <- runif(1, -1, 1)
 
-    ##
-    ## initialize sigma2
-    ##
-
-    alpha_sigma2 <- 1
-    beta_sigma2  <- 1
-    ## check if priors for alpha_sigma2 are specified
-    if (!is.null(priors[['alpha_sigma2']])) {
-        if (!is_positive_numeric(priors[['alpha_sigma2']], 1))
-            stop("If specified, the parameter alpha_sigma2 in priors must be a positive numeric value.")
-        if (all(!is.na(priors[['alpha_sigma2']]))) {
-            alpha_sigma2 <- priors[['alpha_sigma2']]
-        }
-    }
-    ## check if priors for beta_sigma2 are specified
-    if (!is.null(priors[['beta_sigma2']])) {
-        if (!is_positive_numeric(priors[['beta_sigma2']], 1))
-            stop("If specified, the parameter beta_sigma2 in priors must be a positive numeric value.")
-        if (all(!is.na(priors[['beta_sigma2']]))) {
-            beta_sigma2 <- priors[['beta_sigma2']]
-        }
-    }
-
-    sigma2  <- pmax(pmin(1 / rgamma(1, alpha_sigma2, beta_sigma2), 5), 0.1)
-    sigma   <- sqrt(sigma2)
 
     ## intialize an ICAR structure for fitting alpha
     Q_alpha      <- make_Q_alpha_2d(sqrt(n_dims), rep(0.9, length(n_dims)), use_spam = use_spam)

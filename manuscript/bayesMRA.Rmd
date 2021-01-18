@@ -64,7 +64,9 @@ knitr::opts_chunk$set(fig.width = 16, fig.height = 9, dpi = 300, dev.args = list
 
 - Jean Remy: Focus on the writing of the spatial models in the ** Defining the MRA model** section. Pay attention to how Nychka et. al. Multiresolution... writes the model statement. 
 
+- John: work on package code and fit heaton et. al. data [https://github.com/finnlindgren/heatoncomparison](https://github.com/finnlindgren/heatoncomparison)
 
+- John: write up sum-to-zero constraint and multi-resolution factorization for better scaling to massive data
 
 # Introduction
 

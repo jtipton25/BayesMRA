@@ -19,7 +19,7 @@ mcmc_mra(
   config = NULL,
   verbose = FALSE,
   use_spam = TRUE,
-  center_process = TRUE,
+  joint = TRUE,
   n_chain = 1
 )
 }
@@ -62,6 +62,8 @@ outputs progress messages every 50 iterations.
 \item{verbose}{Should verbose output be printed? Typically this is only useful for troubleshooting.}
 
 \item{use_spam}{is a boolean flag to determine whether the output is a list of spam matrix objects (\code{use_spam = TRUE}) or a an \eqn{n \times n}{n x n} sparse Matrix of class "dgCMatrix" \code{use_spam = FALSE} (see spam and Matrix packages for details).}
+
+\item{joint}{Should the spatial parameters alpha be sampled jointly or by each resolution}
 
 \item{n_chain}{is the MCMC chain id. The default is 1.}
 }

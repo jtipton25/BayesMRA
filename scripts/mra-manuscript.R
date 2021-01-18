@@ -4,7 +4,7 @@ library(mvnfast)
 # library(MCMCpack)
 library(tidyverse)
 library(patchwork)
-library(spam)
+library(spam64)
 library(fields)
 library(spBayes)
 library(coda)
@@ -49,8 +49,8 @@ theme_custom <- function(scale_text = 1) {
 
 set.seed(11)
 
-N <- 40^2
-
+# N <- 40^2
+N <- 1e4
 ## setup the spatial process
 locs <- as.matrix(
     expand.grid(
@@ -58,17 +58,18 @@ locs <- as.matrix(
         seq(0, 1, length.out = sqrt(N))
     )
 )
-D <- fields::rdist(locs)
+# D <- fields::rdist(locs)
 
 ## fixed effects include intercept, elevation, and latitude
-X <- cbind(1, as.vector(mvnfast::rmvn(1, rep(0, N), 3 * exp(-D / 20))), locs[, 2])
+# X <- cbind(1, as.vector(mvnfast::rmvn(1, rep(0, N), 3 * exp(-D / 20))), locs[, 2])
+X <- cbind(1, rnorm(N))
 p <- ncol(X)
 
 beta <- rnorm(ncol(X))
 
 ## MRA spatio-temporal random effect
-M <- 3
-n_coarse <- 10
+M <- 4
+n_coarse <- 20
 
 MRA    <- mra_wendland_2d(locs, M = M, n_coarse = n_coarse, use_spam = TRUE)
 

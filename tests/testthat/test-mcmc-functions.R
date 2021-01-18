@@ -42,7 +42,7 @@ test_that("mcmc_mra", {
     expect_error(mcmc_mra(y, X, locs, params, n_chain = NA), "n_chain must be a positive integer")
     expect_error(mcmc_mra(y, X, locs, params, n_chain = NULL), "n_chain must be a positive integer")
 
-    expect_error(mcmc_mra(y, X, locs, params, use_spam = FALSE), "Only support use_spam = TRUE")
+    expect_error(mcmc_mra(y, X, locs, params, use_spam = FALSE), "The Matrix package is not currently supported")
 
     expect_error(mcmc_mra(y, X), 'argument "locs" is missing, with no default')
     expect_error(mcmc_mra(y, X, locs), 'argument "params" is missing, with no default')
@@ -216,9 +216,9 @@ test_that("mcmc_mra", {
     expect_error(mcmc_mra(y, X, locs, params, config = list(sample_tau2 = NA)), "If specified, sample_tau2 must be TRUE or FALSE")
     expect_error(mcmc_mra(y, X, locs, params, config = list(sample_tau2 = 3)), "If specified, sample_tau2 must be TRUE or FALSE")
 
-    expect_error(mcmc_mra(y, X, locs, params, config = list(sample_lambda = "TRUE")), "If specified, sample_lambda must be TRUE or FALSE")
-    expect_error(mcmc_mra(y, X, locs, params, config = list(sample_lambda = NA)), "If specified, sample_lambda must be TRUE or FALSE")
-    expect_error(mcmc_mra(y, X, locs, params, config = list(sample_lambda = 3)), "If specified, sample_lambda must be TRUE or FALSE")
+    # expect_error(mcmc_mra(y, X, locs, params, config = list(sample_lambda = "TRUE")), "If specified, sample_lambda must be TRUE or FALSE")
+    # expect_error(mcmc_mra(y, X, locs, params, config = list(sample_lambda = NA)), "If specified, sample_lambda must be TRUE or FALSE")
+    # expect_error(mcmc_mra(y, X, locs, params, config = list(sample_lambda = 3)), "If specified, sample_lambda must be TRUE or FALSE")
 
     expect_error(mcmc_mra(y, X, locs, params, config = list(sample_sigma2 = "TRUE")), "If specified, sample_sigma2 must be TRUE or FALSE")
     expect_error(mcmc_mra(y, X, locs, params, config = list(sample_sigma2 = NA)), "If specified, sample_sigma2 must be TRUE or FALSE")

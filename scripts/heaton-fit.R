@@ -1,4 +1,4 @@
-load("~/Downloads/heatoncomparison-master/Data/AllSatelliteTemps.RData")
+load(here::here("data", "AllSatelliteTemps.RData"))
 
 str(all.sat.temps)
 locs <- cbind(all.sat.temps$Lat, all.sat.temps$Lon)
@@ -63,29 +63,45 @@ priors <- list(
     mu_beta      = rep(0, ncol(X)),
     Sigma_beta   = 5 * diag(ncol(X)))
 
-M <- 3
-n_coarse_grid <- 10
+M <- 4
+n_coarse_grid <- 40
 
 sd_y <- sd(y)
 mu_y <- mean(y)
 
+MRA <- mra_wendland_2d(locs, M = 3, n_coarse_grid = 55)
+MRA$n_dims
+sqrt(MRA$n_dims)
+sum(MRA$n_dims)
 
 if (file.exists(here::here("results", "heaton-fit.RData"))) {
     load(here::here("results", "heaton-fit.RData"))
 } else {
     start   <- Sys.time()
+
+    # to do: center and scale X
     out <- mcmc_mra(
-    y = (y - mu_y) / sd_y,
-    X = X,
-    locs = locs,
-    params = params,
-    priors = priors,
-    M = 3,
-    n_coarse_grid = 10)
+        y = (y - mu_y) / sd_y,
+        X = X,
+        locs = locs,
+        params = params,
+        priors = priors,
+        M = 3,
+        n_coarse_grid = 40,
+        joint = FALSE)
+
     end     <- Sys.time()
     runtime <- end - start
     save(out, runtime, file = here::here("results", "heaton-fit.RData"))
 }
+
+## Check the output to make sure the sum to 0 constraints are satisfied
+iter_idx <- 224
+sum(out$MRA$W %*% out$alpha[iter_idx, ])
+sum(out$MRA$W[, out$MRA$dims_idx == 1] %*% out$alpha[iter_idx, out$MRA$dims_idx == 1])
+sum(out$MRA$W[, out$MRA$dims_idx == 2] %*% out$alpha[iter_idx, out$MRA$dims_idx == 2])
+sum(out$MRA$W[, out$MRA$dims_idx == 3] %*% out$alpha[iter_idx, out$MRA$dims_idx == 3])
+
 
 # Trace plots of parameters ---------------------------------------------------
 
@@ -139,6 +155,8 @@ p_beta  <- ggplot(dat_beta, aes(x = iteration, y = beta, group = covariate, colo
 (p_tau2 + p_lambda) /  (p_sigma2 + p_beta)
 
 # Trace plots for spatial random effects  -------------------------------------
+
+## To do: double check these results
 dat_alpha <- data.frame(
     alpha = c(out$alpha),
     iteration = rep(1:nrow(out$alpha), each = ncol(out$alpha)),
@@ -188,7 +206,7 @@ p_sigma2 <- data.frame(sigma2 = out$sigma2) %>%
 
 ## predicted vs. estimated tau2
 dat_plot <- data.frame(
-    tau2 = c(out$beta),
+    tau2 = c(out$tau2),
     resolution = factor(rep(1:M, each = nrow(out$tau2)))
 )
 
@@ -247,7 +265,7 @@ MRA_pred <- mra_wendland_2d_pred(locs_pred, out$MRA)
 
 # y_pred <- matrix(NA, nrow = nrow(all.sat.temps), ncol = nrow(out$alpha))
 X_pred <- model.matrix(~ Lon + Lat, data = all.sat.temps)
-W_pred <- do.call(cbind, MRA_pred$W_pred)
+W_pred <- MRA_pred$W_pred
 # for (k in 1:nrow(out$alpha)) {
 #     if (k %% 10 == 0) {
 #         message("Generating prediction for iteration ", k, " out of ", nrow(out$alpha), " iterations")
@@ -261,7 +279,8 @@ Xbeta_pred  <- t(X_pred %*% t(out$beta)) * sd_y + mu_y
 Walpha_pred <- t(W_pred %*% t(out$alpha)) * sd_y
 y_pred <- Xbeta_pred + Walpha_pred
 
-Walpha_post <- t(out$MRA$W %*% t(out$alpha)) * sd_y
+range(Walpha_post)
+range(Walpha_pred)
 
 y_pred_mean <- apply(y_pred, 2, mean)
 y_pred_sd   <- apply(y_pred, 2, sd)
@@ -269,17 +288,21 @@ y_pred_sd   <- apply(y_pred, 2, sd)
 dat_pred <- data.frame(
     y = y_pred_mean,
     sd = y_pred_sd,
-    Lat = locs_pred[, 1],
-    Lon = locs_pred[, 2])
+    Lat = all.sat.temps$Lat,
+    Lon = all.sat.temps$Lon)
+
+zlims = range(
+    range(y_pred_mean),
+    range(all.sat.temps$TrueTemp, na.rm = TRUE))
 
 p_obs <- all.sat.temps %>%
     ggplot(aes(x = Lat, y = Lon, fill = TrueTemp)) +
     geom_raster() +
-    scale_fill_viridis_c(option = "B")
+    scale_fill_viridis_c(option = "B", limits = zlims)
 p_fit <- dat_pred %>%
     ggplot(aes(x = Lat, y = Lon, fill = y)) +
     geom_raster() +
-    scale_fill_viridis_c(option = "B")
+    scale_fill_viridis_c(option = "B", limits = zlims)
 p_obs + p_fit
 
 
