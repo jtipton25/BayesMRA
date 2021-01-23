@@ -1,0 +1,43 @@
+#' Plot the observed and "true" (holdout) spatial data
+#'
+#' Plot the fitted model from the output of `mcmc_mra()` or `mcmc_mra_integrated()`. Also add in the observed (or true data if using simulated/hold out data) to compare model fit to the data.
+#'
+#' @param out The output from `mcmc_mra()` or `mcmc_mra_integrated()`
+#' @param data A dataframe with four columns: Lat, Lon, Observed, Fitted
+#' @param base_size The base size for the plot
+#' @param ...
+#'
+#' @return
+#' @import ggplot2
+#' @import patchwork
+#' @export
+#'
+#'
+plot_fitted_alphas <- function(out, base_size = 12) {
+
+    fitted_alphas <- data.frame(
+        x = unlist(sapply(1:out$MRA$M, function(i) out$MRA$locs_grid[[i]][, 1])),
+        y = unlist(sapply(1:out$MRA$M, function(i) out$MRA$locs_grid[[i]][, 2])),
+        res = factor(unlist(sapply(1:out$MRA$M, function(i) rep(i, each = nrow(out$MRA$locs_grid[[i]]))))),
+        alpha = unlist(sapply(1:out$MRA$M, function(i) apply(out$alpha, 2, mean)[out$MRA$dims_idx == i]))
+    ) %>%
+        ggplot(aes(x = x, y = y, fill = alpha)) +
+        geom_raster() +
+        scale_fill_viridis_c() +
+        ggtitle("Posterior mean spatial random effects") +
+        facet_wrap( ~ res, ncol = 2) +
+        geom_rect(
+            data = NULL,
+            aes(xmin = min(out$locs[, 1]),
+                xmax = max(out$locs[, 1]),
+                ymin = min(out$locs[, 2]),
+                ymax = max(out$locs[, 2])
+            ),
+            fill  = NA,
+            color = "black",
+            alpha = 0.5
+        ) +
+        theme_bw(base_size)
+
+    return(fitted_alphas)
+}

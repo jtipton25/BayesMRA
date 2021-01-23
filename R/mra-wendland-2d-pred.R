@@ -48,7 +48,7 @@ mra_wendland_2d_pred <- function(
     }
 
 
-    M      <- length(MRA$radius)
+    M      <- MRA$M
 
     ## Define max_points parameter
     if (is.null(max_points)) {

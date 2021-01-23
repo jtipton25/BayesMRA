@@ -120,6 +120,7 @@ mcmc_mra <- function(
     verbose       = FALSE,
     use_spam      = TRUE, ## use spam or Matrix for sparse matrix operations
     joint         = TRUE,
+    constraint    = "unconstrained",
     n_chain       = 1
 ) {
 
@@ -145,6 +146,14 @@ mcmc_mra <- function(
         stop("params must contain a positive integer n_thin.")
     if (!is_positive_integer(params$n_message, 1))
         stop("params must contain a positive integer n_message.")
+
+    ## check the constraints on alpha
+    if (!(constraint %in% c("unconstrained", "overall", "resolution", "predicted"))) {
+        stop('constraint must be either "unconstrained", "overall", "resolution", or "predicted"')
+    }
+    if (constraint == "predicted") {
+        stop('constraint = "predicted" is not currently supported -- developer note: add W_pred to function call to enable this in future results')
+    }
 
     params$n_adapt   <- as.integer(params$n_adapt)
     params$n_mcmc    <- as.integer(params$n_mcmc)
@@ -245,6 +254,21 @@ mcmc_mra <- function(
     N      <- length(y)
     # n_time <- dim(Y)[3]
     p      <- ncol(X)
+
+    ##
+    ## center and scale the input and covariates
+    ##
+
+    sd_y <- sd(y)
+    mu_y <- mean(y)
+    y <- (y - mu_y) / sd_y
+
+    mu_X <- apply(X[, -1], 2, mean)
+    sd_X <- apply(X[, -1], 2, sd)
+    for(i in 2:ncol(X)) {
+        X[, i] <- (X[, i] - mu_X[i-1]) / sd_X[i-1]
+    }
+
 
     ##
     ## setup MRA spatial basis
@@ -431,7 +455,37 @@ mcmc_mra <- function(
         stop("The only sparse matrix pacakage available is spam")
     }
 
-    ## define the constraint matrices to ensure each resolution has random effects with mean 0
+
+    A_constraint <- NULL
+    a_constraint <- NULL
+    if (constraint == "overall") {
+        ## overall constraint on random effect
+        A_constraint <- rep(1, N) %*% W
+        a_constraint <- 0
+    } else if (constraint == "resolution") {
+        ## resolution level constraint on random effect W_m %*% alpha_m
+        A_constraint_list <- vector(mode = "list", length = M)
+        a_constraint <- NULL
+        if (joint) {
+            A_constraint_tmp <- sapply(1:M, function(i){
+                tmp <- rep(1, N) %*% W[, dims_idx == i]
+                return(tmp)
+            })
+            A_constraint <- matrix(0, M, sum(n_dims))
+            for (i in 1:M) {
+                A_constraint[i, dims_idx == i] <- A_constraint_tmp[[i]]
+            }
+
+            a_constraint <- rep(0, M)
+        } else {
+            for (m in 1:M) {
+                A_constraint_list[[m]] <- rep(1, N) %*% W_list[[m]]
+            }
+            a_constraint <- 0
+        }
+    }
+    ## Old constraint on alpha but not on Walpha
+    # ## define the constraint matrices to ensure each resolution has random effects with mean 0
     # A_constraint <- t(
     #     sapply(1:M, function(i){
     #         tmp = rep(0, sum(n_dims))
@@ -441,30 +495,9 @@ mcmc_mra <- function(
     # )
     # a_constraint <- rep(0, M)
 
-    ## overall constraint on random effect
-    # A_constraint <- rep(1, N) %*% W
-    # a_constraint <- 0
 
-    ## resolution level constraint on random effect W_m %*% alpha_m
-    A_constraint_list <- vector(mode = "list", length = M)
-    a_constraint <- NULL
-    if (joint) {
-        A_constraint_tmp <- sapply(1:M, function(i){
-            tmp <- rep(1, N) %*% W[, dims_idx == i]
-            return(tmp)
-        })
-        A_constraint <- matrix(0, M, sum(n_dims))
-        for (i in 1:M) {
-            A_constraint[i, dims_idx == i] <- A_constraint_tmp[[i]]
-        }
 
-        a_constraint <- rep(0, M)
-    } else {
-        for (m in 1:M) {
-            A_constraint_list[[m]] <- rep(1, N) %*% W_list[[m]]
-        }
-        a_constraint <- 0
-    }
+
 
     ## intialize an ICAR structure for fitting alpha
     Q_alpha      <- make_Q_alpha_2d(sqrt(n_dims), rep(1, length(n_dims)), use_spam = use_spam)
@@ -630,26 +663,33 @@ mcmc_mra <- function(
                 # A_alpha_chol <- chol.spam(A_alpha, Rstruct = Rstruct)
                 b_alpha <- 1 / sigma2 * tW %*% (y - X_beta)
                 # alpha   <- as.vector(rmvnorm.canonical(1, b_alpha, A_alpha, Rstruct = Rstruct))
-                ## sample constrained to sum to 0
-                alpha   <- as.vector(rmvnorm.canonical.const(1, b_alpha, A_alpha, Rstruct = Rstruct,
-                                                             A = A_constraint, a = a_constraint))
-                ## update W_alpha
-                W_alpha <- W %*% alpha
+                if (constraint == "unconstrained") {
+                    alpha   <- as.vector(rmvnorm.canonical.const(1, b_alpha, A_alpha, Rstruct = Rstruct))
+                } else if (constraint %in% c("overall", "resolution", "predicted")) {
+                    ## sample constrained to sum to 0
+                    alpha   <- as.vector(rmvnorm.canonical.const(1, b_alpha, A_alpha, Rstruct = Rstruct,
+                                                                 A = A_constraint, a = a_constraint))
+                    ## update W_alpha
+                    W_alpha <- W %*% alpha
+                }
             } else {
                 for (m in 1:M) {
                     A_alpha_list[[m]] <- 1 / sigma2 * tWW_list[[m]] + tau2[m] * Q_alpha[[m]]
                     b_alpha_list[[m]] <- 1 / sigma2 * tW_list[[m]] %*% (y - X_beta - apply(W_alpha[, -m], 1, sum))
-                    alpha[dims_idx == m]   <- as.vector(rmvnorm.canonical.const(1, b_alpha_list[[m]], A_alpha_list[[m]], Rstruct = Rstruct_list[[m]],
-                                                                 A = A_constraint_list[[m]], a = a_constraint))
-                    for (m in 1:M) {
-                        W_alpha[, m] <- W_list[[m]] %*% alpha[dims_idx == m]
+
+                    if (constraint == "unconstrained") {
+                        alpha[dims_idx == m]   <- as.vector(rmvnorm.canonical.const(1, b_alpha_list[[m]], A_alpha_list[[m]], Rstruct = Rstruct_list[[m]]))
+                    } else if (constraint %in% c("overall", "resolution", "predicted")) {
+                        alpha[dims_idx == m]   <- as.vector(rmvnorm.canonical.const(1, b_alpha_list[[m]], A_alpha_list[[m]], Rstruct = Rstruct_list[[m]],
+                                                                                    A = A_constraint_list[[m]], a = a_constraint))
                     }
+                    W_alpha[, m] <- W_list[[m]] %*% alpha[dims_idx == m]
                 }
             }
         }
 
         ##
-        ## sample rho
+        ## sample rho -- placeholder for spatio-temporal model
         ##
 
         # if (sample_rho) {
@@ -682,26 +722,11 @@ mcmc_mra <- function(
                 devs    <- alpha[dims_idx == m]
                 SS      <- as.numeric(devs %*% (Q_alpha[[m]] %*% devs))
                 tau2[m] <- rgamma(1, alpha_tau2 + n_dims[m] / 2, beta_tau2 + SS / 2)
-                # tau2[m] <- 1 / rgamma(1, 0.5 + n_dims[m] / 2, lambda[m] + SS / 2)
-                # tau2_inv[m] <- 1 / rgamma(1, 0.5 + n_dims[m] / 2, lambda[m] + SS / 2)
-                # tau2[m]     <- 1 / tau2_inv[m]
             }
         }
 
         Q_alpha_tau2 <- make_Q_alpha_tau2(Q_alpha, tau2, use_spam = use_spam)
 
-        ##
-        ## sample lambda
-        ##
-
-        # if (sample_lambda) {
-        #     if (verbose)
-        #         message("sample lambda")
-        #     for (m in 1:M) {
-        #         lambda[m]     <- rgamma(1, 1, scale_lambda + 1 / tau2[m])
-        #         # lambda[m]     <- rgamma(1, 1, scale_lambda + tau2[m])
-        #     }
-        # }
 
         ##
         ## save variables
@@ -715,7 +740,6 @@ mcmc_mra <- function(
                 tau2_save[save_idx, ]   <- tau2
                 sigma2_save[save_idx]   <- sigma2
                 alpha_save[save_idx, ]  <- alpha
-                # lambda_save[save_idx, ] <- lambda
             }
         }
 
@@ -734,14 +758,25 @@ mcmc_mra <- function(
     ## return the MCMC output -- think about a better way to make this a class
     ##
 
+    for(i in 2:ncol(X)) {
+        X[, i] <- X[, i] * sd_X[i-1] + mu_X[i-1]
+    }
+
     out <- list(
         beta     = beta_save,
         # rho      = rho_save,
         tau2     = tau2_save,
         sigma2   = sigma2_save,
         alpha    = alpha_save,
-        # lambda   = lambda_save,
-        MRA      = MRA
+        MRA      = MRA,
+        y        = y * sd_y + mu_y,
+        mu_y     = mu_y,
+        sd_y     = sd_y,
+        X        = X,
+        mu_X     = mu_X,
+        sd_X     = sd_X,
+        locs     = locs
+
     )
 
     class(out) <- "mcmc_mra"

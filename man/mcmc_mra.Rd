@@ -20,6 +20,7 @@ mcmc_mra(
   verbose = FALSE,
   use_spam = TRUE,
   joint = TRUE,
+  constraint = "unconstrained",
   n_chain = 1
 )
 }
