@@ -66,6 +66,8 @@ outputs progress messages every 50 iterations.
 
 \item{joint}{Should the spatial parameters alpha be sampled jointly or by each resolution}
 
+\item{constraint}{What constraint should be applied to the spatial process? Options include no constraint (\code{constraint = "unconstrained"}), a constraint so the entire MRA process sums to 0 (\code{constraint = "overall"}), a constraint so that each of the M levels of the MRA process sum to 0 (\code{constraint = "resolution"}), or whether the predicted process must sum to 0 (\code{constraint = "predicted"}). Note: \code{constraint = "predicted"} is NOT currently supported.}
+
 \item{n_chain}{is the MCMC chain id. The default is 1.}
 }
 \description{

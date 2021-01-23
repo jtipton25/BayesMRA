@@ -41,8 +41,8 @@ plot_trace <- function(out, base_size = 12) {
 
     p_beta  <- data.frame(
         beta      = c(out$beta),
-        iteration = rep(1:nrow(out$beta), times = ncol(X)),
-        covariate = factor(rep(1:ncol(X), each = nrow(out$beta)))
+        iteration = rep(1:nrow(out$beta), times = ncol(out$beta)),
+        covariate = factor(rep(1:ncol(out$beta), each = nrow(out$beta)))
     ) %>%
         ggplot(aes(x = iteration, y = beta, group = covariate, color = covariate)) +
         geom_line(alpha = 0.75) +

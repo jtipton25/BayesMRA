@@ -15,23 +15,23 @@
 #'
 plot_fitted_process <- function(out, data, base_size = 12, ...) {
 
-    X <- out$X
+    X <- out$data$X
     for(i in 2:ncol(X)) {
-        X[, i] <- (X[, i] - out$mu_X[i-1]) / out$sd_X[i-1]
+        X[, i] <- (X[, i] - out$data$mu_X[i-1]) / out$data$sd_X[i-1]
     }
-    Xbeta_post <- t(X %*% t(out$beta)) * out$sd_y + out$mu_y
-    Walpha_post <- t(out$MRA$W %*% t(out$alpha)) * out$sd_y
+    Xbeta_post <- t(X %*% t(out$beta)) * out$data$sd_y + out$data$mu_y
+    Walpha_post <- t(out$MRA$W %*% t(out$alpha)) * out$data$sd_y
     mu_post <- Xbeta_post + Walpha_post
 
     dat_plot <- data.frame(
-        Lat          = locs[, 1],
-        Lon          = locs[, 2],
+        Lat          = out$data$locs[, 1],
+        Lon          = out$data$locs[, 2],
         mean_Xbeta   = apply(Xbeta_post, 2, mean),
         mean_Walpha  = apply(Walpha_post, 2, mean),
         mean_mu      = apply(mu_post, 2, mean))
     zlims = range(
         range(dat_plot$mean_mu),
-        range(code.test$TrueTemp, na.rm = TRUE))
+        range(data$Observed, na.rm = TRUE))
 
     plot_Xbeta <- dat_plot %>%
         ggplot(aes(x = Lat, y = Lon, fill = mean_Xbeta)) +

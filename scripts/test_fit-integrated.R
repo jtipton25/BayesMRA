@@ -5,7 +5,6 @@ library(BayesMRA)
 
 load(here::here("data", "SmallTestData.RData"))
 
-str(code.test)
 code.test$MaskTemp = code.test$MaskedData
 code.test$FullTemp = code.test$FullData
 code.test$TrueTemp = code.test$FullData
@@ -15,42 +14,17 @@ locs <- cbind(code.test$Lat, code.test$Lon)
 ## create a mask in the upper corner
 code.test$MaskTemp[code.test$Lat > 0.60 & code.test$Lon > 0.60] <- NA
 
+# Plot the data ----------------------------------------------------------------
 
+dat_plot <- data.frame(
+    Lat = code.test$Lat,
+    Lon = code.test$Lon,
+    Observed = code.test$MaskTemp,
+    Truth = code.test$FullTemp)
 
-theme_custom <- function(scale_text = 1) {
-    theme(
-        plot.title = element_text(
-            size  = 24 * scale_text,
-            face  = "bold",
-            hjust = 0.5
-        ),
-        axis.text.x  = element_text(size = 14 * scale_text),
-        axis.text.y  = element_text(size = 14 * scale_text),
-        strip.text.x = element_text(size = 10 * scale_text),
-        axis.title.x = element_text(
-            size   = 16 * scale_text,
-            margin = margin(t = 10, r = 0, b = 0, l = 0)
-        ),
-        axis.title.y = element_text(
-            size   = 16 * scale_text,
-            margin = margin(t = 0, r = 10, b = 0, l = 0)
-        ),
-        legend.text  = element_text(size = 10 * scale_text),
-        legend.title = element_text(size = 14 * scale_text)
-    )
-}
+plot_test_data(dat_plot)
 
-
-plot_mask <- code.test %>%
-    ggplot(aes(x = Lat, y = Lon, fill = MaskTemp)) +
-    geom_raster() +
-    scale_fill_viridis_c(option = "B")
-plot_full <- code.test %>%
-    ggplot(aes(x = Lat, y = Lon, fill = TrueTemp)) +
-    geom_raster() +
-    scale_fill_viridis_c(option = "B")
-plot_mask + plot_full
-
+# Setup the model --------------------------------------------------------------
 dat_fit <- code.test %>%
     filter(!is.na(MaskTemp))
 
@@ -73,38 +47,7 @@ priors <- list(
     mu_beta      = rep(0, ncol(X)),
     Sigma_beta   = 5 * diag(ncol(X)))
 
-M <- 3
-n_coarse_grid <- 10
-
-sd_y <- sd(y)
-mu_y <- mean(y)
-
-MRA <- mra_wendland_2d(locs, M = 3, n_coarse_grid = 20)
-MRA$n_dims
-sqrt(MRA$n_dims)
-sum(MRA$n_dims)
-nrow(code.test)
-
-# if (file.exists(here::here("results", "test-fit.RData"))) {
-#     load(here::here("results", "test-fit.RData"))
-# } else {
-#     start   <- Sys.time()
-#
-#     # to do: center and scale X
-#     out <- mcmc_mra(
-#         y = (y - mu_y) / sd_y,
-#         X = X,
-#         locs = locs,
-#         params = params,
-#         priors = priors,
-#         M = 3,
-#         n_coarse_grid = 20,
-#         joint = FALSE)
-#
-#     end     <- Sys.time()
-#     runtime <- end - start
-#     save(out, runtime, file = here::here("results", "test-fit.RData"))
-# }
+# Fit integrated model ------------------------------------------------------
 
 if (file.exists(here::here("results", "test-fit-integrated.RData"))) {
     load(here::here("results", "test-fit-integrated.RData"))
@@ -113,7 +56,7 @@ if (file.exists(here::here("results", "test-fit-integrated.RData"))) {
 
     # to do: center and scale X
     out <- mcmc_mra_integrated(
-        y = (y - mu_y) / sd_y,
+        y = y,
         X = X,
         locs = locs,
         params = params,
@@ -124,17 +67,12 @@ if (file.exists(here::here("results", "test-fit-integrated.RData"))) {
     end     <- Sys.time()
     runtime_integrated <- end - start
     save(out, runtime_integrated, file = here::here("results", "test-fit-integrated.RData"))
+    # cell phone notification when done
+    pushoverr::pushover(message = "Finished fitting integrated model")
 }
 
-# pushoverr::pushover(message = "Finished fitting integrated model")
-
 ## Recover alpha with posterior samples
-
-tW <- t(out$MRA$W)
-tWW <- tW %*% out$MRA$W
-Q_alpha <- make_Q_alpha_2d(sqrt(out$MRA$n_dims), rep(1, M))
-Q_alpha_tau2 <- make_Q_alpha_tau2(Q_alpha, out$tau2[1, ])
-
+recover_alpha(out)
 if (file.exists(here::here("results", "fit-integrated-alphas.RData"))) {
     load(here::here("results", "fit-integrated-alphas.RData"))
 } else {

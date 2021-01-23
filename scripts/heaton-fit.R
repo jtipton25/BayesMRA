@@ -1,37 +1,29 @@
-library(scoringRules)
-load(here::here("data", "AllSatelliteTemps.RData"))
-
-str(all.sat.temps)
-locs <- cbind(all.sat.temps$Lat, all.sat.temps$Lon)
-
-
+library(spam)
 library(tidyverse)
 library(patchwork)
+library(BayesMRA)
+library(scoringRules)
 
+load(here::here("data", "AllSatelliteTemps.RData"))
 
+locs <- cbind(all.sat.temps$Lat, all.sat.temps$Lon)
 
-plot_mask <- all.sat.temps %>%
-    ggplot(aes(x = Lat, y = Lon, fill = MaskTemp)) +
-    geom_raster() +
-    scale_fill_viridis_c(option = "B")
-plot_full <- all.sat.temps %>%
-    ggplot(aes(x = Lat, y = Lon, fill = TrueTemp)) +
-    geom_raster() +
-    scale_fill_viridis_c(option = "B")
-plot_mask + plot_full
+# Plot the data ----------------------------------------------------------------
 
+dat_plot <- data.frame(
+    Lat = all.sat.temps$Lat,
+    Lon = all.sat.temps$Lon,
+    Observed = all.sat.temps$MaskTemp,
+    Truth = all.sat.temps$TrueTemp)
+
+plot_test_data(dat_plot)
+
+# Setup the model --------------------------------------------------------------
 dat_fit <- all.sat.temps %>%
     filter(!is.na(MaskTemp))
-library(BayesMRA)
+
 y <- dat_fit$MaskTemp
 X <- model.matrix(~ Lon + Lat, data = dat_fit)
-# center and scale the covariates
-mu_X <- apply(X[, -1], 2, mean)
-sd_X <- apply(X[, -1], 2, sd)
-X_center <- X
-for(i in 2:ncol(X)) {
-    X_center[, i] <- (X[, i] - mu_X[i-1]) / sd_X[i-1]
-}
 locs <- cbind(dat_fit$Lat, dat_fit$Lon)
 
 params <- list(
@@ -49,16 +41,6 @@ priors <- list(
     mu_beta      = rep(0, ncol(X)),
     Sigma_beta   = 5 * diag(ncol(X)))
 
-M <- 4
-n_coarse_grid <- 40
-
-sd_y <- sd(y)
-mu_y <- mean(y)
-
-MRA <- mra_wendland_2d(locs, M = 3, n_coarse_grid = 55)
-MRA$n_dims
-sqrt(MRA$n_dims)
-sum(MRA$n_dims)
 
 # Fit model -------------------------------------------------------------------
 
@@ -68,19 +50,21 @@ if (file.exists(here::here("results", "heaton-fit.RData"))) {
     start   <- Sys.time()
     # to do: center and scale X
     out <- mcmc_mra(
-        y = (y - mu_y) / sd_y,
-        X = X_center,
-        locs = locs,
-        params = params,
-        priors = priors,
-        M = 3,
+        y             = y,
+        X             = X,
+        locs          = locs,
+        params        = params,
+        priors        = priors,
+        M             = 3,
         n_coarse_grid = 40,
-        joint = FALSE,
-        constraint = "resolution")
+        joint         = FALSE,
+        constraint    = "resolution")
 
     end     <- Sys.time()
     runtime <- end - start
     save(out, runtime, file = here::here("results", "heaton-fit.RData"))
+    # cell phone notification when done
+    pushoverr::pushover(message = "Finished fitting Heaton model")
 }
 
 ## Check the output to make sure the sum to 0 constraints are satisfied
@@ -90,196 +74,40 @@ sum(out$MRA$W[, out$MRA$dims_idx == 1] %*% out$alpha[iter_idx, out$MRA$dims_idx 
 sum(out$MRA$W[, out$MRA$dims_idx == 2] %*% out$alpha[iter_idx, out$MRA$dims_idx == 2])
 sum(out$MRA$W[, out$MRA$dims_idx == 3] %*% out$alpha[iter_idx, out$MRA$dims_idx == 3])
 
-
-# Trace plots of parameters ---------------------------------------------------
+# Trace plots of parameters ----------------------------------------------------
 
 plot_trace(out)
 
-# Trace plots for spatial random effects  -------------------------------------
+# Trace plots for spatial random effects  --------------------------------------
 
 plot_trace_alpha(out)
 
-# Posterior distributions ----
-## predicted vs. estimated beta
-dat_plot <- data.frame(
-    beta = c(out$beta),
-    parameter = factor(rep(1:ncol(out$beta), each = nrow(out$beta)))
+# Plot Posterior distributions--------------------------------------------------
+
+plot_posterior_params(out)
+
+# Plot fitted process ----------------------------------------------------------
+
+plot_fitted_process(out, dat_plot)
+
+# Predict spatial process ------------------------------------------------------
+
+new_data <- list(
+    locs_pred = cbind(code.test$Lat, code.test$Lon),
+    X_pred    = model.matrix(~ Lon + Lat, data = code.test)
 )
 
-p_beta <- dat_plot %>%
-    ggplot(aes(x = parameter, y = beta, color = parameter)) +
-    geom_boxplot() +
-    geom_point(position = "jitter") +
-    geom_hline(yintercept = 0, col = "red") +
-    ggtitle("Posterior Distribution for beta") +
-    theme(legend.position = "none")
+preds <- predict_mra(out, new_data)
 
-## predicted vs. estimated sigma2
-p_sigma2 <- data.frame(sigma2 = out$sigma2) %>%
-    ggplot(aes(y = sigma2)) +
-    geom_boxplot() +
-    ylab("sigma2") +
-    ggtitle("Posterior Distribution for sigma2")
+plot_predicted_process(out, dat_plot, preds)
 
-## predicted vs. estimated tau2
-dat_plot <- data.frame(
-    tau2 = c(out$tau2),
-    resolution = factor(rep(1:out$MRA$M, each = nrow(out$tau2)))
-)
+# Plot fitted spatial random effects alpha -------------------------------------
 
-p_tau2 <- dat_plot %>%
-    ggplot(aes(x = resolution, y = tau2)) +
-    geom_boxplot() +
-    geom_point(position = "jitter") +
-    geom_hline(yintercept = 0, col = "red") +
-    ggtitle("Posterior Distribution for tau2")
+plot_fitted_alphas(out)
 
+# Plot fitted MRA resolutions --------------------------------------------------
 
-
-(p_beta + p_sigma2 + p_tau2)
-
-# Plot fitted process
-
-Xbeta_post <- t(X_center %*% t(out$beta)) * sd_y + mu_y
-Walpha_post <- t(out$MRA$W %*% t(out$alpha)) * sd_y
-mu_post <- Xbeta_post + Walpha_post
-
-dat_plot <- data.frame(
-    Lat          = locs[, 1],
-    Lon          = locs[, 2],
-    mean_Xbeta   = apply(Xbeta_post, 2, mean),
-    mean_Walpha  = apply(Walpha_post, 2, mean),
-    mean_mu      = apply(mu_post, 2, mean))
-zlims = range(
-    range(dat_plot$mean_mu),
-    range(all.sat.temps$TrueTemp, na.rm = TRUE))
-
-plot_Xbeta <- dat_plot %>%
-    ggplot(aes(x = Lat, y = Lon, fill = mean_Xbeta)) +
-    geom_raster() +
-    scale_fill_viridis_c(option = "B")
-
-plot_Walpha <- dat_plot %>%
-    ggplot(aes(x = Lat, y = Lon, fill = mean_Walpha)) +
-    geom_raster() +
-    scale_fill_viridis_c(option = "B")
-
-plot_mu <- dat_plot %>%
-    ggplot(aes(x = Lat, y = Lon, fill = mean_mu)) +
-    geom_raster() +
-    scale_fill_viridis_c(option = "B", limits = zlims)
-
-plot_mask <- all.sat.temps %>%
-    ggplot(aes(x = Lat, y = Lon, fill = MaskTemp)) +
-    geom_raster() +
-    scale_fill_viridis_c(option = "B", limits = zlims)
-
-(plot_Xbeta + plot_Walpha) / (plot_mu + plot_mask)
-
-# Predict spatial process -----------------------------------------------------
-locs_pred <- cbind(all.sat.temps$Lat, all.sat.temps$Lon)
-MRA_pred <- mra_wendland_2d_pred(locs_pred, out$MRA)
-
-# y_pred <- matrix(NA, nrow = nrow(all.sat.temps), ncol = nrow(out$alpha))
-X_pred <- model.matrix(~ Lon + Lat, data = all.sat.temps)
-# center and scale the predictive covariates
-X_pred_center <- X_pred
-for(i in 2:ncol(X_pred)) {
-    X_pred_center[, i] <- (X_pred[, i] - mu_X[i-1]) / sd_X[i-1]
-}
-W_pred <- MRA_pred$W_pred
-
-Xbeta_pred  <- t(X_pred_center %*% t(out$beta)) * sd_y + mu_y
-Walpha_pred <- t(W_pred %*% t(out$alpha)) * sd_y
-y_pred <- Xbeta_pred + Walpha_pred
-
-y_pred_mean <- apply(y_pred, 2, mean)
-y_pred_sd   <- apply(y_pred, 2, sd)
-
-dat_pred <- data.frame(
-    y = y_pred_mean,
-    sd = y_pred_sd,
-    Lat = all.sat.temps$Lat,
-    Lon = all.sat.temps$Lon)
-
-zlims = range(
-    range(y_pred_mean),
-    range(all.sat.temps$TrueTemp, na.rm = TRUE))
-
-p_obs <- all.sat.temps %>%
-    ggplot(aes(x = Lat, y = Lon, fill = TrueTemp)) +
-    geom_raster() +
-    scale_fill_viridis_c(option = "B", limits = zlims)
-p_fit <- dat_pred %>%
-    ggplot(aes(x = Lat, y = Lon, fill = y)) +
-    geom_raster() +
-    scale_fill_viridis_c(option = "B", limits = zlims)
-p_obs + p_fit
-
-
-p_sd <- dat_pred %>%
-    ggplot(aes(x = Lat, y = Lon, fill = sd)) +
-    geom_raster() +
-    scale_fill_viridis_c(option = "B")
-p_sd
-
-
-# Plot fitted spatial random effects alpha ------------------------------------
-
-fitted_alphas <- data.frame(
-    x = unlist(sapply(1:out$MRA$M, function(i) out$MRA$locs_grid[[i]][, 1])),
-    y = unlist(sapply(1:out$MRA$M, function(i) out$MRA$locs_grid[[i]][, 2])),
-    res = factor(unlist(sapply(1:out$MRA$M, function(i) rep(i, each = nrow(out$MRA$locs_grid[[i]]))))),
-    alpha = unlist(sapply(1:out$MRA$M, function(i) apply(out$alpha, 2, mean)[out$MRA$dims_idx == i]))
-) %>%
-    ggplot(aes(x = x, y = y, fill = alpha)) +
-    geom_raster() +
-    scale_fill_viridis_c() +
-    ggtitle("Posterior mean spatial random effects") +
-    facet_wrap( ~ res, ncol = 2) +
-    geom_rect(
-        data = NULL,
-        aes(xmin = min(locs[, 1]),
-            xmax = max(locs[, 1]),
-            ymin = min(locs[, 2]),
-            ymax = max(locs[, 2])
-        ),
-        fill  = NA,
-        color = "black",
-        alpha = 0.5
-    ) +
-    theme_bw() +
-    theme_custom(0.5)
-fitted_alphas
-
-# Plot fitted MRA resolutions -------------------------------------------------
-
-W_alpha_res = unlist(sapply(1:out$MRA$M, function(m) W_pred[, out$MRA$dims_idx == m] %*% apply(out$alpha, 2, mean)[out$MRA$dims_idx == m], simplify = "matrix"))
-dimnames(W_alpha_res) <- list(
-    site = 1:nrow(W_alpha_res),
-    res  = paste("resolution", 1:out$MRA$M)
-)
-dat_locs <- data.frame(
-    site = 1:nrow(W_alpha_res),
-    Lat  = all.sat.temps$Lat,
-    Lon  = all.sat.temps$Lon
-)
-
-estimated_MRA <- merge(
-    dat_locs,
-    as.data.frame.table(W_alpha_res, responseName = "W_alpha")
-) %>%
-    ggplot(aes(x = Lon, y = Lat, fill = W_alpha)) +
-    geom_raster() +
-    facet_wrap( ~ res, ncol = 2) +
-    xlab("Longitude") +
-    ylab("Latitude") +
-    ggtitle("Estimated Multiresolution process") +
-    scale_fill_viridis_c(option = "B") +
-    theme_bw() +
-    theme_custom(0.5)
-
-estimated_MRA
+plot_fitted_MRA(out, preds)
 
 ## calculate RMSE
 oos <- (!is.na(all.sat.temps$TrueTemp) & is.na(all.sat.temps$MaskTemp))
@@ -292,17 +120,7 @@ RMSE <- sqrt(mean((y_pred_mean[oos] - all.sat.temps$TrueTemp[oos])^2))
 
 
 
-
-
-
-# Fit finer grid model --------------------------------------------------------
-
-MRA <- mra_wendland_2d(locs, M = 2, n_coarse_grid = 160)
-MRA <- mra_wendland_2d(locs, M = 4, n_coarse_grid = 40)
-MRA$n_dims
-sqrt(MRA$n_dims)
-sum(MRA$n_dims)
-
+# Fit finer grid model ---------------------------------------------------------
 
 if (file.exists(here::here("results", "heaton-fit-fine-grid.RData"))) {
     load(here::here("results", "heaton-fit-fine-grid.RData"))
@@ -310,22 +128,22 @@ if (file.exists(here::here("results", "heaton-fit-fine-grid.RData"))) {
     start   <- Sys.time()
     # to do: center and scale X
     out <- mcmc_mra(
-        y = (y - mu_y) / sd_y,
-        X = X_center,
-        locs = locs,
-        params = params,
-        priors = priors,
-        M = 4,
+        y             = y,
+        X             = X,
+        locs          = locs,
+        params        = params,
+        priors        = priors,
+        M             = 4,
         n_coarse_grid = 40,
-        joint = FALSE,
-        constraint = "resolution")
+        joint         = FALSE,
+        constraint    = "resolution")
 
     end     <- Sys.time()
     runtime <- end - start
     save(out, runtime, file = here::here("results", "heaton-fit-fine-grid.RData"))
+    # cell phone notification when done
+    pushoverr::pushover(message = "Finished fitting Heaton fine-grid model")
 }
-
-pushoverr::pushover(message = "Finished fitting fine-grid model")
 
 ## Check the output to make sure the sum to 0 constraints are satisfied
 iter_idx <- 224
@@ -335,195 +153,40 @@ sum(out$MRA$W[, out$MRA$dims_idx == 2] %*% out$alpha[iter_idx, out$MRA$dims_idx 
 sum(out$MRA$W[, out$MRA$dims_idx == 3] %*% out$alpha[iter_idx, out$MRA$dims_idx == 3])
 
 
-# Trace plots of parameters ---------------------------------------------------
+# Trace plots of parameters ----------------------------------------------------
 
 plot_trace(out)
 
-# Trace plots for spatial random effects  -------------------------------------
+# Trace plots for spatial random effects  --------------------------------------
 
 plot_trace_alpha(out)
 
-# Posterior distributions ----
-## predicted vs. estimated beta
-dat_plot <- data.frame(
-    beta = c(out$beta),
-    parameter = factor(rep(1:ncol(out$beta), each = nrow(out$beta)))
+# Plot Posterior distributions--------------------------------------------------
+
+plot_posterior_params(out)
+
+# Plot fitted process ----------------------------------------------------------
+
+plot_fitted_process(out, dat_plot)
+
+# Predict spatial process ------------------------------------------------------
+
+new_data <- list(
+    locs_pred = cbind(code.test$Lat, code.test$Lon),
+    X_pred    = model.matrix(~ Lon + Lat, data = code.test)
 )
 
-p_beta <- dat_plot %>%
-    ggplot(aes(x = parameter, y = beta, color = parameter)) +
-    geom_boxplot() +
-    geom_point(position = "jitter") +
-    geom_hline(yintercept = 0, col = "red") +
-    ggtitle("Posterior Distribution for beta") +
-    theme(legend.position = "none")
+preds <- predict_mra(out, new_data)
 
-## predicted vs. estimated sigma2
-p_sigma2 <- data.frame(sigma2 = out$sigma2) %>%
-    ggplot(aes(y = sigma2)) +
-    geom_boxplot() +
-    ylab("sigma2") +
-    ggtitle("Posterior Distribution for sigma2")
+plot_predicted_process(out, dat_plot, preds)
 
-## predicted vs. estimated tau2
-dat_plot <- data.frame(
-    tau2 = c(out$tau2),
-    resolution = factor(rep(1:out$MRA$M, each = nrow(out$tau2)))
-)
+# Plot fitted spatial random effects alpha -------------------------------------
 
-p_tau2 <- dat_plot %>%
-    ggplot(aes(x = resolution, y = tau2)) +
-    geom_boxplot() +
-    geom_point(position = "jitter") +
-    geom_hline(yintercept = 0, col = "red") +
-    ggtitle("Posterior Distribution for tau2")
+plot_fitted_alphas(out)
 
+# Plot fitted MRA resolutions --------------------------------------------------
 
-
-(p_beta + p_sigma2 + p_tau2)
-
-# Plot fitted process
-
-Xbeta_post <- t(X_center %*% t(out$beta)) * sd_y + mu_y
-Walpha_post <- t(out$MRA$W %*% t(out$alpha)) * sd_y
-mu_post <- Xbeta_post + Walpha_post
-
-dat_plot <- data.frame(
-    Lat          = locs[, 1],
-    Lon          = locs[, 2],
-    mean_Xbeta   = apply(Xbeta_post, 2, mean),
-    mean_Walpha  = apply(Walpha_post, 2, mean),
-    mean_mu      = apply(mu_post, 2, mean))
-zlims = range(
-    range(dat_plot$mean_mu),
-    range(all.sat.temps$TrueTemp, na.rm = TRUE))
-
-plot_Xbeta <- dat_plot %>%
-    ggplot(aes(x = Lat, y = Lon, fill = mean_Xbeta)) +
-    geom_raster() +
-    scale_fill_viridis_c(option = "B")
-
-plot_Walpha <- dat_plot %>%
-    ggplot(aes(x = Lat, y = Lon, fill = mean_Walpha)) +
-    geom_raster() +
-    scale_fill_viridis_c(option = "B")
-
-plot_mu <- dat_plot %>%
-    ggplot(aes(x = Lat, y = Lon, fill = mean_mu)) +
-    geom_raster() +
-    scale_fill_viridis_c(option = "B", limits = zlims)
-
-plot_mask <- all.sat.temps %>%
-    ggplot(aes(x = Lat, y = Lon, fill = MaskTemp)) +
-    geom_raster() +
-    scale_fill_viridis_c(option = "B", limits = zlims)
-
-(plot_Xbeta + plot_Walpha) / (plot_mu + plot_mask)
-
-# Predict spatial process -----------------------------------------------------
-locs_pred <- cbind(all.sat.temps$Lat, all.sat.temps$Lon)
-MRA_pred <- mra_wendland_2d_pred(locs_pred, out$MRA)
-
-# y_pred <- matrix(NA, nrow = nrow(all.sat.temps), ncol = nrow(out$alpha))
-X_pred <- model.matrix(~ Lon + Lat, data = all.sat.temps)
-# center and scale the predictive covariates
-X_pred_center <- X_pred
-for(i in 2:ncol(X_pred)) {
-    X_pred_center[, i] <- (X_pred[, i] - mu_X[i-1]) / sd_X[i-1]
-}
-W_pred <- MRA_pred$W_pred
-
-Xbeta_pred  <- t(X_pred_center %*% t(out$beta)) * sd_y + mu_y
-Walpha_pred <- t(W_pred %*% t(out$alpha)) * sd_y
-y_pred <- Xbeta_pred + Walpha_pred
-
-y_pred_mean <- apply(y_pred, 2, mean)
-y_pred_sd   <- apply(y_pred, 2, sd)
-
-dat_pred <- data.frame(
-    y = y_pred_mean,
-    sd = y_pred_sd,
-    Lat = all.sat.temps$Lat,
-    Lon = all.sat.temps$Lon)
-
-zlims = range(
-    range(y_pred_mean),
-    range(all.sat.temps$TrueTemp, na.rm = TRUE))
-
-p_obs <- all.sat.temps %>%
-    ggplot(aes(x = Lat, y = Lon, fill = TrueTemp)) +
-    geom_raster() +
-    scale_fill_viridis_c(option = "B", limits = zlims)
-p_fit <- dat_pred %>%
-    ggplot(aes(x = Lat, y = Lon, fill = y)) +
-    geom_raster() +
-    scale_fill_viridis_c(option = "B", limits = zlims)
-p_obs + p_fit
-
-
-p_sd <- dat_pred %>%
-    ggplot(aes(x = Lat, y = Lon, fill = sd)) +
-    geom_raster() +
-    scale_fill_viridis_c(option = "B")
-p_sd
-
-
-# Plot fitted spatial random effects alpha ------------------------------------
-
-fitted_alphas <- data.frame(
-    x = unlist(sapply(1:out$MRA$M, function(i) out$MRA$locs_grid[[i]][, 1])),
-    y = unlist(sapply(1:out$MRA$M, function(i) out$MRA$locs_grid[[i]][, 2])),
-    res = factor(unlist(sapply(1:out$MRA$M, function(i) rep(i, each = nrow(out$MRA$locs_grid[[i]]))))),
-    alpha = unlist(sapply(1:out$MRA$M, function(i) apply(out$alpha, 2, mean)[out$MRA$dims_idx == i]))
-) %>%
-    ggplot(aes(x = x, y = y, fill = alpha)) +
-    geom_raster() +
-    scale_fill_viridis_c() +
-    ggtitle("Posterior mean spatial random effects") +
-    facet_wrap( ~ res, ncol = 2) +
-    geom_rect(
-        data = NULL,
-        aes(xmin = min(locs[, 1]),
-            xmax = max(locs[, 1]),
-            ymin = min(locs[, 2]),
-            ymax = max(locs[, 2])
-        ),
-        fill  = NA,
-        color = "black",
-        alpha = 0.5
-    ) +
-    theme_bw() +
-    theme_custom(0.5)
-fitted_alphas
-
-# Plot fitted MRA resolutions -------------------------------------------------
-
-W_alpha_res = unlist(sapply(1:out$MRA$M, function(m) W_pred[, out$MRA$dims_idx == m] %*% apply(out$alpha, 2, mean)[out$MRA$dims_idx == m], simplify = "matrix"))
-dimnames(W_alpha_res) <- list(
-    site = 1:nrow(W_alpha_res),
-    res  = paste("resolution", 1:out$MRA$M)
-)
-dat_locs <- data.frame(
-    site = 1:nrow(W_alpha_res),
-    Lat  = all.sat.temps$Lat,
-    Lon  = all.sat.temps$Lon
-)
-
-estimated_MRA <- merge(
-    dat_locs,
-    as.data.frame.table(W_alpha_res, responseName = "W_alpha")
-) %>%
-    ggplot(aes(x = Lon, y = Lat, fill = W_alpha)) +
-    geom_raster() +
-    facet_wrap( ~ res, ncol = 2) +
-    xlab("Longitude") +
-    ylab("Latitude") +
-    ggtitle("Estimated Multiresolution process") +
-    scale_fill_viridis_c(option = "B") +
-    theme_bw() +
-    theme_custom(0.5)
-
-estimated_MRA
+plot_fitted_MRA(out, preds)
 
 ## runtime
 as.numeric(runtime, units = "mins")
@@ -552,6 +215,9 @@ COV
 mean(CRPS)
 # Int
 
+
+
+## calculate predictive score by distance to observation -- seems strange
 locs <- cbind(all.sat.temps$Lat, all.sat.temps$Lon)
 in_samp <- !is.na(all.sat.temps$MaskTemp)
 locs_oos <- locs[oos, ]
@@ -580,4 +246,6 @@ dat_scores %>%
     summarize(RMSE = sqrt(mean(RMSE)), MAE = mean(MAE)) %>%
     ggplot(aes(x = D_min, y = RMSE, group = 1)) +
     geom_line() +
+
+##  try to plot MSE/MAE on the map...
     geom_point(data = dat_scores, alpha = 0.01)

@@ -24,6 +24,7 @@
 #' @param config is the list of configuration values if the user wishes to specify initial values. If these values are not specified, then default a configuration will be used.
 #' @param verbose Should verbose output be printed? Typically this is only useful for troubleshooting.
 #' @param joint Should the spatial parameters alpha be sampled jointly or by each resolution
+#' @param constraint What constraint should be applied to the spatial process? Options include no constraint (`constraint = "unconstrained"`), a constraint so the entire MRA process sums to 0 (`constraint = "overall"`), a constraint so that each of the M levels of the MRA process sum to 0 (`constraint = "resolution"`), or whether the predicted process must sum to 0 (`constraint = "predicted"`). Note: `constraint = "predicted"` is NOT currently supported.
 #' @param use_spam is a boolean flag to determine whether the output is a list of spam matrix objects (\code{use_spam = TRUE}) or a an \eqn{n \times n}{n x n} sparse Matrix of class "dgCMatrix" \code{use_spam = FALSE} (see spam and Matrix packages for details).
 #' @param n_chain is the MCMC chain id. The default is 1.
 #'
@@ -153,6 +154,12 @@ mcmc_mra <- function(
     }
     if (constraint == "predicted") {
         stop('constraint = "predicted" is not currently supported -- developer note: add W_pred to function call to enable this in future results')
+    }
+    if (constraint == "resolution" & joint == TRUE) {
+        stop('The constraint cannot be "resolution" when joint is TRUE')
+    }
+    if (constraint == "overall" & joint == FALSE) {
+        stop('The constraint cannot be "overall" when joint is FALSE')
     }
 
     params$n_adapt   <- as.integer(params$n_adapt)
@@ -456,47 +463,9 @@ mcmc_mra <- function(
     }
 
 
-    A_constraint <- NULL
-    a_constraint <- NULL
-    if (constraint == "overall") {
-        ## overall constraint on random effect
-        A_constraint <- rep(1, N) %*% W
-        a_constraint <- 0
-    } else if (constraint == "resolution") {
-        ## resolution level constraint on random effect W_m %*% alpha_m
-        A_constraint_list <- vector(mode = "list", length = M)
-        a_constraint <- NULL
-        if (joint) {
-            A_constraint_tmp <- sapply(1:M, function(i){
-                tmp <- rep(1, N) %*% W[, dims_idx == i]
-                return(tmp)
-            })
-            A_constraint <- matrix(0, M, sum(n_dims))
-            for (i in 1:M) {
-                A_constraint[i, dims_idx == i] <- A_constraint_tmp[[i]]
-            }
-
-            a_constraint <- rep(0, M)
-        } else {
-            for (m in 1:M) {
-                A_constraint_list[[m]] <- rep(1, N) %*% W_list[[m]]
-            }
-            a_constraint <- 0
-        }
-    }
-    ## Old constraint on alpha but not on Walpha
-    # ## define the constraint matrices to ensure each resolution has random effects with mean 0
-    # A_constraint <- t(
-    #     sapply(1:M, function(i){
-    #         tmp = rep(0, sum(n_dims))
-    #         tmp[dims_idx == i] <- 1
-    #         return(tmp)
-    #     })
-    # )
-    # a_constraint <- rep(0, M)
-
-
-
+    constraints <- make_constraint(MRA, constraint = constraint)
+    A_constraint <- constraints$A_constraint
+    a_constraint <- constraints$a_constraint
 
 
     ## intialize an ICAR structure for fitting alpha
@@ -763,20 +732,31 @@ mcmc_mra <- function(
     }
 
     out <- list(
-        beta     = beta_save,
-        # rho      = rho_save,
-        tau2     = tau2_save,
-        sigma2   = sigma2_save,
-        alpha    = alpha_save,
-        MRA      = MRA,
-        y        = y * sd_y + mu_y,
-        mu_y     = mu_y,
-        sd_y     = sd_y,
-        X        = X,
-        mu_X     = mu_X,
-        sd_X     = sd_X,
-        locs     = locs
-
+        beta   = beta_save,
+        # rho    = rho_save,
+        tau2   = tau2_save,
+        sigma2 = sigma2_save,
+        alpha  = alpha_save,
+        MRA    = MRA,
+        data   = list(
+            y    = y * sd_y + mu_y,
+            mu_y = mu_y,
+            sd_y = sd_y,
+            X    = X,
+            mu_X = mu_X,
+            sd_X = sd_X,
+            locs = locs),
+        model  = list(
+            params     = params,
+            priors     = priors,
+            inits      = inits,
+            config     = config,
+            verbose    = verbose,
+            use_spam   = use_spam,
+            joint      = joint,
+            constraint = constraint,
+            n_chain    = n_chain)
+        ## add in run-time variables as an object too
     )
 
     class(out) <- "mcmc_mra"

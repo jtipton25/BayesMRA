@@ -28,10 +28,10 @@ plot_fitted_alphas <- function(out, base_size = 12) {
         facet_wrap( ~ res, ncol = 2) +
         geom_rect(
             data = NULL,
-            aes(xmin = min(out$locs[, 1]),
-                xmax = max(out$locs[, 1]),
-                ymin = min(out$locs[, 2]),
-                ymax = max(out$locs[, 2])
+            aes(xmin = min(out$data$locs[, 1]),
+                xmax = max(out$data$locs[, 1]),
+                ymin = min(out$data$locs[, 2]),
+                ymax = max(out$data$locs[, 2])
             ),
             fill  = NA,
             color = "black",

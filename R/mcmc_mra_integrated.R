@@ -225,6 +225,20 @@ mcmc_mra_integrated <- function(
     p      <- ncol(X)
 
     ##
+    ## center and scale the input and covariates
+    ##
+
+    sd_y <- sd(y)
+    mu_y <- mean(y)
+    y <- (y - mu_y) / sd_y
+
+    mu_X <- apply(X[, -1], 2, mean)
+    sd_X <- apply(X[, -1], 2, sd)
+    for(i in 2:ncol(X)) {
+        X[, i] <- (X[, i] - mu_X[i-1]) / sd_X[i-1]
+    }
+
+    ##
     ## setup MRA spatial basis
     ##
 
@@ -713,11 +727,17 @@ mcmc_mra_integrated <- function(
 
     out <- list(
         beta     = beta_save,
-        # rho      = rho_save,
         tau2     = tau2_save,
         sigma2   = sigma2_save,
         ll       = ll_save,
-        MRA      = MRA
+        MRA      = MRA,
+        y        = y * sd_y + mu_y,
+        mu_y     = mu_y,
+        sd_y     = sd_y,
+        X        = X,
+        mu_X     = mu_X,
+        sd_X     = sd_X,
+        locs     = locs
     )
 
     class(out) <- "mcmc_mra_integrated"

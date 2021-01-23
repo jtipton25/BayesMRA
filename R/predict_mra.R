@@ -27,25 +27,21 @@ predict_mra <- function(out, new_data) {
 
     # center and scale the predictors using the same scaling as the model fit
     X_pred <- new_data$X_pred
-    for(i in 2:ncol(X)) {
-        X_pred[, i] <- (X_pred[, i] - out$mu_X[i-1]) / out$sd_X[i-1]
+    for(i in 2:ncol(X_pred)) {
+        X_pred[, i] <- (X_pred[, i] - out$data$mu_X[i-1]) / out$data$sd_X[i-1]
     }
 
-    Xbeta_pred  <- t(X_pred %*% t(out$beta)) * out$sd_y + out$mu_y
-    Walpha_pred <- t(MRA_pred$W_pred %*% t(out$alpha)) * out$sd_y
+    Xbeta_pred  <- t(X_pred %*% t(out$beta)) * out$data$sd_y + out$data$mu_y
+    Walpha_pred <- t(MRA_pred$W_pred %*% t(out$alpha)) * out$data$sd_y
     y_pred      <- Xbeta_pred + Walpha_pred
-
-    for(i in 2:ncol(X)) {
-        X_pred[, i] <- X_pred[, i] * out$sd_X[i-1] + out$mu_X[i-1]
-    }
 
     out <- list(
         MRA_pred    = MRA_pred,
         Xbeta_pred  = Xbeta_pred,
         Walpha_pred = Walpha_pred,
         y_pred      = y_pred,
-        X_pred = X_pred,
-        locs_pred = locs_pred)
+        X_pred      = new_data$X_pred,
+        locs_pred   = new_data$locs_pred)
 
     class(out) <- "mcmc_mra_pred"
     return(out)
