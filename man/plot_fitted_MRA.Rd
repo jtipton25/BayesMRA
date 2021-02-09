@@ -4,16 +4,24 @@
 \alias{plot_fitted_MRA}
 \title{Plot the fitted MRA process}
 \usage{
-plot_fitted_MRA(out, preds, base_size = 12)
+plot_fitted_MRA(
+  out,
+  preds,
+  base_size = 12,
+  file = NULL,
+  width = 16,
+  height = 9,
+  ...
+)
 }
 \arguments{
 \item{out}{The output from \code{mcmc_mra()} or \code{mcmc_mra_integrated()}}
 
 \item{base_size}{The base size for the plot}
 
-\item{data}{A dataframe with four columns: Lat, Lon, Observed, Fitted}
-
 \item{...}{}
+
+\item{data}{A dataframe with four columns: Lat, Lon, Observed, Fitted}
 }
 \value{
 

@@ -4,7 +4,7 @@
 \alias{plot_test_data}
 \title{Plot the observed and "true" (holdout) spatial data}
 \usage{
-plot_test_data(data, base_size = 12, ...)
+plot_test_data(data, base_size = 12, file = NULL, width = 16, height = 9, ...)
 }
 \arguments{
 \item{data}{A dataframe with four columns: Lat, Lon, Observed, Fitted}

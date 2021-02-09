@@ -14,7 +14,7 @@
 #' @export
 #'
 #'
-plot_predicted_process <- function(out, data, preds, base_size = 12, ...) {
+plot_predicted_process <- function(out, data, preds, base_size = 12, file = NULL, width = 16, height = 9, ...) {
 
     ## add in titles, grouping of legends, change sd color scheme
 
@@ -22,6 +22,13 @@ plot_predicted_process <- function(out, data, preds, base_size = 12, ...) {
 
     if(class(preds) != "mcmc_mra_pred")
         stop('preds must be of class "mcmc_mra_pred" which is the output of the function predict_mra()')
+    if (!is_positive_numeric(width, 1))
+        stop("width must be a positive number")
+    if (!is_positive_numeric(height, 1))
+        stop("height must be a positive number")
+    if (!is.null(file) & !is.character(file))
+        stop("file must be a character string")
+
 
     Wpred_mean <- apply(preds$Walpha_pred, 2, mean)
     y_pred_mean <- apply(preds$y_pred, 2, mean)
@@ -49,6 +56,16 @@ plot_predicted_process <- function(out, data, preds, base_size = 12, ...) {
         ggplot(aes(x = Lat, y = Lon, fill = sd)) +
         geom_raster() +
         scale_fill_viridis_c(option = "B")
-    return(p_obs + p_fit + p_sd)
+
+    if (is.null(file)) {
+        return(p_obs + p_fit + p_sd)
+    } else {
+        ggsave(filename = file,
+               plot = p_obs + p_fit + p_sd,
+               device = "png",
+               width = width,
+               height = height,
+               units = "in")
+    }
 }
 

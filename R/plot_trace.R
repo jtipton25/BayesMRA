@@ -11,9 +11,16 @@
 #' @import latex2exp
 #'
 
-plot_trace <- function(out, base_size = 12) {
-    if (class(out) != "mcmc_mra")
-        stop('out must be of class "mcmc_mra"')
+plot_trace <- function(out, base_size = 12, file = NULL, width = 16, height = 9, ...) {
+
+    if (!(class(out) %in% c("mcmc_mra", "mcmc_mra_integrated")))
+        stop('out must be of class "mcmc_mra" or "mcmc_mra_integrated"')
+    if (!is_positive_numeric(width, 1))
+        stop("width must be a positive number")
+    if (!is_positive_numeric(height, 1))
+        stop("height must be a positive number")
+    if (!is.null(file) & !is.character(file))
+        stop("file must be a character string")
 
     M <- out$MRA$M
 
@@ -52,5 +59,15 @@ plot_trace <- function(out, base_size = 12) {
         theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) +
         ylab(TeX("$\\beta$"))
 
-    return(p_tau2 / p_sigma2 / p_beta)
+
+    if (is.null(file)) {
+        return(p_tau2 / p_sigma2 / p_beta)
+    } else {
+        ggsave(filename = file,
+               plot = p_tau2 / p_sigma2 / p_beta,
+               device = "png",
+               width = width,
+               height = height,
+               units = "in")
+    }
 }

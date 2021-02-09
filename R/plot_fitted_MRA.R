@@ -13,7 +13,19 @@
 #' @export
 #'
 #'
-plot_fitted_MRA <- function(out, preds, base_size = 12) {
+plot_fitted_MRA <- function(out, preds, base_size = 12, file = NULL, width = 16, height = 9, ...) {
+
+    if (!(class(out) %in% c("mcmc_mra", "mcmc_mra_integrated")))
+        stop('out must be of class "mcmc_mra" or "mcmc_mra_integrated"')
+    if(class(preds) != "mcmc_mra_pred")
+        stop('preds must be of class "mcmc_mra_pred" which is the output of the function predict_mra()')
+    if (!is_positive_numeric(width, 1))
+        stop("width must be a positive number")
+    if (!is_positive_numeric(height, 1))
+        stop("height must be a positive number")
+    if (!is.null(file) & !is.character(file))
+        stop("file must be a character string")
+
 
 
     W_alpha_res = unlist(sapply(1:out$MRA$M, function(m) preds$MRA_pred$W_pred[, out$MRA$dims_idx == m] %*% apply(out$alpha, 2, mean)[out$MRA$dims_idx == m], simplify = "matrix"))
@@ -48,7 +60,17 @@ plot_fitted_MRA <- function(out, preds, base_size = 12) {
         scale_fill_viridis_c(option = "B") +
         theme_bw(base_size = base_size)
 
-    return(estimated_MRA)
+    if (is.null(file)) {
+        return(estimated_MRA)
+    } else {
+        ggsave(filename = file,
+               plot = estimated_MRA,
+               device = "png",
+               width = width,
+               height = height,
+               units = "in")
+    }
+
 }
 
 

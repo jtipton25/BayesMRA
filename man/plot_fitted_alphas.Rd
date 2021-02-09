@@ -4,16 +4,23 @@
 \alias{plot_fitted_alphas}
 \title{Plot the observed and "true" (holdout) spatial data}
 \usage{
-plot_fitted_alphas(out, base_size = 12)
+plot_fitted_alphas(
+  out,
+  base_size = 12,
+  file = NULL,
+  width = 16,
+  height = 9,
+  ...
+)
 }
 \arguments{
 \item{out}{The output from \code{mcmc_mra()} or \code{mcmc_mra_integrated()}}
 
 \item{base_size}{The base size for the plot}
 
-\item{data}{A dataframe with four columns: Lat, Lon, Observed, Fitted}
-
 \item{...}{}
+
+\item{data}{A dataframe with four columns: Lat, Lon, Observed, Fitted}
 }
 \value{
 

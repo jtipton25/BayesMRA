@@ -24,9 +24,7 @@ recover_alpha <- function(out, n_message = 100, constraint = "unconstrained") {
     if (constraint == "predicted") {
         stop('constraint = "predicted" is not currently supported -- developer note: add W_pred to function call to enable this in future results')
     }
-    if (constraint == "resolution") {
-        stop('constraint = "resolution" is not currently supported for composition sampling')
-    }
+
     # initialize the process for compositional sampling of alpha
     tW           <- t(out$MRA$W)
     tWW          <- tW %*% out$MRA$W
@@ -41,12 +39,13 @@ recover_alpha <- function(out, n_message = 100, constraint = "unconstrained") {
     a_constraint <- constraints$a_constraint
 
     for (j in 1:nrow(out$beta)) {
+        # can parallelize this if desired
         if (j %% n_message == 0) {
             message("Compsition sampling recovery of alpha for Iteration ", j, " out of ", nrow(out$beta))
         }
         Q_alpha_tau2 <- make_Q_alpha_tau2(Q_alpha, out$tau2[j, ])
         A_alpha      <- 1 / out$sigma2[j] * tWW + Q_alpha_tau2
-        b_alpha      <- 1 / out$sigma2[j] * tW %*% ((out$y - out$mu_y) / out$sd_y - out$X %*% out$beta[j, ])
+        b_alpha      <- 1 / out$sigma2[j] * tW %*% ((out$data$y - out$data$mu_y) / out$data$sd_y - out$data$X %*% out$beta[j, ])
         # alpha   <- as.vector(rmvnorm.canonical(1, b_alpha, A_alpha, Rstruct = Rstruct))
         ## sample constrained to sum to 0
         if (constraint == "unconstrained") {

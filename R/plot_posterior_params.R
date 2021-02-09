@@ -12,9 +12,17 @@
 #' @import latex2exp
 #'
 
-plot_posterior_params <- function(out, base_size = 12, alpha = 0.1, ...) {
-    if (class(out) != "mcmc_mra")
-        stop('out must be of class "mcmc_mra"')
+plot_posterior_params <- function(out, base_size = 12, alpha = 0.1, file = NULL, width = 16, height = 9, ...) {
+
+    if (!(class(out) %in% c("mcmc_mra", "mcmc_mra_integrated")))
+        stop('out must be of class "mcmc_mra" or "mcmc_mra_integrated"')
+    if (!is_positive_numeric(width, 1))
+        stop("width must be a positive number")
+    if (!is_positive_numeric(height, 1))
+        stop("height must be a positive number")
+    if (!is.null(file) & !is.character(file))
+        stop("file must be a character string")
+
 
     M <- out$MRA$M
     p_beta <- data.frame(
@@ -55,5 +63,14 @@ plot_posterior_params <- function(out, base_size = 12, alpha = 0.1, ...) {
         ylab(TeX("$\\tau^2$"))
 
 
-    return(p_beta / p_sigma2 / p_tau2)
+    if (is.null(file)) {
+        return(p_beta / p_sigma2 / p_tau2)
+    } else {
+        ggsave(filename = file,
+               plot = p_beta / p_sigma2 / p_tau2,
+               device = "png",
+               width = width,
+               height = height,
+               units = "in")
+    }
 }

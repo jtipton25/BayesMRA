@@ -13,9 +13,17 @@
 #' @import latex2exp
 #'
 
-plot_trace_alpha <- function(out, base_size = 12, alpha = 0.1, n_per_res = 10, ...) {
-    if (class(out) != "mcmc_mra")
-        stop('out must be of class "mcmc_mra"')
+plot_trace_alpha <- function(out, base_size = 12, alpha = 0.1, n_per_res = 10, file = NULL, width = 16, height = 9, ...) {
+
+    if (!(class(out) %in% c("mcmc_mra", "mcmc_mra_integrated")))
+        stop('out must be of class "mcmc_mra" or "mcmc_mra_integrated"')
+    if (!is_positive_numeric(width, 1))
+        stop("width must be a positive number")
+    if (!is_positive_numeric(height, 1))
+        stop("height must be a positive number")
+    if (!is.null(file) & !is.character(file))
+        stop("file must be a character string")
+
 
     M        <- out$MRA$M
     n_dims   <- out$MRA$n_dims
@@ -52,5 +60,14 @@ plot_trace_alpha <- function(out, base_size = 12, alpha = 0.1, n_per_res = 10, .
         theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) +
         ylab(TeX("$\\alpha$"))
 
-    return(p_alpha)
+    if (is.null(file)) {
+        return(p_alpha)
+    } else {
+        ggsave(filename = file,
+               plot = p_alpha,
+               device = "png",
+               width = width,
+               height = height,
+               units = "in")
+    }
 }

@@ -4,12 +4,14 @@
 \alias{make_constraint}
 \title{Construct the constraint matrices for the spatial random effects alpha}
 \usage{
-make_constraint(MRA, constraint = "unconstrained")
+make_constraint(MRA, constraint = "unconstrained", joint = TRUE)
 }
 \arguments{
 \item{MRA}{An MRA object. Usually contained in the output from \code{mcmc_mra()} or \code{mcmc_mra_integrated()} or for developers, the MRA object can be created directly from the function \code{mra_wendland_2d()}}
 
 \item{constraint}{What constraint should be applied to the spatial process? Options include no constraint (\code{constraint = "unconstrained"}), a constraint so the entire MRA process sums to 0 (\code{constraint = "overall"}), a constraint so that each of the M levels of the MRA process sum to 0 (\code{constraint = "resolution"}), or whether the predicte process must sum to 0 (\code{constraint = "predicted"}). Note: \code{constraint = "predicted"} is NOT currently supported.}
+
+\item{joint}{Should the spatial parameters alpha be sampled jointly or by each resolution}
 }
 \value{
 

@@ -4,7 +4,16 @@
 \alias{plot_trace_alpha}
 \title{Trace plots from the output of \code{mcmc_mra()} or \code{mcmc_mra_integrated()}}
 \usage{
-plot_trace_alpha(out, base_size = 12, alpha = 0.1, n_per_res = 10, ...)
+plot_trace_alpha(
+  out,
+  base_size = 12,
+  alpha = 0.1,
+  n_per_res = 10,
+  file = NULL,
+  width = 16,
+  height = 9,
+  ...
+)
 }
 \arguments{
 \item{out}{The output from \code{mcmc_mra()} or \code{mcmc_mra_integrated()}}

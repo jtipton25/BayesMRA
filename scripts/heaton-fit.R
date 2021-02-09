@@ -93,8 +93,8 @@ plot_fitted_process(out, dat_plot)
 # Predict spatial process ------------------------------------------------------
 
 new_data <- list(
-    locs_pred = cbind(code.test$Lat, code.test$Lon),
-    X_pred    = model.matrix(~ Lon + Lat, data = code.test)
+    locs_pred = cbind(all.sat.temps$Lat, all.sat.temps$Lon),
+    X_pred    = model.matrix(~ Lon + Lat, data = all.sat.temps)
 )
 
 preds <- predict_mra(out, new_data)
@@ -111,7 +111,7 @@ plot_fitted_MRA(out, preds)
 
 ## calculate RMSE
 oos <- (!is.na(all.sat.temps$TrueTemp) & is.na(all.sat.temps$MaskTemp))
-RMSE <- sqrt(mean((y_pred_mean[oos] - all.sat.temps$TrueTemp[oos])^2))
+RMSE <- sqrt(mean((preds$y_pred_mean[oos] - all.sat.temps$TrueTemp[oos])^2))
 
 
 
@@ -172,8 +172,8 @@ plot_fitted_process(out, dat_plot)
 # Predict spatial process ------------------------------------------------------
 
 new_data <- list(
-    locs_pred = cbind(code.test$Lat, code.test$Lon),
-    X_pred    = model.matrix(~ Lon + Lat, data = code.test)
+    locs_pred = cbind(all.sat.temps$Lat, all.sat.temps$Lon),
+    X_pred    = model.matrix(~ Lon + Lat, data = all.sat.temps)
 )
 
 preds <- predict_mra(out, new_data)
@@ -195,13 +195,13 @@ as.numeric(runtime, units = "mins")
 oos <- (!is.na(all.sat.temps$TrueTemp) & is.na(all.sat.temps$MaskTemp))
 y_oos <- all.sat.temps$TrueTemp[oos]
 # RMSE
-RMSE <- sqrt(mean((y_pred_mean[oos] - y_oos)^2))
+RMSE <- sqrt(mean((preds$y_pred_mean[oos] - y_oos)^2))
 #MAE
-MAE  <- mean(abs(y_pred_mean[oos] - y_oos))
+MAE  <- mean(abs(preds$y_pred_mean[oos] - y_oos))
 # CRPS
-CRPS <- BayesComposition::makeCRPS(y_pred[, oos], y_oos, nrow(y_pred[, oos]))
+CRPS <- BayesComposition::makeCRPS(preds$y_pred[, oos], y_oos, nrow(preds$y_pred[, oos]))
 # Cov
-CI <- apply(y_pred[, oos], 2, quantile, prob = c(0.025, 0.975))
+CI <- apply(preds$y_pred[, oos], 2, quantile, prob = c(0.025, 0.975))
 in_out <- rep(FALSE, sum(oos))
 for (i in 1:sum(oos)) {
     in_out[i] <- (y_oos[i] > CI[1, i]) & (y_oos[i] < CI[2, i])
@@ -231,8 +231,8 @@ for (i in 1:sum(oos)) {
 }
 nbreaks <- 5
 dat_scores <- data.frame(
-    RMSE = (y_pred_mean[oos] - y_oos)^2,
-    MAE  = abs(y_pred_mean[oos] - y_oos),
+    RMSE = (preds$y_pred_mean[oos] - y_oos)^2,
+    MAE  = abs(preds$y_pred_mean[oos] - y_oos),
     D_min = cut(D_min, breaks = nbreaks)
 )
 

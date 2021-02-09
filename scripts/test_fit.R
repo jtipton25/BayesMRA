@@ -3,10 +3,19 @@ library(tidyverse)
 library(patchwork)
 library(BayesMRA)
 
-load(here::here("data", "SmallTestData.RData"))
+# setup image directory
+if (!dir.exists(here::here("images"))) {
+    dir.create(here::here("images"))
+}
+if (!dir.exists(here::here("images", "test-data"))) {
+    dir.create(here::here("images", "test-data"))
+}
+
+# clean up this data object
+# load(here::here("data", "SmallTestData.RData"))
+data("SmallTestData", package = "BayesMRA")
 
 code.test$MaskTemp = code.test$MaskedData
-code.test$FullTemp = code.test$FullData
 code.test$TrueTemp = code.test$FullData
 
 locs <- cbind(code.test$Lat, code.test$Lon)
@@ -20,9 +29,9 @@ dat_plot <- data.frame(
     Lat = code.test$Lat,
     Lon = code.test$Lon,
     Observed = code.test$MaskTemp,
-    Truth = code.test$FullTemp)
+    Truth = code.test$TrueTemp)
 
-plot_test_data(dat_plot)
+plot_test_data(dat_plot, file = here::here("images", "test-data", "test-data.png"))
 
 # Setup the model --------------------------------------------------------------
 dat_fit <- code.test %>%
@@ -82,19 +91,19 @@ sum(out$MRA$W[, out$MRA$dims_idx == 3] %*% out$alpha[iter_idx, out$MRA$dims_idx 
 
 # Trace plots of parameters ----------------------------------------------------
 
-plot_trace(out)
+plot_trace(out, file = here::here("images", "test-data", "test-data-trace-plots-no-constraint.png"))
 
 # Trace plots for spatial random effects  --------------------------------------
 
-plot_trace_alpha(out)
+plot_trace_alpha(out, file = here::here("images", "test-data", "test-data-trace-alpha-no-constraint.png"))
 
 # Plot Posterior distributions--------------------------------------------------
 
-plot_posterior_params(out)
+plot_posterior_params(out, file = here::here("images", "test-data", "test-data-posterior-no-constraint.png"))
 
 # Plot fitted process ----------------------------------------------------------
 
-plot_fitted_process(out, dat_plot)
+plot_fitted_process(out, dat_plot, file = here::here("images", "test-data", "test-data-fitted-process-no-constraint.png"))
 
 # Predict spatial process ------------------------------------------------------
 
@@ -105,15 +114,15 @@ new_data <- list(
 
 preds <- predict_mra(out, new_data)
 
-plot_predicted_process(out, dat_plot, preds)
+plot_predicted_process(out, dat_plot, preds, file = here::here("images", "test-data", "test-data-predicted-process-no-constraint.png"))
 
 # Plot fitted spatial random effects alpha -------------------------------------
 
-plot_fitted_alphas(out)
+plot_fitted_alphas(out, file = here::here("images", "test-data", "test-data-fitted-alpha-no-constraint.png"))
 
 # Plot fitted MRA resolutions --------------------------------------------------
 
-plot_fitted_MRA(out, preds)
+plot_fitted_MRA(out, preds, file = here::here("images", "test-data", "test-data-fitted-MRA-no-constraint.png"))
 
 
 
@@ -132,8 +141,6 @@ if (file.exists(here::here("results", "test-fit-constrained.RData"))) {
     load(here::here("results", "test-fit-constrained.RData"))
 } else {
     start   <- Sys.time()
-
-    # to do: center and scale X
     out <- mcmc_mra(
         y = y,
         X = X,
@@ -161,19 +168,19 @@ sum(out$MRA$W[, out$MRA$dims_idx == 3] %*% out$alpha[iter_idx, out$MRA$dims_idx 
 
 # Trace plots of parameters ----------------------------------------------------
 
-plot_trace(out)
+plot_trace(out, file = here::here("images", "test-data", "test-data-trace-plots-constrained.png"))
 
 # Trace plots for spatial random effects  --------------------------------------
 
-plot_trace_alpha(out)
+plot_trace_alpha(out, file = here::here("images", "test-data", "test-data-trace-alpha-constrained.png"))
 
 # Plot Posterior distributions--------------------------------------------------
 
-plot_posterior_params(out)
+plot_posterior_params(out, file = here::here("images", "test-data", "test-data-posterior-constrained.png"))
 
 # Plot fitted process ----------------------------------------------------------
 
-plot_fitted_process(out, dat_plot)
+plot_fitted_process(out, dat_plot, file = here::here("images", "test-data", "test-data-fitted-process-constrained.png"))
 
 # Predict spatial process ------------------------------------------------------
 
@@ -184,14 +191,14 @@ new_data <- list(
 
 preds <- predict_mra(out, new_data)
 
-plot_predicted_process(out, dat_plot, preds)
+plot_predicted_process(out, dat_plot, preds, file = here::here("images", "test-data", "test-data-predicted-process-constrained.png"))
 
 # Plot fitted spatial random effects alpha -------------------------------------
 
-plot_fitted_alphas(out)
+plot_fitted_alphas(out, file = here::here("images", "test-data", "test-data-fitted-alpha-constrained.png"))
 
 # Plot fitted MRA resolutions --------------------------------------------------
 
-plot_fitted_MRA(out, preds)
+plot_fitted_MRA(out, preds, file = here::here("images", "test-data", "test-data-fitted-MRA-constrained.png"))
 
 

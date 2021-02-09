@@ -4,7 +4,15 @@
 \alias{plot_posterior_params}
 \title{Posterior distribution plots from the output of \code{mcmc_mra()} or \code{mcmc_mra_integrated()}}
 \usage{
-plot_posterior_params(out, base_size = 12, alpha = 0.1, ...)
+plot_posterior_params(
+  out,
+  base_size = 12,
+  alpha = 0.1,
+  file = NULL,
+  width = 16,
+  height = 9,
+  ...
+)
 }
 \arguments{
 \item{out}{The output from \code{mcmc_mra()} or \code{mcmc_mra_integrated()}}

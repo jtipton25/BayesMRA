@@ -155,12 +155,13 @@ mcmc_mra <- function(
     if (constraint == "predicted") {
         stop('constraint = "predicted" is not currently supported -- developer note: add W_pred to function call to enable this in future results')
     }
-    if (constraint == "resolution" & joint == TRUE) {
-        stop('The constraint cannot be "resolution" when joint is TRUE')
-    }
-    if (constraint == "overall" & joint == FALSE) {
-        stop('The constraint cannot be "overall" when joint is FALSE')
-    }
+    # not sure if these make sense
+    # if (constraint == "resolution" & joint == TRUE) {
+    #     stop('The constraint cannot be "resolution" when joint is TRUE')
+    # }
+    # if (constraint == "overall" & joint == FALSE) {
+    #     stop('The constraint cannot be "overall" when joint is FALSE')
+    # }
 
     params$n_adapt   <- as.integer(params$n_adapt)
     params$n_mcmc    <- as.integer(params$n_mcmc)
@@ -463,7 +464,7 @@ mcmc_mra <- function(
     }
 
 
-    constraints <- make_constraint(MRA, constraint = constraint)
+    constraints <- make_constraint(MRA, constraint = constraint, joint = joint)
     A_constraint <- constraints$A_constraint
     a_constraint <- constraints$a_constraint
 
@@ -650,7 +651,7 @@ mcmc_mra <- function(
                         alpha[dims_idx == m]   <- as.vector(rmvnorm.canonical.const(1, b_alpha_list[[m]], A_alpha_list[[m]], Rstruct = Rstruct_list[[m]]))
                     } else if (constraint %in% c("overall", "resolution", "predicted")) {
                         alpha[dims_idx == m]   <- as.vector(rmvnorm.canonical.const(1, b_alpha_list[[m]], A_alpha_list[[m]], Rstruct = Rstruct_list[[m]],
-                                                                                    A = A_constraint_list[[m]], a = a_constraint))
+                                                                                    A = A_constraint[[m]], a = a_constraint[[m]]))
                     }
                     W_alpha[, m] <- W_list[[m]] %*% alpha[dims_idx == m]
                 }

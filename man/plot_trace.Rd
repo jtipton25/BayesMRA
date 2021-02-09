@@ -4,7 +4,7 @@
 \alias{plot_trace}
 \title{Trace plots from the output of \code{mcmc_mra()} or \code{mcmc_mra_integrated()}}
 \usage{
-plot_trace(out, base_size = 12)
+plot_trace(out, base_size = 12, file = NULL, width = 16, height = 9, ...)
 }
 \arguments{
 \item{out}{The output from \code{mcmc_mra()} or \code{mcmc_mra_integrated()}}

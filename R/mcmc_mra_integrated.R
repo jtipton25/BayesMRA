@@ -731,13 +731,22 @@ mcmc_mra_integrated <- function(
         sigma2   = sigma2_save,
         ll       = ll_save,
         MRA      = MRA,
-        y        = y * sd_y + mu_y,
-        mu_y     = mu_y,
-        sd_y     = sd_y,
-        X        = X,
-        mu_X     = mu_X,
-        sd_X     = sd_X,
-        locs     = locs
+        data   = list(
+            y    = y * sd_y + mu_y,
+            mu_y = mu_y,
+            sd_y = sd_y,
+            X    = X,
+            mu_X = mu_X,
+            sd_X = sd_X,
+            locs = locs),
+        model  = list(
+            params     = params,
+            priors     = priors,
+            inits      = inits,
+            config     = config,
+            verbose    = verbose,
+            use_spam   = use_spam,
+            n_chain    = n_chain)
     )
 
     class(out) <- "mcmc_mra_integrated"

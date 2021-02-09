@@ -13,7 +13,18 @@
 #' @export
 #'
 #'
-plot_fitted_alphas <- function(out, base_size = 12) {
+plot_fitted_alphas <- function(out, base_size = 12, file = NULL, width = 16, height = 9, ...) {
+
+    if (!(class(out) %in% c("mcmc_mra", "mcmc_mra_integrated")))
+        stop('out must be of class "mcmc_mra" or "mcmc_mra_integrated"')
+    if (!is_positive_numeric(width, 1))
+        stop("width must be a positive number")
+    if (!is_positive_numeric(height, 1))
+        stop("height must be a positive number")
+    if (!is.null(file) & !is.character(file))
+        stop("file must be a character string")
+
+
 
     fitted_alphas <- data.frame(
         x = unlist(sapply(1:out$MRA$M, function(i) out$MRA$locs_grid[[i]][, 1])),
@@ -39,5 +50,14 @@ plot_fitted_alphas <- function(out, base_size = 12) {
         ) +
         theme_bw(base_size)
 
-    return(fitted_alphas)
+    if (is.null(file)) {
+        return(fitted_alphas)
+    } else {
+        ggsave(filename = file,
+               plot = fitted_alphas,
+               device = "png",
+               width = width,
+               height = height,
+               units = "in")
+    }
 }

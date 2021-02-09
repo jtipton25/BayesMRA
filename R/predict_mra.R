@@ -17,10 +17,8 @@ predict_mra <- function(out, new_data) {
     # to do
 
     # check if out is class MRA
-    if (class(out)!= "mcmc_mra") {
-        stop("out must be of class mcmc_mra which is the output of mcmc_mra()")
-    }
-
+    if (!(class(out) %in% c("mcmc_mra", "mcmc_mra_integrated")))
+        stop('out must be of class "mcmc_mra" or "mcmc_mra_integrated"')
 
     # generate the prediction MRA grid
     MRA_pred <- mra_wendland_2d_pred(new_data$locs_pred, out$MRA)

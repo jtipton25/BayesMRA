@@ -13,7 +13,17 @@
 #' @export
 #'
 #'
-plot_fitted_process <- function(out, data, base_size = 12, ...) {
+plot_fitted_process <- function(out, data, base_size = 12, file = NULL, width = 16, height = 9, ...) {
+
+    if (!(class(out) %in% c("mcmc_mra", "mcmc_mra_integrated")))
+        stop('out must be of class "mcmc_mra" or "mcmc_mra_integrated"')
+    if (!is_positive_numeric(width, 1))
+        stop("width must be a positive number")
+    if (!is_positive_numeric(height, 1))
+        stop("height must be a positive number")
+    if (!is.null(file) & !is.character(file))
+        stop("file must be a character string")
+
 
     X <- out$data$X
     for(i in 2:ncol(X)) {
@@ -60,5 +70,14 @@ plot_fitted_process <- function(out, data, base_size = 12, ...) {
 
     (plot_Xbeta + plot_Walpha) / (plot_mu + plot_obs)
 
-    return((plot_Xbeta + plot_Walpha) / (plot_mu + plot_obs))
+    if (is.null(file)) {
+        return((plot_Xbeta + plot_Walpha) / (plot_mu + plot_obs))
+    } else {
+        ggsave(filename = file,
+               plot = (plot_Xbeta + plot_Walpha) / (plot_mu + plot_obs),
+               device = "png",
+               width = width,
+               height = height,
+               units = "in")
+    }
 }

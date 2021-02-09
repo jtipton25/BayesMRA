@@ -4,7 +4,16 @@
 \alias{plot_predicted_process}
 \title{Plot the observed (or true) and predicted spatial data}
 \usage{
-plot_predicted_process(out, data, preds, base_size = 12, ...)
+plot_predicted_process(
+  out,
+  data,
+  preds,
+  base_size = 12,
+  file = NULL,
+  width = 16,
+  height = 9,
+  ...
+)
 }
 \arguments{
 \item{out}{The output from \code{mcmc_mra()} or \code{mcmc_mra_integrated()}}

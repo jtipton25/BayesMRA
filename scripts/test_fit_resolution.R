@@ -130,8 +130,6 @@ if (file.exists(here::here("results", "test-fit-resolution-constrained.RData")))
     load(here::here("results", "test-fit-resolution-constrained.RData"))
 } else {
     start   <- Sys.time()
-
-    # to do: center and scale X
     out <- mcmc_mra(
         y = y,
         X = X,

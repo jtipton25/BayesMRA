@@ -4,7 +4,15 @@
 \alias{plot_fitted_process}
 \title{Plot the observed and "true" (holdout) spatial data}
 \usage{
-plot_fitted_process(out, data, base_size = 12, ...)
+plot_fitted_process(
+  out,
+  data,
+  base_size = 12,
+  file = NULL,
+  width = 16,
+  height = 9,
+  ...
+)
 }
 \arguments{
 \item{out}{The output from \code{mcmc_mra()} or \code{mcmc_mra_integrated()}}
