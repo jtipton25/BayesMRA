@@ -188,14 +188,6 @@ mcmc_mra_integrated <- function(
         }
     }
 
-
-    # sample_rho <- TRUE
-    # if (!is.null(config)) {
-    #     if (!is.null(config[['sample_rho']])) {
-    #         sample_rho <- config[['sample_rho']]
-    #     }
-    # }
-
     ## do we sample the MRA variance parameter? This is primarily
     ## used to troubleshoot model fitting using simulated data
     sample_tau2 <- TRUE
@@ -367,21 +359,12 @@ mcmc_mra_integrated <- function(
             beta_tau2 <- priors[['beta_tau2']]
         }
     }
-    #100 * pmin(pmax(1 / rgamma(M, 0.5, lambda), 1), 100)
-
 
     Q_alpha_tau2 <- make_Q_alpha_tau2(Q_alpha, tau2, use_spam = use_spam)
 
     ## initialize the cholesky structure
     G       <- Q_alpha_tau2 + tWW / sigma2
     Rstruct <- chol(G)
-
-    ##
-    ## initialize rho
-    ##
-
-    # rho      <- runif(1, -1, 1)
-
 
     ## intialize an ICAR structure for fitting alpha
     Q_alpha      <- make_Q_alpha_2d(sqrt(n_dims), rep(0.9, length(n_dims)), use_spam = use_spam)
@@ -423,13 +406,6 @@ mcmc_mra_integrated <- function(
         }
     }
 
-    ## initial values for rho
-    # if (!is.null(inits[['rho']])) {
-    #     if (all(!is.na(inits[['rho']]))) {
-    #         rho <- inits[['rho']]
-    #     }
-    # }
-
     ##
     ## initialize the log likelihood
     ##
@@ -442,7 +418,6 @@ mcmc_mra_integrated <- function(
 
     n_save       <- params$n_mcmc / params$n_thin
     beta_save    <- matrix(0, n_save, p)
-    # rho_save     <- rep(0, n_save)
     tau2_save    <- matrix(0, n_save, M)
     sigma2_save  <- rep(0, n_save)
     ll_save      <- rep(0, n_save)
@@ -475,11 +450,6 @@ mcmc_mra_integrated <- function(
     ##
     ## tuning variables for adaptive MCMC
     ##
-
-    # ## tuning for rho
-    # rho_accept       <- 0
-    # rho_accept_batch <- 0
-    # rho_tune         <- 0.025
 
     ##
     ## Starting MCMC chain
@@ -604,29 +574,6 @@ mcmc_mra_integrated <- function(
         }
 
         ##
-        ## sample rho
-        ##
-
-        # if (sample_rho) {
-        #     if (verbose)
-        #         message("sample rho")
-        #
-        #     rho_vals <- rowSums(
-        #         sapply(2:n_time, function(tt) {
-        #             t_alpha_Q <- t(alpha[, tt-1]) %*% Q_alpha_tau2
-        #             c(
-        #                 t_alpha_Q %*% alpha[, tt-1],
-        #                 t_alpha_Q %*% alpha[, tt]
-        #             )
-        #         })
-        #     )
-        #
-        #     a_rho <- rho_vals[1]
-        #     b_rho <- rho_vals[2]
-        #     rho   <- rtrunc(1, "norm", a = -1, b = 1, mean = b_rho / a_rho, sd = sqrt(1 / a_rho))
-        # }
-
-        ##
         ## sample tau2
         ##
 
@@ -700,7 +647,6 @@ mcmc_mra_integrated <- function(
             if (k %% params$n_thin == 0) {
                 save_idx                <- (k - params$n_adapt) / params$n_thin
                 beta_save[save_idx, ]   <- beta
-                # rho_save[save_idx]       <- rho
                 tau2_save[save_idx, ]   <- tau2
                 sigma2_save[save_idx]   <- sigma2
                 ll_save[save_idx]       <- ll_current

@@ -208,14 +208,6 @@ mcmc_mra <- function(
         }
     }
 
-
-    # sample_rho <- TRUE
-    # if (!is.null(config)) {
-    #     if (!is.null(config[['sample_rho']])) {
-    #         sample_rho <- config[['sample_rho']]
-    #     }
-    # }
-
     ## do we sample the MRA variance parameter? This is primarily
     ## used to troubleshoot model fitting using simulated data
     sample_tau2 <- TRUE
@@ -227,16 +219,7 @@ mcmc_mra <- function(
         }
     }
 
-    # sample_lambda <- TRUE
-    # if (!is.null(config)) {
-    #     if (!is.null(config[['sample_lambda']])) {
-    #         sample_lambda <- config[['sample_lambda']]
-    #         if (!is.logical(sample_lambda) | is.na(sample_lambda))
-    #             stop('If specified, sample_lambda must be TRUE or FALSE')
-    #     }
-    # }
-
-    ## do we sample the nugger variance parameter
+    ## do we sample the nugget variance parameter
     sample_sigma2 <- TRUE
     if (!is.null(config)) {
         if (!is.null(config[['sample_sigma2']])) {
@@ -271,8 +254,8 @@ mcmc_mra <- function(
     mu_y <- mean(y)
     y <- (y - mu_y) / sd_y
 
-    mu_X <- apply(X[, -1], 2, mean)
-    sd_X <- apply(X[, -1], 2, sd)
+    mu_X <- apply(X[, -1, drop = FALSE], 2, mean)
+    sd_X <- apply(X[, -1, drop = FALSE], 2, sd)
     for(i in 2:ncol(X)) {
         X[, i] <- (X[, i] - mu_X[i-1]) / sd_X[i-1]
     }
@@ -332,7 +315,7 @@ mcmc_mra <- function(
     ##
 
     mu_beta        <- rep(0, p)
-    Sigma_beta     <- 10 * diag(p)
+    Sigma_beta     <- 100 * diag(p)
 
     ## check if priors for mu_beta are specified
     if (!is.null(priors[['mu_beta']])) {
@@ -351,15 +334,7 @@ mcmc_mra <- function(
             Sigma_beta <- priors[['Sigma_beta']]
         }
     }
-    Sigma_beta_chol <- tryCatch(
-        chol(Sigma_beta),
-        error = function(e) {
-            if (verbose)
-                message("The Cholesky decomposition of the prior covariance Sigma_beta was ill-conditioned and mildy regularized.")
-            chol(Sigma_beta + 1e-8 * diag(p))
-        }
-    )
-    Sigma_beta_inv  <- chol2inv(Sigma_beta_chol)
+    Sigma_beta_inv  <- chol2inv(chol(Sigma_beta))
 
     ##
     ## initialize beta
@@ -374,13 +349,6 @@ mcmc_mra <- function(
     ##
 
     Q_alpha <- make_Q_alpha_2d(sqrt(n_dims), rep(0.999, length(n_dims)), use_spam = use_spam)
-
-    ## prior for lambda is scale_lambda
-    ## fix this so it can be set by the user
-    # scale_lambda <- 0.5
-    # scale_lambda <- 500
-    #
-    # lambda <- rgamma(M, 0.5, scale_lambda)
     tau2   <- rep(1, M)
 
     alpha_tau2 <- 0.01
@@ -401,15 +369,8 @@ mcmc_mra <- function(
             beta_tau2 <- priors[['beta_tau2']]
         }
     }
-    #100 * pmin(pmax(1 / rgamma(M, 0.5, lambda), 1), 100)
 
     Q_alpha_tau2 <- make_Q_alpha_tau2(Q_alpha, tau2, use_spam = use_spam)
-
-    ##
-    ## initialize rho
-    ##
-
-    # rho      <- runif(1, -1, 1)
 
     ##
     ## initialize sigma2
@@ -510,6 +471,7 @@ mcmc_mra <- function(
         }
     }
 
+    W_alpha <- NULL
     if (joint) {
         W_alpha <- W %*% alpha
     } else {
@@ -529,38 +491,23 @@ mcmc_mra <- function(
     }
     Q_alpha_tau2 <- make_Q_alpha_tau2(Q_alpha, tau2, use_spam = use_spam)
 
-    ## initial values for rho
-    # if (!is.null(inits[['rho']])) {
-    #     if (all(!is.na(inits[['rho']]))) {
-    #         rho <- inits[['rho']]
-    #     }
-    # }
-
-
     ##
-    ## setup save variables
+    ## setup save variables ----------------------------------------------------
     ##
 
     n_save       <- params$n_mcmc / params$n_thin
     beta_save    <- matrix(0, n_save, p)
-    # rho_save     <- rep(0, n_save)
     tau2_save    <- matrix(0, n_save, M)
     sigma2_save  <- rep(0, n_save)
     alpha_save   <- matrix(0, n_save, sum(n_dims))
-    # lambda_save    <- matrix(0, n_save, M)
 
     ##
-    ## initialize tuning
+    ## initialize tuning -------------------------------------------------------
     ##
 
     ##
     ## tuning variables for adaptive MCMC
     ##
-
-    # ## tuning for rho
-    # rho_accept       <- 0
-    # rho_accept_batch <- 0
-    # rho_tune         <- 0.025
 
     ##
     ## Starting MCMC chain
@@ -659,29 +606,6 @@ mcmc_mra <- function(
         }
 
         ##
-        ## sample rho -- placeholder for spatio-temporal model
-        ##
-
-        # if (sample_rho) {
-        #     if (verbose)
-        #         message("sample rho")
-        #
-        #     rho_vals <- rowSums(
-        #         sapply(2:n_time, function(tt) {
-        #             t_alpha_Q <- t(alpha[, tt-1]) %*% Q_alpha_tau2
-        #             c(
-        #                 t_alpha_Q %*% alpha[, tt-1],
-        #                 t_alpha_Q %*% alpha[, tt]
-        #             )
-        #         })
-        #     )
-        #
-        #     a_rho <- rho_vals[1]
-        #     b_rho <- rho_vals[2]
-        #     rho   <- rtrunc(1, "norm", a = -1, b = 1, mean = b_rho / a_rho, sd = sqrt(1 / a_rho))
-        # }
-
-        ##
         ## sample tau2
         ##
 
@@ -706,7 +630,6 @@ mcmc_mra <- function(
             if (k %% params$n_thin == 0) {
                 save_idx                <- (k - params$n_adapt) / params$n_thin
                 beta_save[save_idx, ]   <- beta
-                # rho_save[save_idx]       <- rho
                 tau2_save[save_idx, ]   <- tau2
                 sigma2_save[save_idx]   <- sigma2
                 alpha_save[save_idx, ]  <- alpha
@@ -734,7 +657,6 @@ mcmc_mra <- function(
 
     out <- list(
         beta   = beta_save,
-        # rho    = rho_save,
         tau2   = tau2_save,
         sigma2 = sigma2_save,
         alpha  = alpha_save,
