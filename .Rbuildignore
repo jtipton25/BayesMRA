@@ -8,7 +8,7 @@
 ^development$
 ^codecov\.yml$
 ^README\.Rmd$
-^.travis.yml$
+^travis-backup$
 ^doc$
 ^Meta$
 ^cran-comments\.md$
