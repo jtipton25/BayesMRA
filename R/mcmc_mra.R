@@ -39,30 +39,23 @@
 #' ## simulate the MRA process
 #' M <- 2
 #' MRA <- mra_wendland_2d(locs, M = M, n_coarse_grid = 4)
-#' W <- do.call(cbind, MRA$W)
+#' W <- MRA$W
+#' n_dims <- MRA$n_dims
+#' dims_idx <- MRA$dims_idx
 #'
-#' n_dims   <- rep(NA, length(MRA$W))
-#' dims_idx <- NULL
-#' for (i in 1:M) {
-#'     n_dims[i] <- ncol(MRA$W[[i]])
-#'     dims_idx  <- c(dims_idx, rep(i, n_dims[i]))
-#' }
 #' ## set up the process precision matrices
 #' Q_alpha <- make_Q_alpha_2d(sqrt(n_dims), c(0.9, 0.8))
 #' Q_alpha_tau2 <- make_Q_alpha_tau2(Q_alpha, tau2 = c(2, 4))
 #'
 #' ## add in constraints so each resolution has random effects that sum to 0
-#' A_constraint <- sapply(1:M, function(i){
-#'     tmp = rep(0, sum(n_dims))
-#'     tmp[dims_idx == i] <- 1
-#'     return(tmp)
-#' })
-#' a_constraint <- rep(0, M)
+#' constraints <- make_constraint(MRA, constraint = "resolution", joint = TRUE)
+#' A_constraint <- constraints$A_constraint
+#' a_constraint <- constraints$a_constraint
 #' alpha <- as.vector(spam::rmvnorm.prec.const(
 #'     n = 1,
 #'     mu = rep(0, nrow(W)),
 #'     Q = Q_alpha_tau2,
-#'     A = t(A_constraint),
+#'     A = A_constraint,
 #'     a = a_constraint))
 #' ## define the data
 #' y <-  as.vector(X %*% beta + W %*% alpha + rnorm(10))
@@ -91,9 +84,7 @@
 #'     params        = params,
 #'     priors        = priors,
 #'     M             = 2,
-#'     n_coarse_grid = 4,
-#'     n_cores       = 1L,
-#'     verbose       = FALSE
+#'     n_coarse_grid = 4
 #' )
 #'
 #' @export

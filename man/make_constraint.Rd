@@ -14,7 +14,7 @@ make_constraint(MRA, constraint = "unconstrained", joint = TRUE)
 \item{joint}{Should the spatial parameters alpha be sampled jointly or by each resolution}
 }
 \value{
-
+A list of constraint matrices \code{A_constraint} and \code{a_constraint} for use in \code{spam} sampling functions
 }
 \description{
 Construct the constraint matrices for the spatial random effects alpha

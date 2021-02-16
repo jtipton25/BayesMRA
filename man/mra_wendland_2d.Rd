@@ -30,9 +30,13 @@ mra_wendland_2d(
 \item{use_spam}{is a boolean flag to determine whether the output is a list of \code{spam::spam} matrix objects (\code{use_spam = TRUE}) or a an \eqn{n \times n}{n x n} sparse Matrix of class \code{Matrix::dgCMatrix} \code{use_spam = FALSE} (see spam and Matrix packages for details).}
 }
 \value{
-A list of objects including the MRA knots locations \code{locs_grid},
+A list of objects including the observation locations \code{locs},
+the MRA knots locations \code{locs_grid},
 the Wendland basis representation matrix \code{W} at the observed locations,
-the basis radius \code{radius}, the numbers of resolutions \code{M},
+the basis radius \code{radius},
+the numbers of resolutions \code{M},
+#' the basis function dimensions \code{n_dims},
+the basis function resolution indices \code{dims_idx},
 the number of expected neighbors in the interior of each grid \code{n_neighbors},
 the number of interior basis functions in one direction \code{n_coarse_grid},
 the number of additional padding basis functions given by \code{n_padding},
@@ -46,8 +50,6 @@ set.seed(111)
 locs <- matrix(runif(20), 10, 2)
 MRA <- mra_wendland_2d(locs, M = 2, n_coarse_grid = 4)
 ## plot the MRA grid at different resolutions
-layout(matrix(1:2, 1, 2))
-plot(MRA$locs_grid[[1]])
-plot(MRA$locs_grid[[2]])
+plot_MRA_grid(MRA)
 
 }

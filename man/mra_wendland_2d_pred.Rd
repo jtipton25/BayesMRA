@@ -11,13 +11,22 @@ mra_wendland_2d_pred(locs_pred, MRA, max_points = NULL, use_spam = TRUE)
 
 \item{MRA}{The multi-resolution basis expansion at the observed locations. This object is the output of \verb{mra_wendland-2d()} and is of class "mra_wendland_2d".}
 
-\item{use_spam}{is a boolean flag to determine whether the output is a list of spam matrix objects (\code{use_spam = TRUE}) or a an \eqn{n \times n}{n x n} sparse Matrix of class "dgCMatrix" \code{use_spam = FALSE} (see spam and Matrix packages for details).}
+\item{max_points}{The expected number of pairs less than or equal to the radius. Default is \code{nrow(locs)} * \code{num_neighbors}.}
 
-\item{n_neighbors}{The expected number of neighbors for each interior basis function. This determines the basis radius parameter.}
+\item{use_spam}{is a boolean flag to determine whether the output is a list of spam matrix objects (\code{use_spam = TRUE}) or a an \eqn{n \times n}{n x n} sparse Matrix of class "dgCMatrix" \code{use_spam = FALSE} (see spam and Matrix packages for details).}
 }
 \value{
-A list of objects including the MRA knots locations \code{locs_grid},
-the Wendland basis representation matrix \code{W_pred} at the prediction locations, and the basis radius \code{radius}
+A list of objects including the observation locations \code{locs},
+the MRA knots locations \code{locs_grid},
+the Wendland basis representation matrix \code{W_pred} at the prediction locations,
+the basis radius \code{radius},
+the numbers of resolutions \code{M},
+the basis function dimensions \code{n_dims},
+the basis function resolution indices \code{dims_idx},
+the number of expected neighbors in the interior of each grid \code{n_neighbors},
+the number of interior basis functions in one direction \code{n_coarse_grid},
+the number of additional padding basis functions given by \code{n_padding},
+and the setting \code{use_spam} which determines whether the MRA output uses the \code{spam} format.
 }
 \description{
 Code to construct the mutli-resolution sparse basis function representation for fitting spatial processes
@@ -27,11 +36,9 @@ set.seed(111)
 locs <- matrix(runif(20), 10, 2)
 locs_pred <- matrix(runif(20), 10, 2)
 MRA <- mra_wendland_2d(locs, M = 2, n_coarse_grid = 4)
-MRA_pred <- mra_wendland_2d_pred(locs, locs_pred, MRA)
+MRA_pred <- mra_wendland_2d_pred(locs_pred, MRA)
 
 ## plot the MRA prediction grid at different resolutions
-layout(matrix(1:2, 1, 2))
-plot(MRA_pred$locs_grid[[1]])
-plot(MRA_pred$locs_grid[[2]])
+plot_MRA_grid(MRA_pred)
 
 }

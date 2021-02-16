@@ -3,17 +3,18 @@
 #' Plot the fitted model from the output of `mcmc_mra()` or `mcmc_mra_integrated()`. Also add in the observed (or true data if using simulated/hold out data) to compare model fit to the data.
 #'
 #' @param out The output from `mcmc_mra()` or `mcmc_mra_integrated()`
-#' @param data A dataframe with four columns: Lat, Lon, Observed, Fitted
 #' @param base_size The base size for the plot
-#' @param ...
+#' @param file If `file = NULL`, the ggplot object is returned. If `file` is not NULL, an image is saved to the file path specified by `file`
+#' @param width If a file path is specified, `width` determines the width of the saved image (in inches)
+#' @param height If a file path is specified, `height` determines the height of the saved image (in inches)
 #'
-#' @return
+#' @return Either a ggplot object (if `file = NULL`) or a saved image file with no return (`file` is not NULL)
 #' @import ggplot2
 #' @import patchwork
 #' @export
 #'
 #'
-plot_fitted_alphas <- function(out, base_size = 12, file = NULL, width = 16, height = 9, ...) {
+plot_fitted_alphas <- function(out, base_size = 12, file = NULL, width = 16, height = 9) {
 
     if (!(class(out) %in% c("mcmc_mra", "mcmc_mra_integrated")))
         stop('out must be of class "mcmc_mra" or "mcmc_mra_integrated"')
@@ -32,7 +33,7 @@ plot_fitted_alphas <- function(out, base_size = 12, file = NULL, width = 16, hei
         res = factor(unlist(sapply(1:out$MRA$M, function(i) rep(i, each = nrow(out$MRA$locs_grid[[i]]))))),
         alpha = unlist(sapply(1:out$MRA$M, function(i) apply(out$alpha, 2, mean)[out$MRA$dims_idx == i]))
     ) %>%
-        ggplot(aes(x = x, y = y, fill = alpha)) +
+        ggplot(aes(x = .data$x, y = .data$y, fill = alpha)) +
         geom_raster() +
         scale_fill_viridis_c() +
         ggtitle("Posterior mean spatial random effects") +

@@ -3,17 +3,19 @@
 #' Plot the fitted spatial process from the output of `mcmc_mra()` or `mcmc_mra_integrated()` for each resolution.
 #'
 #' @param out The output from `mcmc_mra()` or `mcmc_mra_integrated()`
-#' @param data A dataframe with four columns: Lat, Lon, Observed, Fitted
+#' @param preds A prediction object that is the output of `predict_mra()`
 #' @param base_size The base size for the plot
-#' @param ...
+#' @param file If `file = NULL`, the ggplot object is returned. If `file` is not NULL, an image is saved to the file path specified by `file`
+#' @param width If a file path is specified, `width` determines the width of the saved image (in inches)
+#' @param height If a file path is specified, `height` determines the height of the saved image (in inches)
 #'
-#' @return
+#' @return Either a ggplot object (if `file = NULL`) or a saved image file with no return (`file` is not NULL)
 #' @import ggplot2
 #' @import patchwork
 #' @export
 #'
 #'
-plot_fitted_MRA <- function(out, preds, base_size = 12, file = NULL, width = 16, height = 9, ...) {
+plot_fitted_MRA <- function(out, preds, base_size = 12, file = NULL, width = 16, height = 9) {
 
     if (!(class(out) %in% c("mcmc_mra", "mcmc_mra_integrated")))
         stop('out must be of class "mcmc_mra" or "mcmc_mra_integrated"')
@@ -51,7 +53,7 @@ plot_fitted_MRA <- function(out, preds, base_size = 12, file = NULL, width = 16,
         as.data.frame.table(W_alpha_res, responseName = "W_alpha")
     ) %>%
         rbind(dat_full) %>%
-        ggplot(aes(x = Lon, y = Lat, fill = W_alpha)) +
+        ggplot(aes(x = .data$Lon, y = .data$Lat, fill = .data$W_alpha)) +
         geom_raster() +
         facet_wrap( ~ res, ncol = 2) +
         xlab("Longitude") +

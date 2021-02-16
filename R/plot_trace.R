@@ -2,8 +2,11 @@
 #'
 #' @param out The output from `mcmc_mra()` or `mcmc_mra_integrated()`
 #' @param base_size The base size for the plot
+#' @param file If `file = NULL`, the ggplot object is returned. If `file` is not NULL, an image is saved to the file path specified by `file`
+#' @param width If a file path is specified, `width` determines the width of the saved image (in inches)
+#' @param height If a file path is specified, `height` determines the height of the saved image (in inches)
 #'
-#' @return Trace plots of the parameters
+#' @return Either a ggplot object of the model trace plots (not including the spatial coefficients alpha) (if `file = NULL`) or a saved image file with no return (`file` is not NULL)
 #' @export
 #'
 #' @import patchwork
@@ -11,7 +14,7 @@
 #' @import latex2exp
 #'
 
-plot_trace <- function(out, base_size = 12, file = NULL, width = 16, height = 9, ...) {
+plot_trace <- function(out, base_size = 12, file = NULL, width = 16, height = 9) {
 
     if (!(class(out) %in% c("mcmc_mra", "mcmc_mra_integrated")))
         stop('out must be of class "mcmc_mra" or "mcmc_mra_integrated"')
@@ -29,7 +32,7 @@ plot_trace <- function(out, base_size = 12, file = NULL, width = 16, height = 9,
         iteration = rep(1:nrow(out$tau2), times = M),
         resolution = factor(rep(1:M, each = nrow(out$tau2)))
     ) %>%
-        ggplot(aes(x = iteration, y = tau2, group = resolution, color = resolution)) +
+        ggplot(aes(x = .data$iteration, y = .data$tau2, group = .data$resolution, color = .data$resolution)) +
         geom_line(alpha = 0.75) +
         scale_color_viridis_d(end = 0.8) +
         ggtitle(TeX("Trace plots for $\\tau2$")) +
@@ -38,7 +41,7 @@ plot_trace <- function(out, base_size = 12, file = NULL, width = 16, height = 9,
         ylab(TeX("$\\tau^2$"))
 
     p_sigma2 <- data.frame(sigma2 = c(out$sigma2), iteration = 1:length(out$sigma2)) %>%
-        ggplot(aes(x = iteration, y = sigma2)) +
+        ggplot(aes(x = .data$iteration, y = .data$sigma2)) +
         geom_line(alpha = 0.75) +
         scale_color_viridis_d(end = 0.8) +
         ggtitle(TeX("Trace plots for $\\sigma2$")) +
@@ -51,7 +54,7 @@ plot_trace <- function(out, base_size = 12, file = NULL, width = 16, height = 9,
         iteration = rep(1:nrow(out$beta), times = ncol(out$beta)),
         covariate = factor(rep(1:ncol(out$beta), each = nrow(out$beta)))
     ) %>%
-        ggplot(aes(x = iteration, y = beta, group = covariate, color = covariate)) +
+        ggplot(aes(x = .data$iteration, y = .data$beta, group = .data$covariate, color = .data$covariate)) +
         geom_line(alpha = 0.75) +
         scale_color_viridis_d(end = 0.8) +
         ggtitle(TeX("Trace plots for $\\beta$")) +

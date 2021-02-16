@@ -20,21 +20,22 @@ test_that("rmvn_arma", {
         var(X), var(Y), tol = 0.05
     )
 
-    set.seed(11)
-    N <- 10000
-    d <- 3
-    b <- rnorm(3)
-    ## matrix with third eigenvalue of 0
-    A <- matrix(c(1, 0, 2, 0, 1, 2, 2, 2, 8), 3, 3)
-
-    X <- mvnfast::rmvn(N, solve(A + 1e-6 * diag(d)) %*% b, solve(A + 1e-6 * diag(d)))
-    Y <- t(sapply(1:N, function(i) rmvn_arma(A, b)))
-    expect_equal(
-        colMeans(X), colMeans(Y), tol = 0.05
-    )
-    expect_equal(
-        var(X), var(Y), tol = 0.05
-    )
+    ## Why did I want to simulate from a singular matrix??
+    # set.seed(11)
+    # N <- 10000
+    # d <- 3
+    # b <- rnorm(3)
+    # ## matrix with third eigenvalue of 0
+    # A <- matrix(c(1, 0, 2, 0, 1, 2, 2, 2, 8), 3, 3)
+    #
+    # X <- mvnfast::rmvn(N, solve(A + 1e-4 * diag(d)) %*% b, solve(A + 1e-6 * diag(d)))
+    # Y <- t(sapply(1:N, function(i) rmvn_arma(A, b)))
+    # expect_equal(
+    #     colMeans(X), colMeans(Y), tol = 0.05
+    # )
+    # expect_equal(
+    #     var(X), var(Y), tol = 0.05
+    # )
 })
 
 

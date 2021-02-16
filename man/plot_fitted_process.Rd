@@ -10,8 +10,7 @@ plot_fitted_process(
   base_size = 12,
   file = NULL,
   width = 16,
-  height = 9,
-  ...
+  height = 9
 )
 }
 \arguments{
@@ -21,10 +20,14 @@ plot_fitted_process(
 
 \item{base_size}{The base size for the plot}
 
-\item{...}{}
+\item{file}{If \code{file = NULL}, the ggplot object is returned. If \code{file} is not NULL, an image is saved to the file path specified by \code{file}}
+
+\item{width}{If a file path is specified, \code{width} determines the width of the saved image (in inches)}
+
+\item{height}{If a file path is specified, \code{height} determines the height of the saved image (in inches)}
 }
 \value{
-
+Either a ggplot object (if \code{file = NULL}) or a saved image file with no return (\code{file} is not NULL)
 }
 \description{
 Plot the fitted model from the output of \code{mcmc_mra()} or \code{mcmc_mra_integrated()}. Also add in the observed (or true data if using simulated/hold out data) to compare model fit to the data.

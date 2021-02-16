@@ -33,7 +33,7 @@ dmvn_smw(
 
 \item{Rstruct}{is the Cholesky prior precision matrix for random effects alpha}
 
-\item{logd}{}
+\item{logd}{is a logical value of whether to calculate the log density (\code{logd = TRUE}) or the density on the data scale (\code{logd = FALSE})}
 }
 \value{
 The (log) density of a normal distribution with mean \eqn{\mathbf{X} \boldsymbol{\beta}} and covariance matrix \eqn{\sigma^2 \mathbf{I} + \mathbf{W} \mathbf{Q}_{\alpha_{\tau^2}} \mathbf{W}'}

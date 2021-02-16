@@ -5,15 +5,17 @@
 #' @param out The output from `mcmc_mra()` or `mcmc_mra_integrated()`
 #' @param data A dataframe with four columns: Lat, Lon, Observed, Fitted
 #' @param base_size The base size for the plot
-#' @param ...
+#' @param file If `file = NULL`, the ggplot object is returned. If `file` is not NULL, an image is saved to the file path specified by `file`
+#' @param width If a file path is specified, `width` determines the width of the saved image (in inches)
+#' @param height If a file path is specified, `height` determines the height of the saved image (in inches)
 #'
-#' @return
+#' @return Either a ggplot object (if `file = NULL`) or a saved image file with no return (`file` is not NULL)
 #' @import ggplot2
 #' @import patchwork
 #' @export
 #'
 #'
-plot_fitted_process <- function(out, data, base_size = 12, file = NULL, width = 16, height = 9, ...) {
+plot_fitted_process <- function(out, data, base_size = 12, file = NULL, width = 16, height = 9) {
 
     if (!(class(out) %in% c("mcmc_mra", "mcmc_mra_integrated")))
         stop('out must be of class "mcmc_mra" or "mcmc_mra_integrated"')
@@ -44,26 +46,26 @@ plot_fitted_process <- function(out, data, base_size = 12, file = NULL, width = 
         range(data$Observed, na.rm = TRUE))
 
     plot_Xbeta <- dat_plot %>%
-        ggplot(aes(x = Lat, y = Lon, fill = mean_Xbeta)) +
+        ggplot(aes(x = .data$Lat, y = .data$Lon, fill = .data$mean_Xbeta)) +
         geom_raster() +
         theme_bw(base_size = base_size) +
         scale_fill_viridis_c(option = "B")
 
     plot_Walpha <- dat_plot %>%
-        ggplot(aes(x = Lat, y = Lon, fill = mean_Walpha)) +
+        ggplot(aes(x = .data$Lat, y = .data$Lon, fill = .data$mean_Walpha)) +
         geom_raster() +
         theme_bw(base_size = base_size) +
         scale_fill_viridis_c(option = "B")
 
     plot_mu <- dat_plot %>%
-        ggplot(aes(x = Lat, y = Lon, fill = mean_mu)) +
+        ggplot(aes(x = .data$Lat, y = .data$Lon, fill = .data$mean_mu)) +
         geom_raster() +
         theme_bw(base_size = base_size) +
         scale_fill_viridis_c(option = "B", limits = zlims)
 
     plot_obs <- data %>%
-        filter(!is.na(Observed)) %>%
-        ggplot(aes(x = Lat, y = Lon, fill = Observed)) +
+        filter(!is.na(.data$Observed)) %>%
+        ggplot(aes(x = .data$Lat, y = .data$Lon, fill = .data$Observed)) +
         geom_raster() +
         theme_bw(base_size = base_size) +
         scale_fill_viridis_c(option = "B", limits = zlims)

@@ -7,7 +7,7 @@
 #' @param base_size The base size for the plot
 #' @param title The title for the plot
 #'
-#' @return
+#' @return A ggplot of the sparse matrix structure of a matrix of class "spam"
 #' @import ggplot2
 #' @import dplyr
 #' @import tidyr
@@ -16,7 +16,7 @@
 #'
 #'
 plot_sparse_matrix <- function(x, tile_size = 1, base_size = 12, title = "") {
-    if (class(x) != "spam")
+    if (!inherits(x, "spam"))
         stop('x must be of class "spam"')
 
     # extract the sparsity structure
@@ -29,7 +29,7 @@ plot_sparse_matrix <- function(x, tile_size = 1, base_size = 12, title = "") {
         sparsity = 1) %>%
         drop_na() %>%
         # plot the sparse matrix
-        ggplot(aes(y = row, x = column, fill = sparsity)) +
+        ggplot(aes(y = .data$row, x = .data$column, fill = .data$sparsity)) +
         geom_tile(aes(width = tile_size, height = tile_size)) +
         scale_fill_gradient(low = "black", high = "black") +
         scale_y_reverse() +

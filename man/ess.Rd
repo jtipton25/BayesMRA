@@ -42,7 +42,7 @@ interest.}
 elliptical slice sampler.}
 }
 \value{
-
+An updated set of \code{pars} after an elliptical slice sampling update
 }
 \description{
 Code for the elliptical slice sampler

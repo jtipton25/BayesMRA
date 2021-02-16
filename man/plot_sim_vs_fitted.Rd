@@ -13,8 +13,7 @@ plot_sim_vs_fitted(
   base_size = 12,
   file = NULL,
   width = 16,
-  height = 9,
-  ...
+  height = 9
 )
 }
 \arguments{
@@ -30,12 +29,14 @@ plot_sim_vs_fitted(
 
 \item{base_size}{The base size for the plot}
 
-\item{tile_size}{The size of the ggplot2 tile}
+\item{file}{If \code{file = NULL}, the ggplot object is returned. If \code{file} is not NULL, an image is saved to the file path specified by \code{file}}
 
-\item{title}{The title for the plot}
+\item{width}{If a file path is specified, \code{width} determines the width of the saved image (in inches)}
+
+\item{height}{If a file path is specified, \code{height} determines the height of the saved image (in inches)}
 }
 \value{
-
+Either a ggplot object of the fitted vs. simulated parameter values (if \code{file = NULL}) or a saved image file with no return (\code{file} is not NULL)
 }
 \description{
 Plot the fitted model parameters vs. simulated model parameters

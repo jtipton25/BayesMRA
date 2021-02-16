@@ -12,9 +12,13 @@
 #' @importFrom Matrix Matrix
 #' @import spam
 #' @import spam64
-#' @return A list of objects including the MRA knots locations `locs_grid`,
+#' @return A list of objects including the observation locations `locs`,
+#' the MRA knots locations `locs_grid`,
 #' the Wendland basis representation matrix `W` at the observed locations,
-#' the basis radius `radius`, the numbers of resolutions `M`,
+#' the basis radius `radius`,
+#' the numbers of resolutions `M`,
+#' #' the basis function dimensions `n_dims`,
+#' the basis function resolution indices `dims_idx`,
 #' the number of expected neighbors in the interior of each grid `n_neighbors`,
 #' the number of interior basis functions in one direction `n_coarse_grid`,
 #' the number of additional padding basis functions given by `n_padding`,
@@ -25,9 +29,7 @@
 #' locs <- matrix(runif(20), 10, 2)
 #' MRA <- mra_wendland_2d(locs, M = 2, n_coarse_grid = 4)
 #' ## plot the MRA grid at different resolutions
-#' layout(matrix(1:2, 1, 2))
-#' plot(MRA$locs_grid[[1]])
-#' plot(MRA$locs_grid[[2]])
+#' plot_MRA_grid(MRA)
 #'
 #' @export
 mra_wendland_2d <- function(
@@ -165,6 +167,7 @@ mra_wendland_2d <- function(
     W <- do.call(cbind, W)
 
     out <- list(
+        locs          = locs,
         locs_grid     = locs_grid,
         W             = W,
         radius        = radius,

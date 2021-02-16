@@ -63,14 +63,15 @@ test_that("illegal input for mra_wendland_2d_pred", {
     expect_error(mra_wendland_2d_pred(locs_pred, MRA, use_spam = 3.5), "use_spam must be either TRUE or FALSE")
     expect_error(mra_wendland_2d_pred(locs_pred, MRA, use_spam = NA), "use_spam must be either TRUE or FALSE")
     expect_error(mra_wendland_2d_pred(locs_pred, MRA, use_spam = "aaa"), "use_spam must be either TRUE or FALSE")
+    expect_error(mra_wendland_2d_pred(locs_pred, MRA, use_spam = FALSE), "The Matrix package is not currently supported")
 
     class(MRA) <- NULL
-    expect_error(mra_wendland_2d_pred(locs, locs_pred, MRA), 'MRA must be of class "mra_wendland_2d"')
+    expect_error(mra_wendland_2d_pred(locs_pred, MRA), 'MRA must be of class "mra_wendland_2d"')
 
     class(MRA) <- "XXX"
-    expect_error(mra_wendland_2d_pred(locs, locs_pred, MRA), 'MRA must be of class "mra_wendland_2d"')
+    expect_error(mra_wendland_2d_pred(locs_pred, MRA), 'MRA must be of class "mra_wendland_2d"')
 
     MRA <- mra_wendland_2d(locs)
-    expect_s3_class(mra_wendland_2d_pred(locs, locs_pred, MRA), "mra_wendland_2d_pred")
-    expect_s3_class(mra_wendland_2d_pred(locs, locs_pred, MRA, use_spam = FALSE), "mra_wendland_2d_pred")
+    expect_s3_class(mra_wendland_2d_pred(locs_pred, MRA), "mra_wendland_2d_pred")
+    # expect_s3_class(mra_wendland_2d_pred(locs_pred, MRA, use_spam = FALSE), "mra_wendland_2d_pred")
 })

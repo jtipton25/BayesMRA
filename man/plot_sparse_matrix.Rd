@@ -16,7 +16,7 @@ plot_sparse_matrix(x, tile_size = 1, base_size = 12, title = "")
 \item{title}{The title for the plot}
 }
 \value{
-
+A ggplot of the sparse matrix structure of a matrix of class "spam"
 }
 \description{
 Plot the sparsity of a spam matrix object using ggplot2

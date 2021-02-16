@@ -9,13 +9,19 @@ Description: Software for fitting sparse Bayesian multi-resolution spatial model
 License: GPL (>= 3)
 Depends: R (>= 3.5.0)
 Imports: 
+    dplyr,
     fields,
+    ggplot2,
     igraph,
+    latex2exp,
+    patchwork,
     Matrix,
     mvnfast,
     Rcpp (>= 1.0.4.6),
     spam,
-    spam64
+    spam64,
+    tidyr,
+    tidyverse
 Roxygen: list(markdown = TRUE)    
 RoxygenNote: 7.1.1
 Suggests: 

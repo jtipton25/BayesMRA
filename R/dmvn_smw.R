@@ -8,7 +8,7 @@
 #' @param Q_alpha_tau2 is the prior precision matrix for random effects alpha
 #' @param sigma2 is the residual error
 #' @param Rstruct is the Cholesky prior precision matrix for random effects alpha
-#' @param logd
+#' @param logd is a logical value of whether to calculate the log density (`logd = TRUE`) or the density on the data scale (`logd = FALSE`)
 #'
 #' @return The (log) density of a normal distribution with mean \eqn{\mathbf{X} \boldsymbol{\beta}} and covariance matrix \eqn{\sigma^2 \mathbf{I} + \mathbf{W} \mathbf{Q}_{\alpha_{\tau^2}} \mathbf{W}'}
 #' @import spam

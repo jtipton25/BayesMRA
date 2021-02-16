@@ -3,16 +3,20 @@
 #' @param out The output from `mcmc_mra()` or `mcmc_mra_integrated()`
 #' @param base_size The base size for the plot
 #' @param alpha The plot transparency
+#' @param file If `file = NULL`, the ggplot object is returned. If `file` is not NULL, an image is saved to the file path specified by `file`
+#' @param width If a file path is specified, `width` determines the width of the saved image (in inches)
+#' @param height If a file path is specified, `height` determines the height of the saved image (in inches)
 #'
-#' @return Plots of the posterior distribution of model parameters
-#' @export
+#' @return Either a ggplot object of the posterior distribution of some model parameters (if `file = NULL`) or a saved image file with no return (`file` is not NULL)
+#'
+##' @export
 #'
 #' @import patchwork
 #' @import tidyverse
 #' @import latex2exp
 #'
 
-plot_posterior_params <- function(out, base_size = 12, alpha = 0.1, file = NULL, width = 16, height = 9, ...) {
+plot_posterior_params <- function(out, base_size = 12, alpha = 0.1, file = NULL, width = 16, height = 9) {
 
     if (!(class(out) %in% c("mcmc_mra", "mcmc_mra_integrated")))
         stop('out must be of class "mcmc_mra" or "mcmc_mra_integrated"')
@@ -29,7 +33,7 @@ plot_posterior_params <- function(out, base_size = 12, alpha = 0.1, file = NULL,
         beta = c(out$beta),
         parameter = factor(rep(1:ncol(out$beta), each = nrow(out$beta)))
         ) %>%
-        ggplot(aes(x = parameter, y = beta)) +
+        ggplot(aes(x = .data$parameter, y = .data$beta)) +
         geom_violin() +
         geom_point(position = "jitter", alpha = alpha) +
         geom_hline(yintercept = 0, col = "red", lty = 2) +
@@ -41,7 +45,7 @@ plot_posterior_params <- function(out, base_size = 12, alpha = 0.1, file = NULL,
 
 
     p_sigma2 <- data.frame(sigma2 = out$sigma2) %>%
-        ggplot(aes(y = sigma2, x = "")) +
+        ggplot(aes(y = .data$sigma2, x = "")) +
         geom_violin() +
         geom_point(position = "jitter", alpha = alpha) +
         xlab("") +
@@ -53,7 +57,7 @@ plot_posterior_params <- function(out, base_size = 12, alpha = 0.1, file = NULL,
     p_tau2 <- dat_plot <- data.frame(
         tau2 = c(out$tau2),
         resolution = factor(rep(1:M, each = nrow(out$tau2)))) %>%
-        ggplot(aes(x = resolution, y = tau2)) +
+        ggplot(aes(x = .data$resolution, y = .data$tau2)) +
         geom_violin() +
         geom_point(position = "jitter", alpha = alpha) +
         geom_hline(yintercept = 0, col = "red", lty = 2) +

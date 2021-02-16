@@ -4,7 +4,7 @@
 #' @param constraint What constraint should be applied to the spatial process? Options include no constraint (`constraint = "unconstrained"`), a constraint so the entire MRA process sums to 0 (`constraint = "overall"`), a constraint so that each of the M levels of the MRA process sum to 0 (`constraint = "resolution"`), or whether the predicte process must sum to 0 (`constraint = "predicted"`). Note: `constraint = "predicted"` is NOT currently supported.
 #' @param joint Should the spatial parameters alpha be sampled jointly or by each resolution
 #'
-#' @return
+#' @return A list of constraint matrices `A_constraint` and `a_constraint` for use in `spam` sampling functions
 #' @export
 #'
 make_constraint <- function(MRA, constraint = "unconstrained", joint = TRUE) {

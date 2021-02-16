@@ -5,11 +5,13 @@
 #' @param beta The simulated regression coefficients
 #' @param W The simulated spatial basis functions
 #' @param alpha The simulated spatial basis coefficients
-#' @param tile_size The size of the ggplot2 tile
 #' @param base_size The base size for the plot
-#' @param title The title for the plot
+#' @param file If `file = NULL`, the ggplot object is returned. If `file` is not NULL, an image is saved to the file path specified by `file`
+#' @param width If a file path is specified, `width` determines the width of the saved image (in inches)
+#' @param height If a file path is specified, `height` determines the height of the saved image (in inches)
 #'
-#' @return
+#' @return Either a ggplot object of the fitted vs. simulated parameter values (if `file = NULL`) or a saved image file with no return (`file` is not NULL)
+#' @importFrom stats quantile
 #' @import ggplot2
 #' @import dplyr
 #' @import tidyr
@@ -17,7 +19,7 @@
 #' @export
 #'
 
-plot_sim_vs_fitted <- function(out, X, beta, W, alpha, base_size = 12, file = NULL, width = 16, height = 9, ...) {
+plot_sim_vs_fitted <- function(out, X, beta, W, alpha, base_size = 12, file = NULL, width = 16, height = 9) {
 
     if (!(class(out) %in% c("mcmc_mra", "mcmc_mra_integrated")))
         stop('out must be of class "mcmc_mra" or "mcmc_mra_integrated"')
@@ -53,19 +55,19 @@ plot_sim_vs_fitted <- function(out, X, beta, W, alpha, base_size = 12, file = NU
         mean_Walpha  = apply(Walpha_post, 2, mean),
         lower_Walpha = apply(Walpha_post, 2, quantile, prob = 0.025),
         upper_Walpha = apply(Walpha_post, 2, quantile, prob = 0.975),
-        truth_Walpha = (W %*% alpha),
+        truth_Walpha = (W %*% alpha)#,
 
-        mean_mu      = apply(mu_post, 2, mean),
-        lower_mu     = apply(mu_post, 2, quantile, prob = 0.025),
-        upper_mu     = apply(mu_post, 2, quantile, prob = 0.975),
-        truth_mu     = X_s %*% beta + (W %*% alpha)[s]
+        # mean_mu      = apply(mu_post, 2, mean),
+        # lower_mu     = apply(mu_post, 2, quantile, prob = 0.025),
+        # upper_mu     = apply(mu_post, 2, quantile, prob = 0.975),
+        # truth_mu     = X %*% beta + (W %*% alpha)
     )
 
     plot_Xbeta <- dat_plot %>%
-        ggplot(aes(x = truth_Xbeta, y = mean_Xbeta)) +
+        ggplot(aes(x = .data$truth_Xbeta, y = .data$mean_Xbeta)) +
         scale_color_viridis_d(begin = 0, end = 0.8) +
         geom_point(alpha = 0.5) +
-        geom_errorbar(aes(ymin = lower_Xbeta, ymax = upper_Xbeta)) +
+        geom_errorbar(aes(ymin = .data$lower_Xbeta, ymax = .data$upper_Xbeta)) +
         geom_abline(intercept = 0, slope = 1, col = "red") +
         ggtitle("Estimated vs. simulated fixed effects") +
         xlab("Simulated fixed effects") +
@@ -73,10 +75,10 @@ plot_sim_vs_fitted <- function(out, X, beta, W, alpha, base_size = 12, file = NU
         theme_bw(base_size = base_size)
 
     plot_Walpha <- dat_plot %>%
-        ggplot(aes(x = truth_Walpha, y = mean_Walpha)) +
+        ggplot(aes(x = .data$truth_Walpha, y = .data$mean_Walpha)) +
         scale_color_viridis_d(begin = 0, end = 0.8) +
         geom_point(alpha = 0.5) +
-        geom_errorbar(aes(ymin = lower_Walpha, ymax = upper_Walpha)) +
+        geom_errorbar(aes(ymin = .data$lower_Walpha, ymax = .data$upper_Walpha)) +
         geom_abline(intercept = 0, slope = 1, col = "red") +
         ggtitle("Estimated vs. simulated spatial process") +
         xlab("Simulated spatial process") +

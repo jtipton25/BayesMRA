@@ -14,7 +14,7 @@ recover_alpha(out, n_message = 100, constraint = "unconstrained")
 \item{constraint}{What constraint should be applied to the spatial process? Options include no constraint (\code{constraint = "unconstrained"}), a constraint so the entire MRA process sums to 0 (\code{constraint = "overall"}), a constraint so that each of the M levels of the MRA process sum to 0 (\code{constraint = "resolution"}), or whether the predicte process must sum to 0 (\code{constraint = "predicted"}). Note: \code{constraint = "predicted"} is NOT currently supported.}
 }
 \value{
-
+Composition sampling draws of the spatial coefficients alpha
 }
 \description{
 Recover the latent spatial parameters alpha

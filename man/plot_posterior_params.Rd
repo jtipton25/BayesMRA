@@ -10,8 +10,7 @@ plot_posterior_params(
   alpha = 0.1,
   file = NULL,
   width = 16,
-  height = 9,
-  ...
+  height = 9
 )
 }
 \arguments{
@@ -20,9 +19,15 @@ plot_posterior_params(
 \item{base_size}{The base size for the plot}
 
 \item{alpha}{The plot transparency}
+
+\item{file}{If \code{file = NULL}, the ggplot object is returned. If \code{file} is not NULL, an image is saved to the file path specified by \code{file}}
+
+\item{width}{If a file path is specified, \code{width} determines the width of the saved image (in inches)}
+
+\item{height}{If a file path is specified, \code{height} determines the height of the saved image (in inches)}
 }
 \value{
-Plots of the posterior distribution of model parameters
+Either a ggplot object of the posterior distribution of some model parameters (if \code{file = NULL}) or a saved image file with no return (\code{file} is not NULL)
 }
 \description{
 Posterior distribution plots from the output of \code{mcmc_mra()} or \code{mcmc_mra_integrated()}

@@ -3,9 +3,12 @@
 #' @param out The output from `mcmc_mra()` or `mcmc_mra_integrated()`
 #' @param base_size The base size for the plot
 #' @param alpha The plot transparency
-#' @param n_per_res The number of alpha parameters to sample per resolutoin
+#' @param n_per_res The number of alpha parameters to sample per resolution
+#' @param file If `file = NULL`, the ggplot object is returned. If `file` is not NULL, an image is saved to the file path specified by `file`
+#' @param width If a file path is specified, `width` determines the width of the saved image (in inches)
+#' @param height If a file path is specified, `height` determines the height of the saved image (in inches)
 #'
-#' @return Trace plots of the alpha parameter
+#' @return Either a ggplot object of the trace plots for a subset of the spatial coefficients alpha (if `file = NULL`) or a saved image file with no return (`file` is not NULL)
 #' @export
 #'
 #' @import patchwork
@@ -13,7 +16,7 @@
 #' @import latex2exp
 #'
 
-plot_trace_alpha <- function(out, base_size = 12, alpha = 0.1, n_per_res = 10, file = NULL, width = 16, height = 9, ...) {
+plot_trace_alpha <- function(out, base_size = 12, alpha = 0.1, n_per_res = 10, file = NULL, width = 16, height = 9) {
 
     if (!(class(out) %in% c("mcmc_mra", "mcmc_mra_integrated")))
         stop('out must be of class "mcmc_mra" or "mcmc_mra_integrated"')
@@ -51,7 +54,7 @@ plot_trace_alpha <- function(out, base_size = 12, alpha = 0.1, n_per_res = 10, f
         filter(
             eval(parse(text = paste(paste0("eval(filter_", 1:M, ")"), collapse = " | ")))
         ) %>%
-        ggplot(aes(x = iteration, y = alpha, group = knot, color = knot)) +
+        ggplot(aes(x = .data$iteration, y = .data$alpha, group = .data$knot, color = .data$knot)) +
         geom_line(alpha = alpha) +
         facet_wrap( ~ resolution, ncol = 1) +
         scale_color_viridis_d(end = 0.8) +

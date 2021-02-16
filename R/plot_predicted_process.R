@@ -6,15 +6,17 @@
 #' @param data A dataframe with four columns: Lat, Lon, Observed, Truth
 #' @param preds A prediction object that is the output of `predict_mra()`
 #' @param base_size The base size for the plot
-#' @param ...
+#' @param file If `file = NULL`, the ggplot object is returned. If `file` is not NULL, an image is saved to the file path specified by `file`
+#' @param width If a file path is specified, `width` determines the width of the saved image (in inches)
+#' @param height If a file path is specified, `height` determines the height of the saved image (in inches)
 #'
-#' @return
+#' @return Either a ggplot object of the predicted process (if `file = NULL`) or a saved image file with no return (`file` is not NULL)
 #' @import ggplot2
 #' @import patchwork
 #' @export
 #'
 #'
-plot_predicted_process <- function(out, data, preds, base_size = 12, file = NULL, width = 16, height = 9, ...) {
+plot_predicted_process <- function(out, data, preds, base_size = 12, file = NULL, width = 16, height = 9) {
 
     ## add in titles, grouping of legends, change sd color scheme
 
@@ -45,15 +47,15 @@ plot_predicted_process <- function(out, data, preds, base_size = 12, file = NULL
         range(data$Observed, na.rm = TRUE))
 
     p_obs <- data %>%
-        ggplot(aes(x = Lat, y = Lon, fill = Observed)) +
+        ggplot(aes(x = .data$Lat, y = .data$Lon, fill = .data$Observed)) +
         geom_raster() +
         scale_fill_viridis_c(option = "B", limits = zlims)
     p_fit <- dat_pred %>%
-        ggplot(aes(x = Lat, y = Lon, fill = y)) +
+        ggplot(aes(x = .data$Lat, y = .data$Lon, fill = .data$y)) +
         geom_raster() +
         scale_fill_viridis_c(option = "B", limits = zlims)
     p_sd <- dat_pred %>%
-        ggplot(aes(x = Lat, y = Lon, fill = sd)) +
+        ggplot(aes(x = .data$Lat, y = .data$Lon, fill = .data$sd)) +
         geom_raster() +
         scale_fill_viridis_c(option = "B")
 
