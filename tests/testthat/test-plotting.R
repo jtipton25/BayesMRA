@@ -1,0 +1,2 @@
+context("testing plotting functions")
+
