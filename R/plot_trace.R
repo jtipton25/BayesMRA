@@ -16,12 +16,14 @@
 
 plot_trace <- function(out, base_size = 12, file = NULL, width = 16, height = 9) {
 
-    if (!(class(out) %in% c("mcmc_mra", "mcmc_mra_integrated")))
+    if (!inherits(out, c("mcmc_mra", "mcmc_mra_integrated")))
         stop('out must be of class "mcmc_mra" or "mcmc_mra_integrated"')
     if (!is_positive_numeric(width, 1))
         stop("width must be a positive number")
     if (!is_positive_numeric(height, 1))
         stop("height must be a positive number")
+    if (!is_positive_numeric(base_size, 1))
+        stop("base_size must be a positive number")
     if (!is.null(file) & !is.character(file))
         stop("file must be a character string")
 

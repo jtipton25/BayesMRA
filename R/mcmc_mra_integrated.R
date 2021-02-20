@@ -90,7 +90,7 @@
 #' @importFrom mvnfast rmvn dmvn
 #' @importFrom fields rdist
 #' @importFrom Matrix Cholesky
-#' @importFrom stats lm rgamma dgamma
+#' @importFrom stats lm rgamma dgamma sd rnorm runif
 #' @import spam
 
 mcmc_mra_integrated <- function(
@@ -215,8 +215,8 @@ mcmc_mra_integrated <- function(
     mu_y <- mean(y)
     y <- (y - mu_y) / sd_y
 
-    mu_X <- apply(X[, -1], 2, mean)
-    sd_X <- apply(X[, -1], 2, sd)
+    mu_X <- apply(X[, -1, drop = FALSE], 2, mean)
+    sd_X <- apply(X[, -1, drop = FALSE], 2, sd)
     for(i in 2:ncol(X)) {
         X[, i] <- (X[, i] - mu_X[i-1]) / sd_X[i-1]
     }

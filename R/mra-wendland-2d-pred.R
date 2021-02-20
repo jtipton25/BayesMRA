@@ -38,14 +38,14 @@ mra_wendland_2d_pred <- function(
     max_points    = NULL,
     use_spam = TRUE
 ) {
-    N_pred <- nrow(locs_pred)
+    n_pred <- nrow(locs_pred)
 
     # if (class(MRA) != "mra_wendland_2d")
     if (!inherits(MRA, "mra_wendland_2d"))
         stop('MRA must be of class "mra_wendland_2d"')
 
-    if (!is_numeric_matrix(locs_pred, N_pred, 2)) {
-        stop("locs_pred must be a numeric matrix with N rows and 2 columns")
+    if (!is_numeric_matrix(locs_pred, n_pred, 2)) {
+        stop("locs_pred must be a numeric matrix with n_pred rows and 2 columns")
     }
 
     if (!(is.null(max_points) | is_positive_integer(max_points, 1))) {
@@ -60,7 +60,7 @@ mra_wendland_2d_pred <- function(
 
     ## Define max_points parameter
     if (is.null(max_points)) {
-        max_points <- N_pred * MRA$n_neighbors
+        max_points <- n_pred * MRA$n_neighbors
     }
 
     W_pred       <- vector(mode = "list", length = M)

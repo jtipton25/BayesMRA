@@ -1,17 +1,20 @@
 
 #' Transform the beta parameters to restore the parameters to the original scale.
-#' The function `mcmc_mra()` fits the regression coefficients using centered and
-#' scaled response and covariate values. This function undoes that transformation
-#' to scale the parameter estimates to their usual (uncentered and unscaled) scale
+#' The functions `mcmc_mra()` and `mcmc_mra_integrated()` fit the regression
+#'  coefficients using centered and scaled response and covariate values. This
+#' function undoes that transformation to scale the parameter estimates to
+#' their usual (uncentered and unscaled) scale
 #' estimates
 #'
-#' @param out The output of `mcmc_mra()`
+#' @param out The output of `mcmc_mra()` or `mcmc_mra_integrated()`
 #'
 #' @return A matrix of the size of parameters in out$beta of transformed
 #' regression parameters equivalent to fitting the model on the original scale
 #' @export
 #'
 unscale_beta <- function(out) {
+    if (!inherits(out, c("mcmc_mra", "mcmc_mra_integrated")))
+        stop('out must be of class "mcmc_mra" or "mcmc_mra_integrated"')
     K <- out$model$params$n_mcmc / out$model$params$n_thin
     p <- ncol(out$data$X)
     mu_y <- out$data$mu_y
@@ -31,17 +34,21 @@ unscale_beta <- function(out) {
 
 
 #' Transform the sigma2 parameter to restore the parameter to the original scale.
-#' The function `mcmc_mra()` fits the regression variance using a centered and
-#' scaled response. This function undoes that transformation to scale the
-#' parameter estimate to its usual (uncentered and unscaled) scale
+#' The functions `mcmc_mra()` and `mcmc_mra_integrated()` fit the regression
+#'  variance using a centered and scaled response. This function undoes
+#' that transformation to scale the parameter estimate to its usual
+#' (uncentered and unscaled) scale
 #'
-#' @param out The output of `mcmc_mra()`
+#' @param out The output of `mcmc_mra()` or `mcmc_mra_integrated()`
 #'
 #' @return A vector of the size of out$sigma2 of transformed regression
 #' variance equivalent to fitting the model on the original scale
 #' @export
 #'
 unscale_sigma2 <- function(out) {
+    if (!inherits(out, c("mcmc_mra", "mcmc_mra_integrated")))
+        stop('out must be of class "mcmc_mra" or "mcmc_mra_integrated"')
+
     K <- out$model$params$n_mcmc / out$model$params$n_thin
     p <- ncol(out$data$X)
     sd_y <- out$data$sd_y

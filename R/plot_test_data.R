@@ -17,8 +17,23 @@ plot_test_data <- function(data, base_size = 12, file = NULL, width = 16, height
         stop("width must be a positive number")
     if (!is_positive_numeric(height, 1))
         stop("height must be a positive number")
+    if (!is_positive_numeric(base_size, 1))
+        stop("base_size must be a positive number")
     if (!is.null(file) & !is.character(file))
         stop("file must be a character string")
+
+    ## write checks for the data object
+    if (!is.data.frame(data))
+        stop("data must be a data.frame with variables Observed, Lat, and Lon")
+    if (!is_numeric_with_na(data$Observed, nrow(data)))
+        stop("The data.frame data must contain a numeric vector named Observed of the observed values")
+    if (!is_numeric_vector(data$Truth, nrow(data)))
+        stop("The data.frame data must contain a numeric vector named Truth of the full values")
+    if (!is_numeric_vector(data$Lat, nrow(data)))
+        stop("The data.frame data must contain a numeric vector named Lat of the latitude locations")
+    if (!is_numeric_vector(data$Lon, nrow(data)))
+        stop("The data.frame data must contain a numeric vector named Lon of the longitude locations")
+
 
     plot_obs <- data %>%
         filter(!is.na(.data$Observed)) %>%

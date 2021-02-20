@@ -67,7 +67,17 @@ M <- 3
 n_coarse <- 10
 
 MRA    <- mra_wendland_2d(locs, M = M, n_coarse = n_coarse, use_spam = TRUE)
+```
 
+```
+## temp space set at 108800
+```
+
+```
+## Error in fields.rdist.near(locs, locs_grid[[m]], delta = radius[m], max.points = max_points): Ran out of space, increase max.points
+```
+
+```r
 # MRA    <- mra_wendland_2d(locs, M = M, n_max_fine_grid = 2^8, use_spam = TRUE)
 W_list   <- MRA$W
 n_dims   <- rep(NA, length(W_list))
@@ -76,13 +86,38 @@ for (i in 1:M) {
   n_dims[i] <- ncol(W_list[[i]])
   dims_idx  <- c(dims_idx, rep(i, n_dims[i]))
 }
+```
+
+```
+## Error in W_list[[i]]: this S4 class is not subsettable
+```
+
+```r
 W <- do.call(cbind, W_list)
+```
 
+```
+## Error in do.call(cbind, W_list): second argument must be a list
+```
+
+```r
 Q_alpha      <- make_Q_alpha_2d(sqrt(n_dims), rep(0.999, length(n_dims)), prec_model = "CAR")
+```
 
+```
+## Error in make_Q_alpha_2d(sqrt(n_dims), rep(0.999, length(n_dims)), prec_model = "CAR"): n_dims must be a vector of integers of length M.
+```
+
+```r
 tau2         <- 10 * 2^(2 * (1:M - 1))
 Q_alpha_tau2 <- make_Q_alpha_tau2(Q_alpha, tau2)
+```
 
+```
+## Error in make_Q_alpha_tau2(Q_alpha, tau2): object 'Q_alpha' not found
+```
+
+```r
 ## initialize the random effect
 ## set up a linear constraint so that each resolution sums to one
 A_constraint <- sapply(1:M, function(i){
@@ -90,13 +125,29 @@ A_constraint <- sapply(1:M, function(i){
         tmp[dims_idx == i] <- 1
         return(tmp)
     })
+```
 
+```
+## Error in rep(0, sum(n_dims)): invalid 'times' argument
+```
+
+```r
 a_constraint <- rep(0, M)
 alpha   <- as.vector(rmvnorm.prec.const(n = 1, mu = rep(0, sum(n_dims)), Q = Q_alpha_tau2, A = t(A_constraint), a = a_constraint))
+```
 
+```
+## Error in rmvnorm.prec.const(n = 1, mu = rep(0, sum(n_dims)), Q = Q_alpha_tau2, : object 'Q_alpha_tau2' not found
+```
+
+```r
 sigma2 <- runif(1, 0.25, 0.5)
 
 y <- X %*% beta + W %*% alpha + rnorm(N, 0, sqrt(sigma2))
+```
+
+```
+## Error in W %*% alpha: requires numeric/complex matrix/vector arguments
 ```
 
 Next, the sum-to-one constraint is verified by checking that within each dimension the sum of the $\boldsymbol{\alpha}_m$ parameters is 0.
@@ -107,7 +158,7 @@ sum(alpha)
 ```
 
 ```
-## [1] 1.98782e-14
+## [1] 1.065272
 ```
 
 ```r
@@ -115,7 +166,7 @@ sum(alpha[dims_idx == 1])
 ```
 
 ```
-## [1] 1.450229e-15
+## [1] 0
 ```
 
 ```r
@@ -123,7 +174,7 @@ sum(alpha[dims_idx == 2])
 ```
 
 ```
-## [1] 4.22995e-14
+## [1] 0
 ```
 
 ```r
@@ -131,7 +182,7 @@ sum(alpha[dims_idx == 3])
 ```
 
 ```
-## [1] -2.387153e-14
+## [1] 0
 ```
 
 ## Plotting the simulated data
@@ -149,7 +200,9 @@ for (m in 1:M) {
 }
 ```
 
-<img src="plot-precision-matrices-1.png" title="plot of chunk plot-precision-matrices" alt="plot of chunk plot-precision-matrices" style="display: block; margin: auto;" />
+```
+## Error in h(simpleError(msg, call)): error in evaluating the argument 'x' in selecting a method for function 'display': object 'Q_alpha_tau2' not found
+```
 
 The MRA approach requires a set of grid point at each resolution. The set of grid points at each resolution extends beyond the spatial domain that is highlighted in the black box.
 
@@ -179,7 +232,9 @@ data.frame(
   theme_custom()
 ```
 
-<img src="MRA-grid-1.png" title="plot of chunk MRA-grid" alt="plot of chunk MRA-grid" style="display: block; margin: auto;" />
+```
+## Error in MRA$locs_grid[[i]]: subscript out of bounds
+```
 
 At each internal grid cell, we expect there to be 68 neighbors where the Wendland basis is nonzero. The plot below shows the number of neighbors at each grid point for each resolution.
 
@@ -191,7 +246,13 @@ nnn <- sapply(1:M, function(i) {
     sum((D[j, ]) < MRA$radius[i])}
   )
 })
+```
 
+```
+## Error in MRA$locs_grid[[i]]: subscript out of bounds
+```
+
+```r
 data.frame(
   x = unlist(sapply(1:M, function(i) MRA$locs_grid[[i]][, 1])),
   y = unlist(sapply(1:M, function(i) MRA$locs_grid[[i]][, 2])),
@@ -218,7 +279,9 @@ data.frame(
   theme_custom()
 ```
 
-<img src="plot-neighbors-1.png" title="plot of chunk plot-neighbors" alt="plot of chunk plot-neighbors" style="display: block; margin: auto;" />
+```
+## Error in MRA$locs_grid[[i]]: subscript out of bounds
+```
 
 The next plot shows the simulated spatial random effects $\boldsymbol{\alpha}_m$ at each of the grid points. Notice that the variation is largest for the coarse resolution and the variability decreases for each finer resolution.
 
@@ -248,11 +311,19 @@ sim_alphas <- data.frame(
   facet_wrap( ~ resolution, ncol = 2) +
   theme_bw() +
   theme_custom()
+```
 
+```
+## Error in MRA$locs_grid[[i]]: subscript out of bounds
+```
+
+```r
 sim_alphas
 ```
 
-<img src="plot-random-effects-1.png" title="plot of chunk plot-random-effects" alt="plot of chunk plot-random-effects" style="display: block; margin: auto;" />
+```
+## Error in eval(expr, envir, enclos): object 'sim_alphas' not found
+```
 
 Next, we show a simulated realization of the model. The left figure below shows the fixed effects in the model, the middle figure shows the simulated spatial process, and the right plot shows the observed surface.
 
@@ -262,7 +333,13 @@ zlims <- c(
   min(c(X %*% beta), c(y), c(W %*% alpha)),
   max(c(X %*% beta), c(y), c(W %*% alpha))
 )
+```
 
+```
+## Error in W %*% alpha: requires numeric/complex matrix/vector arguments
+```
+
+```r
 g_fixed <- data.frame(
   temp = c(X %*% beta),
   x    = locs[, 1],
@@ -289,7 +366,13 @@ dat_map <- data.frame(
   x    = locs[, 1],
   y    = locs[, 2]
 )
+```
 
+```
+## Error in W %*% alpha: requires numeric/complex matrix/vector arguments
+```
+
+```r
 g_full <- dat_map %>%
   ggplot(aes(x = x, y = y, fill = temp)) +
   geom_raster() +
@@ -302,7 +385,7 @@ g_full <- dat_map %>%
 ```
 
 ```
-## Error in ggplot2::continuous_scale(aesthetics, "continuous_diverging", : object 'zlims' not found
+## Error in ggplot(., aes(x = x, y = y, fill = temp)): object 'dat_map' not found
 ```
 
 ```r
@@ -319,7 +402,7 @@ g_re <- dat_map %>%
 ```
 
 ```
-## Error in ggplot2::continuous_scale(aesthetics, "continuous_diverging", : object 'zlims' not found
+## Error in ggplot(., aes(x = x, y = y, fill = re)): object 'dat_map' not found
 ```
 
 ```r
@@ -336,10 +419,24 @@ To further examine how the spatial process is constructed, the plot below shows 
 ```r
 ## MRA spatial process
 W_alpha_res = unlist(sapply(1:M, function(m) W[, dims_idx == m] %*% alpha[dims_idx == m], simplify = "matrix"))
+```
+
+```
+## Error in W[, dims_idx == m]: object of type 'S4' is not subsettable
+```
+
+```r
 dimnames(W_alpha_res) <- list(
   site = 1:N,
   res  = paste("resolution", 1:M)
 )
+```
+
+```
+## Error in dimnames(W_alpha_res) <- list(site = 1:N, res = paste("resolution", : object 'W_alpha_res' not found
+```
+
+```r
 dat_locs <- data.frame(
   site = 1:N,
   x    = locs[, 1],
@@ -365,10 +462,19 @@ sim_MRA <- rbind(
   colorspace::scale_fill_continuous_diverging("Blue-Red 3") +
   theme_bw() +
   theme_custom()
+```
+
+```
+## Error in provideDimnames(x, sep = sep, base = base): object 'W_alpha_res' not found
+```
+
+```r
 sim_MRA
 ```
 
-<img src="plot-multiresolution-process-1.png" title="plot of chunk plot-multiresolution-process" alt="plot of chunk plot-multiresolution-process" style="display: block; margin: auto;" />
+```
+## Error in eval(expr, envir, enclos): object 'sim_MRA' not found
+```
 
 # Fitting the MRA model
 
@@ -380,7 +486,21 @@ set.seed(111)
 n_sites   <- 500
 s         <- sample(N, n_sites)
 y_s       <- y[s, ]
+```
+
+```
+## Error in y[s, ]: incorrect number of dimensions
+```
+
+```r
 y_oos     <- y[ - s, ]
+```
+
+```
+## Error in y[-s, ]: incorrect number of dimensions
+```
+
+```r
 X_s       <- X[s, ]
 X_oos     <- X[ - s, ]
 locs_s    <- locs[s, ]
@@ -407,7 +527,7 @@ data.frame(
 ```
 
 ```
-## Error in ggplot2::continuous_scale(aesthetics, "continuous_diverging", : object 'zlims' not found
+## Error in data.frame(x = locs_s[, 1], y = locs_s[, 2], site = factor(1:n_sites), : object 'y_s' not found
 ```
 
 
@@ -461,7 +581,7 @@ if (file.exists(here::here("results", "fit-mra-sim.RData"))) {
 ```
 
 
-The fitting of `mcmc_mra()` took 6.04 mins.
+The fitting of `mcmc_mra()` took 54.52 mins.
 
 
 # Examining the MRA MCMC output
@@ -475,28 +595,51 @@ dat_tau2 <- data.frame(
   iteration = rep(1:nrow(out$tau2), times = M),
   resolution = factor(rep(1:M, each = nrow(out$tau2)))
 )
+```
 
+```
+## Error in data.frame(tau2 = c(out$tau2), iteration = rep(1:nrow(out$tau2), : arguments imply differing number of rows: 2000, 1500
+```
+
+```r
 p_tau2 <- ggplot(dat_tau2, aes(x = iteration, y = tau2, group = resolution, color = resolution)) +
   geom_line() +
   scale_color_viridis_d(end = 0.8) +
   ggtitle("Trace plots for tau2") +
   theme_bw() +
   theme_custom(0.7)
+```
 
+```
+## Error in ggplot(dat_tau2, aes(x = iteration, y = tau2, group = resolution, : object 'dat_tau2' not found
+```
+
+```r
 dat_lambda <- data.frame(
   lambda      = c(out$lambda),
   iteration = rep(1:nrow(out$lambda), times = M),
   resolution = factor(rep(1:M, each = nrow(out$lambda)))
 )
+```
 
+```
+## Error in 1:nrow(out$lambda): argument of length 0
+```
+
+```r
 p_lambda <- ggplot(dat_lambda, aes(x = iteration, y = lambda, group = resolution, color = resolution)) +
   geom_line() +
   scale_color_viridis_d(end = 0.8) +
   ggtitle("Trace plots for lambda") +
   theme_bw() +
   theme_custom(0.7)
+```
 
+```
+## Error in ggplot(dat_lambda, aes(x = iteration, y = lambda, group = resolution, : object 'dat_lambda' not found
+```
 
+```r
 p_sigma2 <- data.frame(sigma2 = c(out$sigma2), iteration = 1:length(out$sigma2)) %>%
   ggplot(aes(x = iteration, y = sigma2)) +
   geom_line() +
@@ -510,17 +653,32 @@ dat_beta <- data.frame(
   iteration = rep(1:nrow(out$beta), times = ncol(X)),
   covariate = factor(rep(1:ncol(X), each = nrow(out$beta)))
 )
+```
+
+```
+## Error in data.frame(beta = c(out$beta), iteration = rep(1:nrow(out$beta), : arguments imply differing number of rows: 1000, 1500
+```
+
+```r
 p_beta  <- ggplot(dat_beta, aes(x = iteration, y = beta, group = covariate, color = covariate)) +
   geom_line() +
   scale_color_viridis_d(end = 0.8) +
   ggtitle("Trace plots for beta") +
   theme_bw() +
   theme_custom(0.7)
+```
 
+```
+## Error in ggplot(dat_beta, aes(x = iteration, y = beta, group = covariate, : object 'dat_beta' not found
+```
+
+```r
 (p_tau2 + p_lambda) /  (p_sigma2 + p_beta)
 ```
 
-<img src="trace-plots-1.png" title="plot of chunk trace-plots" alt="plot of chunk trace-plots" style="display: block; margin: auto;" />
+```
+## Error in eval(expr, envir, enclos): object 'p_tau2' not found
+```
 
 Next, the trace plots for the spatial parameter $\boldsymbol{\alpha}_m$ are shown. Because there are so many parameters, a sample is taken for plotting. These trace plots suggest that perhaps $\boldsymbol{\alpha}$ hasn't entirely converged. However, as there is a non-identifiability between $\tau^2_m$ and $\boldsymbol{\alpha}_m$, this is not surprising and might not be remedied with more samples.
 
@@ -535,9 +693,21 @@ dat_alpha <- data.frame(
   knot      = factor(unlist(sapply(1:M, function(m) 1:n_dims[m]))),
   resolution = factor(paste("resolution", dims_idx))
 )
+```
 
+```
+## Error in 1:n_dims[m]: NA/NaN argument
+```
+
+```r
 plot_idx <- sapply(1:M, function(m) sample(n_dims[m], 10))
+```
 
+```
+## Error in sample.int(length(x), size, replace, prob): cannot take a sample larger than the population when 'replace = FALSE'
+```
+
+```r
 dat_alpha %>%
   subset(
     (resolution == "resolution 1" & knot %in% plot_idx[, 1]) |
@@ -554,7 +724,9 @@ dat_alpha %>%
   theme(legend.position = "none")
 ```
 
-<img src="trace-plots-alpha-1.png" title="plot of chunk trace-plots-alpha" alt="plot of chunk trace-plots-alpha" style="display: block; margin: auto;" />
+```
+## Error in subset(., (resolution == "resolution 1" & knot %in% plot_idx[, : object 'dat_alpha' not found
+```
 
 Because the model was fit to simulated data, the posterior predictions can be compared to the simulated parameters to evaluate the model performance. The following plots show the 95\% central credible intervals for different parameters plotted against the simulated parameters. For the regression parameters $\boldsymbol{\beta}$, the model is doing a reasonable job of recovering these parameters. The parameter estimates for $\tau^2_m$ and $\boldsymbol{\alpha}_m$ show poor performance in estimating the true parameters. This is due to a non-identifiability in the model; however, this is not a concern as the spatial process $\sum_{m=1}^M \mathbf{W}_m \boldsymbol{\alpha}_m$ is well estimated which will be shown later.
 
@@ -568,7 +740,13 @@ dat_plot <- data.frame(
   upper = apply(out$beta, 2, quantile, prob = 0.975),
   parameter = factor(1:length(beta))
 )
+```
 
+```
+## Error in data.frame(truth = beta, mean = apply(out$beta, 2, mean), lower = apply(out$beta, : arguments imply differing number of rows: 3, 2
+```
+
+```r
 p_beta <- dat_plot %>%
   ggplot(aes(x = truth, y = mean, color = parameter)) +
   scale_color_viridis_d(begin = 0, end = 0.8) +
@@ -578,7 +756,13 @@ p_beta <- dat_plot %>%
   geom_abline(intercept = 0, slope = 1, col = "red") +
   ggtitle("Estimated vs. predicted beta") +
   theme(legend.position = "none")
+```
 
+```
+## Error in ggplot(., aes(x = truth, y = mean, color = parameter)): object 'dat_plot' not found
+```
+
+```r
 ## predicted vs. estimated sigma2
 p_sigma2 <- data.frame(sigma2 = out$sigma2) %>%
   ggplot(aes(y = sigma2)) +
@@ -600,8 +784,13 @@ dat_plot <- data.frame(
   upper = apply(out$tau2, 2, quantile, prob = 0.975),
   parameter = factor(1:length(tau2))
 )
+```
 
+```
+## Error in data.frame(truth = tau2, mean = apply(out$tau2, 2, mean), lower = apply(out$tau2, : arguments imply differing number of rows: 3, 4
+```
 
+```r
 p_tau2 <- dat_plot %>%
   ggplot(aes(x = truth, y = mean, color = parameter)) +
   scale_color_viridis_d(begin = 0, end = 0.8) +
@@ -611,7 +800,13 @@ p_tau2 <- dat_plot %>%
   geom_abline(intercept = 0, slope = 1, col = "red") +
   ggtitle("Estimated vs. predicted tau2") +
   theme(legend.position = "none")
+```
 
+```
+## Error in ggplot(., aes(x = truth, y = mean, color = parameter)): object 'dat_plot' not found
+```
+
+```r
 # plot alpha estimates
 dat_plot <- data.frame(
   truth = alpha,
@@ -621,20 +816,34 @@ dat_plot <- data.frame(
   parameter = factor(1:length(alpha)),
   res       = factor(dims_idx)
 )
+```
 
+```
+## Error in data.frame(truth = alpha, mean = apply(out$alpha, 2, mean), lower = apply(out$alpha, : arguments imply differing number of rows: 520, 40400, 0
+```
+
+```r
 p_alpha <- dat_plot %>%
   ggplot(aes(x = truth, y = mean, color = res)) +
   scale_color_viridis_d(begin = 0, end = 0.8) +
   geom_point(alpha = 0.5) +
   geom_linerange(aes(ymin = lower, ymax = upper)) +
   geom_abline(intercept = 0, slope = 1, col = "red") +
-  ggtitle("Estimated vs. predicted alpha /nnon-identifialbe but not really a concern") +
+  ggtitle("Estimated vs. predicted alpha /n non-identifialbe but not really a concern") +
   ylab("estimate")
+```
 
+```
+## Error in ggplot(., aes(x = truth, y = mean, color = res)): object 'dat_plot' not found
+```
+
+```r
 (p_beta + p_sigma2) / (p_tau2 + p_alpha)
 ```
 
-<img src="estimated-vs-predicted-1.png" title="plot of chunk estimated-vs-predicted" alt="plot of chunk estimated-vs-predicted" style="display: block; margin: auto;" />
+```
+## Error in eval(expr, envir, enclos): object 'p_beta' not found
+```
 
 
 Next, the simulated and estimated $\boldsymbol{\alpha}_m$ are plotted on the spatial grid. The plots show that the $\boldsymbol{\alpha}_m$s are not being identified.
@@ -665,10 +874,19 @@ fitted_alphas <- data.frame(
   ) +
   theme_bw() +
   theme_custom(0.5)
+```
+
+```
+## Error in MRA$locs_grid[[i]]: subscript out of bounds
+```
+
+```r
 sim_alphas + theme_custom(0.5) + fitted_alphas
 ```
 
-<img src="estimated-alphas-1.png" title="plot of chunk estimated-alphas" alt="plot of chunk estimated-alphas" style="display: block; margin: auto;" />
+```
+## Error in eval(expr, envir, enclos): object 'sim_alphas' not found
+```
 
 Despite the parameters $\tau^2_m$ and $\boldsymbol{\alpha}_m$ not being identifiable, the following plot shows that the full spatial process $\sum_{m=1}^M \mathbf{W}_m \boldsymbol{\alpha}_m$. The two figures (simulated on the left, fitted on the right) demonstrate that each of the $m$ resolutions of the process $\mathbf{W}_m \boldsymbol{\alpha}_m$ are also non-identifiable.
 
@@ -676,10 +894,24 @@ Despite the parameters $\tau^2_m$ and $\boldsymbol{\alpha}_m$ not being identifi
 ```r
 ## Estimated MRA spatial proces
 W_alpha_res = unlist(sapply(1:M, function(m) W[, dims_idx == m] %*% apply(out$alpha, 2, mean)[dims_idx == m], simplify = "matrix"))
+```
+
+```
+## Error in W[, dims_idx == m]: object of type 'S4' is not subsettable
+```
+
+```r
 dimnames(W_alpha_res) <- list(
   site = 1:N,
   res  = paste("resolution", 1:M)
 )
+```
+
+```
+## Error in dimnames(W_alpha_res) <- list(site = 1:N, res = paste("resolution", : object 'W_alpha_res' not found
+```
+
+```r
 dat_locs <- data.frame(
   site = 1:N,
   lat  = locs[, 2],
@@ -705,11 +937,19 @@ estimated_MRA <- rbind(
   colorspace::scale_fill_continuous_diverging("Blue-Red 3") +
   theme_bw() +
   theme_custom(0.5)
+```
 
+```
+## Error in provideDimnames(x, sep = sep, base = base): object 'W_alpha_res' not found
+```
+
+```r
 sim_MRA + theme_custom(0.5) + estimated_MRA
 ```
 
-<img src="simulated-vs-estimated-process-1.png" title="plot of chunk simulated-vs-estimated-process" alt="plot of chunk simulated-vs-estimated-process" style="display: block; margin: auto;" />
+```
+## Error in eval(expr, envir, enclos): object 'sim_MRA' not found
+```
 
 The next plots show the estimated vs. simulated fixed effects, spatial process, and mean response. There is some evidence of non-identifiability between the fixed effects plot and the spatial effects plot (left two plots) as there is a bias in each of the predictions. This is understood to be a consequence of spatial confounding (@hodges2010adding, @hughes2013dimension, @hanks2015restricted).
 
@@ -717,9 +957,29 @@ The next plots show the estimated vs. simulated fixed effects, spatial process, 
 ```r
 ## plot estimated mean response
 Xbeta_post <- t(X_s %*% t(out$beta))
-Walpha_post <- t(do.call(cbind, out$MRA$W) %*% t(out$alpha))
-mu_post <- Xbeta_post + Walpha_post
+```
 
+```
+## Error in h(simpleError(msg, call)): error in evaluating the argument 'x' in selecting a method for function 't': non-conformable arguments
+```
+
+```r
+Walpha_post <- t(do.call(cbind, out$MRA$W) %*% t(out$alpha))
+```
+
+```
+## Error in h(simpleError(msg, call)): error in evaluating the argument 'x' in selecting a method for function 't': second argument must be a list
+```
+
+```r
+mu_post <- Xbeta_post + Walpha_post
+```
+
+```
+## Error in eval(expr, envir, enclos): object 'Xbeta_post' not found
+```
+
+```r
 dat_plot <- data.frame(
   mean_Xbeta   = apply(Xbeta_post, 2, mean),
   lower_Xbeta  = apply(Xbeta_post, 2, quantile, prob = 0.025),
@@ -736,7 +996,13 @@ dat_plot <- data.frame(
   upper_mu     = apply(mu_post, 2, quantile, prob = 0.975),
   truth_mu     = X_s %*% beta + (W %*% alpha)[s]
 )
+```
 
+```
+## Error in apply(Xbeta_post, 2, mean): object 'Xbeta_post' not found
+```
+
+```r
 plot_Xbeta <- dat_plot %>%
   ggplot(aes(x = truth_Xbeta, y = mean_Xbeta)) +
   scale_color_viridis_d(begin = 0, end = 0.8) +
@@ -744,7 +1010,13 @@ plot_Xbeta <- dat_plot %>%
   geom_errorbar(aes(ymin = lower_Xbeta, ymax = upper_Xbeta)) +
   geom_abline(intercept = 0, slope = 1, col = "red") +
   ggtitle("Estimated vs. simulated fixed effects")
+```
 
+```
+## Error in ggplot(., aes(x = truth_Xbeta, y = mean_Xbeta)): object 'dat_plot' not found
+```
+
+```r
 plot_Walpha <- dat_plot %>%
   ggplot(aes(x = truth_Walpha, y = mean_Walpha)) +
   scale_color_viridis_d(begin = 0, end = 0.8) +
@@ -752,7 +1024,13 @@ plot_Walpha <- dat_plot %>%
   geom_errorbar(aes(ymin = lower_Walpha, ymax = upper_Walpha)) +
   geom_abline(intercept = 0, slope = 1, col = "red") +
   ggtitle("Estimated vs. simulated spatial process")
+```
 
+```
+## Error in ggplot(., aes(x = truth_Walpha, y = mean_Walpha)): object 'dat_plot' not found
+```
+
+```r
 plot_mu <- dat_plot %>%
   ggplot(aes(x = truth_mu, y = mean_mu)) +
   scale_color_viridis_d(begin = 0, end = 0.8) +
@@ -760,11 +1038,19 @@ plot_mu <- dat_plot %>%
   geom_errorbar(aes(ymin = lower_mu, ymax = upper_mu)) +
   geom_abline(intercept = 0, slope = 1, col = "red") +
   ggtitle("Estimated vs. simulated mean response")
+```
 
+```
+## Error in ggplot(., aes(x = truth_mu, y = mean_mu)): object 'dat_plot' not found
+```
+
+```r
 plot_Xbeta + plot_Walpha + plot_mu
 ```
 
-<img src="plot-sim-vs-fitted-effects-1.png" title="plot of chunk plot-sim-vs-fitted-effects" alt="plot of chunk plot-sim-vs-fitted-effects" style="display: block; margin: auto;" />
+```
+## Error in eval(expr, envir, enclos): object 'plot_Xbeta' not found
+```
 
 
 

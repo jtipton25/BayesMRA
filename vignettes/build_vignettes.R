@@ -57,5 +57,5 @@ devtools::build_vignettes()
 ## build the documentation site
 ##
 
-pkgdown::build_site()
+# pkgdown::build_site() # not needed as this is part of gitHub Actions workflow
 

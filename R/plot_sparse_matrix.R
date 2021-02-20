@@ -15,9 +15,16 @@
 #' @export
 #'
 #'
-plot_sparse_matrix <- function(x, tile_size = 1, base_size = 12, title = "") {
+plot_sparse_matrix <- function(x, tile_size = 1, base_size = 12, title = NULL) {
     if (!inherits(x, "spam"))
         stop('x must be of class "spam"')
+    if (!is_positive_numeric(tile_size, 1))
+        stop("tile_size must be a positive number")
+    if (!is_positive_numeric(base_size, 1))
+        stop("base_size must be a positive number")
+    if (!is.null(title) & !is.character(title))
+        stop("title must be a character string")
+
 
     # extract the sparsity structure
     nrow <- x@dimension[1]

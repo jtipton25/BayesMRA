@@ -25,6 +25,8 @@ plot_fitted_MRA <- function(out, preds, base_size = 12, file = NULL, width = 16,
         stop("width must be a positive number")
     if (!is_positive_numeric(height, 1))
         stop("height must be a positive number")
+    if (!is_positive_numeric(base_size, 1))
+        stop("base_size must be a positive number")
     if (!is.null(file) & !is.character(file))
         stop("file must be a character string")
 

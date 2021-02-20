@@ -9,6 +9,17 @@ is_numeric <- function(x, n) {
     (typeof(x) == "double" || typeof(x) == "integer")  && length(x) == n && all(!is.na(x))
 }
 
+#' Check if a numeric value with NA values allowed
+#'
+#' this function checks if the input is a scalar (double) with NA values allowed
+#' @param x is the input
+#' @param n is the input length
+#' @keywords internal
+
+is_numeric_with_na <- function(x, n) {
+    (typeof(x) == "double" || typeof(x) == "integer")  && length(x) == n
+}
+
 #' Check if a positive numeric value
 #'
 #'  this function checks if the input is a positive scalar (double)

@@ -8,6 +8,15 @@ test_that("is_numeric function", {
     expect_true(is_numeric(matrix(1:6, 3, 2), 6))
 })
 
+test_that("is_numeric_with_na function", {
+    expect_false(is_numeric_with_na(c(2, 2), 1))
+    expect_false(is_numeric_with_na("NA", 1))
+    expect_false(is_numeric_with_na(NULL, 1))
+    expect_true(is_numeric_with_na(as.numeric(NA), 1))
+    expect_true(is_numeric_with_na(matrix(1:6, 3, 2), 6))
+    expect_true(is_numeric_with_na(matrix(c(1:5, NA), 3, 2), 6))
+})
+
 test_that("is_positive_numeric function", {
     expect_true(is_positive_numeric(1, 1))
     expect_error(is_positive_numeric(-3))

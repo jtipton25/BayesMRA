@@ -21,15 +21,32 @@ plot_predicted_process <- function(out, data, preds, base_size = 12, file = NULL
     ## add in titles, grouping of legends, change sd color scheme
 
     # add in error checking
+    if (!inherits(out, c("mcmc_mra", "mcmc_mra_integrated")))
+        stop('out must be of class "mcmc_mra" or "mcmc_mra_integrated"')
 
+    if(class(preds) != "mcmc_mra_pred")
+        stop('preds must be of class "mcmc_mra_pred" which is the output of the function predict_mra()')
     if(class(preds) != "mcmc_mra_pred")
         stop('preds must be of class "mcmc_mra_pred" which is the output of the function predict_mra()')
     if (!is_positive_numeric(width, 1))
         stop("width must be a positive number")
     if (!is_positive_numeric(height, 1))
         stop("height must be a positive number")
+    if (!is_positive_numeric(base_size, 1))
+        stop("base_size must be a positive number")
     if (!is.null(file) & !is.character(file))
         stop("file must be a character string")
+
+    ## write checks for the data object
+    if (!is.data.frame(data))
+        stop("data must be a data.frame with variables Observed, Lat, and Lon")
+    if (!is_numeric_vector(data$Observed, nrow(data)))
+        stop("The data.frame data must contain a numeric vector named Observed of the observed values")
+    if (!is_numeric_vector(data$Lat, nrow(data)))
+        stop("The data.frame data must contain a numeric vector named Lat of the latitude locations")
+    if (!is_numeric_vector(data$Lon, nrow(data)))
+        stop("The data.frame data must contain a numeric vector named Lon of the longitude locations")
+
 
 
     Wpred_mean <- apply(preds$Walpha_pred, 2, mean)

@@ -10,12 +10,17 @@
 make_constraint <- function(MRA, constraint = "unconstrained", joint = TRUE) {
 
     ## check the constraints on alpha
+    if (!inherits(MRA, "mra_wendland_2d"))
+        stop('MRA must be of class "mra_wendland_2d" which is the output of mra_wendland_1d()')
     if (!(constraint %in% c("unconstrained", "overall", "resolution", "predicted"))) {
         stop('constraint must be either "unconstrained", "overall", "resolution", or "predicted"')
     }
     if (constraint == "predicted") {
         stop('constraint = "predicted" is not currently supported -- developer note: add W_pred to function call to enable this in future results')
     }
+    if (!is.logical(joint) | is.na(joint))
+        stop("joint must be either TRUE or FALSE.")
+
     A_constraint <- NULL
     a_constraint <- NULL
     if (constraint == "overall") {

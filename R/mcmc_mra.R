@@ -92,7 +92,7 @@
 #' @importFrom mvnfast rmvn
 #' @importFrom fields fields.rdist.near
 #' @importFrom Matrix Cholesky
-#' @importFrom stats lm rgamma
+#' @importFrom stats lm rgamma sd
 #' @import spam
 #' @import spam64
 

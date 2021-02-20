@@ -22,6 +22,8 @@ plot_fitted_alphas <- function(out, base_size = 12, file = NULL, width = 16, hei
         stop("width must be a positive number")
     if (!is_positive_numeric(height, 1))
         stop("height must be a positive number")
+    if (!is_positive_numeric(base_size, 1))
+        stop("base_size must be a positive number")
     if (!is.null(file) & !is.character(file))
         stop("file must be a character string")
 
@@ -35,6 +37,7 @@ plot_fitted_alphas <- function(out, base_size = 12, file = NULL, width = 16, hei
     ) %>%
         ggplot(aes(x = .data$x, y = .data$y, fill = alpha)) +
         geom_raster() +
+        # geom_tile() +
         scale_fill_viridis_c() +
         ggtitle("Posterior mean spatial random effects") +
         facet_wrap( ~ res, ncol = 2) +

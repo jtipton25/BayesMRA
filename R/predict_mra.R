@@ -10,9 +10,15 @@ predict_mra <- function(out, new_data) {
     # check new_data input for locs_pred
     # to do
     if (is.null(new_data$locs_pred)) {
-        stop("new_data must contain a n_pred by 2 matrix of locations at which to make predictions")
+        stop("new_data must be a list that contains a n_pred by 2 matrix of locations in the variable locs_pred at which to make predictions")
     }
-
+    if (is.null(new_data$X_pred)) {
+        stop("new_data must be a list that contains a n_pred by p matrix of covariates in the variable X_pred which are used to make predictions")
+    }
+    if (ncol(out$data$X) != ncol(new_data$X_pred))
+        stop("The columns of X_pred in the list new_data must be the same number as X used to fit the model")
+    if (nrow(new_data$locs_pred) != nrow(new_data$X_pred))
+        stop("The number of rows in locs_pred in the list new_data must be equal to the number of rows in X_pred in the list new_data")
     # check new_data input for X_pred
     # to do
 

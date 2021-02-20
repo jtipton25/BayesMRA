@@ -4,7 +4,7 @@
 \alias{plot_sparse_matrix}
 \title{Plot the sparsity structure of a spam matrix object using ggplot2}
 \usage{
-plot_sparse_matrix(x, tile_size = 1, base_size = 12, title = "")
+plot_sparse_matrix(x, tile_size = 1, base_size = 12, title = NULL)
 }
 \arguments{
 \item{x}{The sparse matrix which must be of class "spam"}

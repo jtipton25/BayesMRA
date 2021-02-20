@@ -21,19 +21,31 @@ test_that("illegal input for mra_wendland_2d", {
     expect_error(mra_wendland_2d(locs, M = 3.5), "the number of resolutions M must be a positive integer")
     expect_error(mra_wendland_2d(locs, M = NA), "the number of resolutions M must be a positive integer")
     expect_error(mra_wendland_2d(locs, M = "aaa"), "the number of resolutions M must be a positive integer")
+    expect_error(mra_wendland_2d(locs, M = TRUE), "the number of resolutions M must be a positive integer")
     expect_error(mra_wendland_2d(locs, n_neighbors = 3.5), "n_neighbors must be a positive integer")
     expect_error(mra_wendland_2d(locs, n_neighbors = NA), "n_neighbors must be a positive integer")
     expect_error(mra_wendland_2d(locs, n_neighbors = "aaa"), "n_neighbors must be a positive integer")
+    expect_error(mra_wendland_2d(locs, n_neighbors = TRUE), "n_neighbors must be a positive integer")
     expect_error(mra_wendland_2d(locs, n_coarse_grid = 3.5), "n_coarse_grid must be a positive integer")
     expect_error(mra_wendland_2d(locs, n_coarse_grid = NA), "n_coarse_grid must be a positive integer")
     expect_error(mra_wendland_2d(locs, n_coarse_grid = "aaa"), "n_coarse_grid must be a positive integer")
+    expect_error(mra_wendland_2d(locs, n_coarse_grid = TRUE), "n_coarse_grid must be a positive integer")
     expect_error(mra_wendland_2d(locs, n_padding = 3.5), "n_padding must be a positive integer")
     expect_error(mra_wendland_2d(locs, n_padding = NA), "n_padding must be a positive integer")
     expect_error(mra_wendland_2d(locs, n_padding = "aaa"), "n_padding must be a positive integer")
+    expect_error(mra_wendland_2d(locs, n_padding = TRUE), "n_padding must be a positive integer")
     expect_error(mra_wendland_2d(locs, use_spam = 3.5), "use_spam must be either TRUE or FALSE")
     expect_error(mra_wendland_2d(locs, use_spam = NA), "use_spam must be either TRUE or FALSE")
     expect_error(mra_wendland_2d(locs, use_spam = "aaa"), "use_spam must be either TRUE or FALSE")
+    expect_error(mra_wendland_2d(locs, use_spam = FALSE), "The Matrix package is not currently supported")
     expect_error(mra_wendland_2d(locs, M = 4, n_coarse_grid = 3), "There are too many resolutions to form a reliable grid. Reduce M and try again.")
+
+
+    expect_error(mra_wendland_2d(locs, max_points = "aaa"), "max_points must be either NULL or a positive numeric integer")
+    expect_error(mra_wendland_2d(locs, max_points = -5), "max_points must be either NULL or a positive numeric integer")
+    expect_error(mra_wendland_2d(locs, max_points = 5.5), "max_points must be either NULL or a positive numeric integer")
+    expect_error(mra_wendland_2d(locs, max_points = NA), "max_points must be either NULL or a positive numeric integer")
+    expect_error(mra_wendland_2d(locs, max_points = TRUE), "max_points must be either NULL or a positive numeric integer")
 
     locs <- matrix(1:6, 3, 2)
     expect_s3_class(mra_wendland_2d(locs, M = 2), "mra_wendland_2d")
@@ -46,16 +58,16 @@ test_that("illegal input for mra_wendland_2d_pred", {
     locs <- matrix(1:20, 10, 2)
     MRA <- mra_wendland_2d(locs)
     locs_pred <- matrix(NA, 20, 2)
-    expect_error(mra_wendland_2d_pred(locs_pred, MRA), "locs_pred must be a numeric matrix with N rows and 2 columns")
+    expect_error(mra_wendland_2d_pred(locs_pred, MRA), "locs_pred must be a numeric matrix with n_pred rows and 2 columns")
 
     locs_pred <- matrix(1:30, 10, 3)
-    expect_error(mra_wendland_2d_pred(locs_pred, MRA), "locs_pred must be a numeric matrix with N rows and 2 columns")
+    expect_error(mra_wendland_2d_pred(locs_pred, MRA), "locs_pred must be a numeric matrix with n_pred rows and 2 columns")
 
     locs_pred <- matrix("11", 10, 2)
-    expect_error(mra_wendland_2d_pred(locs_pred, MRA), "locs_pred must be a numeric matrix with N rows and 2 columns")
+    expect_error(mra_wendland_2d_pred(locs_pred, MRA), "locs_pred must be a numeric matrix with n_pred rows and 2 columns")
 
     locs_pred <- 1:10
-    expect_error(mra_wendland_2d_pred(locs_pred, MRA), "locs_pred must be a numeric matrix with N rows and 2 columns")
+    expect_error(mra_wendland_2d_pred(locs_pred, MRA), "locs_pred must be a numeric matrix with n_pred rows and 2 columns")
 
 
     locs <- matrix(1:20, 10, 2)

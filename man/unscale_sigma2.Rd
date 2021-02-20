@@ -3,14 +3,15 @@
 \name{unscale_sigma2}
 \alias{unscale_sigma2}
 \title{Transform the sigma2 parameter to restore the parameter to the original scale.
-The function \code{mcmc_mra()} fits the regression variance using a centered and
-scaled response. This function undoes that transformation to scale the
-parameter estimate to its usual (uncentered and unscaled) scale}
+The functions \code{mcmc_mra()} and \code{mcmc_mra_integrated()} fit the regression
+variance using a centered and scaled response. This function undoes
+that transformation to scale the parameter estimate to its usual
+(uncentered and unscaled) scale}
 \usage{
 unscale_sigma2(out)
 }
 \arguments{
-\item{out}{The output of \code{mcmc_mra()}}
+\item{out}{The output of \code{mcmc_mra()} or \code{mcmc_mra_integrated()}}
 }
 \value{
 A vector of the size of out$sigma2 of transformed regression
@@ -18,7 +19,8 @@ variance equivalent to fitting the model on the original scale
 }
 \description{
 Transform the sigma2 parameter to restore the parameter to the original scale.
-The function \code{mcmc_mra()} fits the regression variance using a centered and
-scaled response. This function undoes that transformation to scale the
-parameter estimate to its usual (uncentered and unscaled) scale
+The functions \code{mcmc_mra()} and \code{mcmc_mra_integrated()} fit the regression
+variance using a centered and scaled response. This function undoes
+that transformation to scale the parameter estimate to its usual
+(uncentered and unscaled) scale
 }

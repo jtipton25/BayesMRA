@@ -14,9 +14,8 @@
 
 recover_alpha <- function(out, n_message = 100, constraint = "unconstrained") {
 
-    if (class(out) != "mcmc_mra_integrated") {
+    if (!inherits(out, "mcmc_mra_integrated"))
         stop('out must be of class "mcmc_mra_integrated" which is the output of the function mcmc_mra_integrated()')
-    }
     ## check the constraints on alpha
     if (!(constraint %in% c("unconstrained", "overall", "resolution", "predicted"))) {
         stop('constraint must be either "unconstrained", "overall", "resolution", or "predicted"')
@@ -24,6 +23,8 @@ recover_alpha <- function(out, n_message = 100, constraint = "unconstrained") {
     if (constraint == "predicted") {
         stop('constraint = "predicted" is not currently supported -- developer note: add W_pred to function call to enable this in future results')
     }
+    if (!is_positive_integer(n_message, 1))
+        stop("n_message must be a positive integer")
 
     # initialize the process for compositional sampling of alpha
     tW           <- t(out$MRA$W)
