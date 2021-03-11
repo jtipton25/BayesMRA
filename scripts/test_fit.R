@@ -13,28 +13,28 @@ if (!dir.exists(here::here("images", "test-data"))) {
 
 # clean up this data object
 # load(here::here("data", "SmallTestData.RData"))
-data("SmallTestData", package = "BayesMRA")
+data("code_test", package = "BayesMRA")
 
-code.test$MaskTemp = code.test$MaskedData
-code.test$TrueTemp = code.test$FullData
+# code_test$MaskTemp = code_test$MaskedData
+# code_test$TrueTemp = code_test$FullData
 
-locs <- cbind(code.test$Lat, code.test$Lon)
+locs <- cbind(code_test$Lat, code_test$Lon)
 
 ## create a mask in the upper corner
-code.test$MaskTemp[code.test$Lat > 0.60 & code.test$Lon > 0.60] <- NA
+code_test$MaskTemp[code_test$Lat > 0.60 & code_test$Lon > 0.60] <- NA
 
 # Plot the data ----------------------------------------------------------------
 
 dat_plot <- data.frame(
-    Lat = code.test$Lat,
-    Lon = code.test$Lon,
-    Observed = code.test$MaskTemp,
-    Truth = code.test$TrueTemp)
+    Lat = code_test$Lat,
+    Lon = code_test$Lon,
+    Observed = code_test$MaskTemp,
+    Truth = code_test$TrueTemp)
 
 plot_test_data(dat_plot, file = here::here("images", "test-data", "test-data.png"))
 
 # Setup the model --------------------------------------------------------------
-dat_fit <- code.test %>%
+dat_fit <- code_test %>%
     filter(!is.na(MaskTemp))
 
 y <- dat_fit$MaskTemp
@@ -54,7 +54,7 @@ priors <- list(
     alpha_sigma2 = 1,
     beta_sigma2  = 1,
     mu_beta      = rep(0, ncol(X)),
-    Sigma_beta   = 5 * diag(ncol(X)))
+    Sigma_beta   = 25 * diag(ncol(X)))
 
 # Fit unconstrained model ------------------------------------------------------
 
@@ -108,8 +108,8 @@ plot_fitted_process(out, dat_plot, file = here::here("images", "test-data", "tes
 # Predict spatial process ------------------------------------------------------
 
 new_data <- list(
-    locs_pred = cbind(code.test$Lat, code.test$Lon),
-    X_pred    = model.matrix(~ Lon + Lat, data = code.test)
+    locs_pred = cbind(code_test$Lat, code_test$Lon),
+    X_pred    = model.matrix(~ Lon + Lat, data = code_test)
 )
 
 preds <- predict_mra(out, new_data)
@@ -185,8 +185,8 @@ plot_fitted_process(out, dat_plot, file = here::here("images", "test-data", "tes
 # Predict spatial process ------------------------------------------------------
 
 new_data <- list(
-    locs_pred = cbind(code.test$Lat, code.test$Lon),
-    X_pred    = model.matrix(~ Lon + Lat, data = code.test)
+    locs_pred = cbind(code_test$Lat, code_test$Lon),
+    X_pred    = model.matrix(~ Lon + Lat, data = code_test)
 )
 
 preds <- predict_mra(out, new_data)
