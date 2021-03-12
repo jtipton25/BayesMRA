@@ -6,11 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Transform the sigma2 parameter to restore the parameter to the original scale.
-The functions mcmc_mra() and mcmc_mra_integrated() fit the regression
-variance using a centered and scaled response. This function undoes
-that transformation to scale the parameter estimate to its usual
-(uncentered and unscaled) scale — unscale_sigma2 • BayesMRA</title>
+<title>Check if a numeric value with NA values allowed — is_numeric_with_na • BayesMRA</title>
 
 
 <!-- jquery -->
@@ -43,16 +39,8 @@ that transformation to scale the parameter estimate to its usual
 
 
 
-<meta property="og:title" content="Transform the sigma2 parameter to restore the parameter to the original scale.
-The functions mcmc_mra() and mcmc_mra_integrated() fit the regression
-variance using a centered and scaled response. This function undoes
-that transformation to scale the parameter estimate to its usual
-(uncentered and unscaled) scale — unscale_sigma2" />
-<meta property="og:description" content="Transform the sigma2 parameter to restore the parameter to the original scale.
-The functions mcmc_mra() and mcmc_mra_integrated() fit the regression
-variance using a centered and scaled response. This function undoes
-that transformation to scale the parameter estimate to its usual
-(uncentered and unscaled) scale" />
+<meta property="og:title" content="Check if a numeric value with NA values allowed — is_numeric_with_na" />
+<meta property="og:description" content="this function checks if the input is a scalar (double) with NA values allowed" />
 
 
 
@@ -135,38 +123,30 @@ that transformation to scale the parameter estimate to its usual
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Transform the sigma2 parameter to restore the parameter to the original scale.
-The functions <code>mcmc_mra()</code> and <code>mcmc_mra_integrated()</code> fit the regression
-variance using a centered and scaled response. This function undoes
-that transformation to scale the parameter estimate to its usual
-(uncentered and unscaled) scale</h1>
-    <small class="dont-index">Source: <a href='https://github.com/jtipton25/BayesMRA/blob/master/R/unscale_estimates.R'><code>R/unscale_estimates.R</code></a></small>
-    <div class="hidden name"><code>unscale_sigma2.Rd</code></div>
+    <h1>Check if a numeric value with NA values allowed</h1>
+    <small class="dont-index">Source: <a href='https://github.com/jtipton25/BayesMRA/blob/master/R/predicates.R'><code>R/predicates.R</code></a></small>
+    <div class="hidden name"><code>is_numeric_with_na.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Transform the sigma2 parameter to restore the parameter to the original scale.
-The functions <code><a href='mcmc_mra.html'>mcmc_mra()</a></code> and <code><a href='mcmc_mra_integrated.html'>mcmc_mra_integrated()</a></code> fit the regression
-variance using a centered and scaled response. This function undoes
-that transformation to scale the parameter estimate to its usual
-(uncentered and unscaled) scale</p>
+    <p>this function checks if the input is a scalar (double) with NA values allowed</p>
     </div>
 
-    <pre class="usage"><span class='fu'>unscale_sigma2</span><span class='op'>(</span><span class='va'>out</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>is_numeric_with_na</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>n</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>out</th>
-      <td><p>The output of <code><a href='mcmc_mra.html'>mcmc_mra()</a></code> or <code><a href='mcmc_mra_integrated.html'>mcmc_mra_integrated()</a></code></p></td>
+      <th>x</th>
+      <td><p>is the input</p></td>
+    </tr>
+    <tr>
+      <th>n</th>
+      <td><p>is the input length</p></td>
     </tr>
     </table>
 
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
-
-    <p>A vector of the size of out$sigma2 of transformed regression
-variance equivalent to fitting the model on the original scale</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

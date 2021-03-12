@@ -178,12 +178,6 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="ess.html">ess()</a></code> </p>
-        </td>
-        <td><p>Code for the elliptical slice sampler</p></td>
-      </tr><tr>
-        
-        <td>
           <p><code><a href="make_Q_alpha_2d.html">make_Q_alpha_2d()</a></code> </p>
         </td>
         <td><p>Generate CAR precision matrix</p></td>
@@ -325,9 +319,10 @@
           <p><code><a href="unscale_beta.html">unscale_beta()</a></code> </p>
         </td>
         <td><p>Transform the beta parameters to restore the parameters to the original scale.
-The function <code>mcmc_mra()</code> fits the regression coefficients using centered and
-scaled response and covariate values. This function undoes that transformation
-to scale the parameter estimates to their usual (uncentered and unscaled) scale
+The functions <code>mcmc_mra()</code> and <code>mcmc_mra_integrated()</code> fit the regression
+coefficients using centered and scaled response and covariate values. This
+function undoes that transformation to scale the parameter estimates to
+their usual (uncentered and unscaled) scale
 estimates</p></td>
       </tr><tr>
         
@@ -335,9 +330,10 @@ estimates</p></td>
           <p><code><a href="unscale_sigma2.html">unscale_sigma2()</a></code> </p>
         </td>
         <td><p>Transform the sigma2 parameter to restore the parameter to the original scale.
-The function <code>mcmc_mra()</code> fits the regression variance using a centered and
-scaled response. This function undoes that transformation to scale the
-parameter estimate to its usual (uncentered and unscaled) scale</p></td>
+The functions <code>mcmc_mra()</code> and <code>mcmc_mra_integrated()</code> fit the regression
+variance using a centered and scaled response. This function undoes
+that transformation to scale the parameter estimate to its usual
+(uncentered and unscaled) scale</p></td>
       </tr><tr>
         
         <td>
