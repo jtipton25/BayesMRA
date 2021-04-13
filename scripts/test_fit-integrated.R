@@ -3,29 +3,38 @@ library(tidyverse)
 library(patchwork)
 library(BayesMRA)
 
-load(here::here("data", "SmallTestData.RData"))
+# setup image directory
+if (!dir.exists(here::here("images"))) {
+    dir.create(here::here("images"))
+}
+if (!dir.exists(here::here("images", "test-data"))) {
+    dir.create(here::here("images", "test-data"))
+}
 
-code.test$MaskTemp = code.test$MaskedData
-code.test$FullTemp = code.test$FullData
-code.test$TrueTemp = code.test$FullData
+# clean up this data object
+# load(here::here("data", "SmallTestData.RData"))
+data("code_test", package = "BayesMRA")
 
-locs <- cbind(code.test$Lat, code.test$Lon)
+# code_test$MaskTemp = code_test$MaskedData
+# code_test$TrueTemp = code_test$FullData
+
+locs <- cbind(code_test$Lat, code_test$Lon)
 
 ## create a mask in the upper corner
-code.test$MaskTemp[code.test$Lat > 0.60 & code.test$Lon > 0.60] <- NA
+code_test$MaskTemp[code_test$Lat > 0.60 & code_test$Lon > 0.60] <- NA
 
 # Plot the data ----------------------------------------------------------------
 
 dat_plot <- data.frame(
-    Lat = code.test$Lat,
-    Lon = code.test$Lon,
-    Observed = code.test$MaskTemp,
-    Truth = code.test$FullTemp)
+    Lat = code_test$Lat,
+    Lon = code_test$Lon,
+    Observed = code_test$MaskTemp,
+    Truth = code_test$TrueTemp)
 
 plot_test_data(dat_plot)
 
 # Setup the model --------------------------------------------------------------
-dat_fit <- code.test %>%
+dat_fit <- code_test %>%
     filter(!is.na(MaskTemp))
 
 y <- dat_fit$MaskTemp
@@ -114,8 +123,8 @@ plot_fitted_process(out, dat_plot)
 # Predict spatial process ------------------------------------------------------
 
 new_data <- list(
-    locs_pred = cbind(code.test$Lat, code.test$Lon),
-    X_pred    = model.matrix(~ Lon + Lat, data = code.test)
+    locs_pred = cbind(code_test$Lat, code_test$Lon),
+    X_pred    = model.matrix(~ Lon + Lat, data = code_test)
 )
 
 preds <- predict_mra(out, new_data)
@@ -187,8 +196,8 @@ plot_fitted_process(out, dat_plot)
 # Predict spatial process ------------------------------------------------------
 
 new_data <- list(
-    locs_pred = cbind(code.test$Lat, code.test$Lon),
-    X_pred    = model.matrix(~ Lon + Lat, data = code.test)
+    locs_pred = cbind(code_test$Lat, code_test$Lon),
+    X_pred    = model.matrix(~ Lon + Lat, data = code_test)
 )
 
 preds <- predict_mra(out, new_data)

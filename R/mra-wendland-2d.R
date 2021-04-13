@@ -8,7 +8,7 @@
 #' @param max_points The expected number of pairs less than or equal to the radius. Default is `nrow(locs)` * `num_neighbors`.
 #' @param use_spam is a boolean flag to determine whether the output is a list of `spam::spam` matrix objects (`use_spam = TRUE`) or a an \eqn{n \times n}{n x n} sparse Matrix of class `Matrix::dgCMatrix` `use_spam = FALSE` (see spam and Matrix packages for details).
 #'
-#' @importFrom fields rdist
+#' @importFrom fields fields.rdist.near
 #' @importFrom Matrix Matrix
 #' @import spam
 #' @import spam64
