@@ -42,6 +42,17 @@ is_numeric_vector <- function(x, n) {
     is_numeric(x, n) && is.vector(x)
 }
 
+#' Check if a numeric vector of length n with NA values allowed
+#'
+#' this function checks if the input is a numeric (double) vector
+#' @param x is the input
+#' @param n is the input vector length
+#' @keywords internal
+
+is_numeric_vector_with_na <- function(x, n) {
+    is_numeric_with_na(x, n) && is.vector(x)
+}
+
 #' Check if a numeric matrix of dimension \eqn{n \times m}{n x m}
 #'
 #' this function checks if the input is a numeric (double) matrix of dimension \eqn{n \times m}{n x m}

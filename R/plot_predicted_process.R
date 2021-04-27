@@ -40,7 +40,7 @@ plot_predicted_process <- function(out, data, preds, base_size = 12, file = NULL
     ## write checks for the data object
     if (!is.data.frame(data))
         stop("data must be a data.frame with variables Observed, Lat, and Lon")
-    if (!is_numeric_vector(data$Observed, nrow(data)))
+    if (!is_numeric_vector_with_na(data$Observed, nrow(data)))
         stop("The data.frame data must contain a numeric vector named Observed of the observed values")
     if (!is_numeric_vector(data$Lat, nrow(data)))
         stop("The data.frame data must contain a numeric vector named Lat of the latitude locations")

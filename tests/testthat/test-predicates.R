@@ -41,6 +41,19 @@ test_that("is_numeric_vector function", {
 
 })
 
+test_that("is_numeric_vector_with_na function", {
+    expect_error(is_numeric_vector_with_na(c(2, 2)))
+    expect_error(is_numeric_vector_with_na(matrix(1:6, 3, 2)))
+    expect_false(is_numeric_vector_with_na(c(2, 2), 3))
+    expect_false(is_numeric_vector_with_na(NA))
+    expect_false(is_numeric_vector_with_na("NA"))
+    expect_false(is_numeric_vector_with_na(NULL))
+    expect_false(is_numeric_vector_with_na(matrix(1:6, 3, 2), 6))
+    expect_true(is_numeric_vector_with_na(c(NA, 2), 2))
+    expect_true(is_numeric_vector_with_na(c(2, 2), 2))
+
+})
+
 test_that("is_numeric_matrix function", {
     expect_error(is_numeric_matrix(c(2, 2), 2))
     ## add in testing on the input dimensions
