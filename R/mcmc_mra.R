@@ -575,11 +575,10 @@ mcmc_mra <- function(
                     alpha   <- as.vector(rmvnorm.canonical.const(1, b_alpha, A_alpha, Rstruct = Rstruct))
                 } else if (constraint %in% c("overall", "resolution", "predicted")) {
                     ## sample constrained to sum to 0
-                    alpha   <- as.vector(rmvnorm.canonical.const(1, b_alpha, A_alpha, Rstruct = Rstruct,
-                                                                 A = A_constraint, a = a_constraint))
-                    ## update W_alpha
-                    W_alpha <- W %*% alpha
+                    alpha   <- as.vector(rmvnorm.canonical.const(1, b_alpha, A_alpha, Rstruct = Rstruct,                                                                 A = A_constraint, a = a_constraint))
                 }
+                ## update W_alpha
+                W_alpha <- W %*% alpha
             } else {
                 for (m in 1:M) {
                     A_alpha_list[[m]] <- 1 / sigma2 * tWW_list[[m]] + tau2[m] * Q_alpha[[m]]
