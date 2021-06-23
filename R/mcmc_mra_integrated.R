@@ -69,8 +69,8 @@
 #' priors <- list(
 #'     alpha_tau2   = 1,
 #'     beta_tau2    = 1,
-#'     alpha_sigma2 = 1,
-#'     beta_sigma2  = 1,
+#'     alpha_sigma = 1,
+#'     beta_sigma  = 1,
 #'     mu_beta      = rep(0, ncol(X)),
 #'     Sigma_beta   = 5 * diag(ncol(X)))
 #'
@@ -191,12 +191,12 @@ mcmc_mra_integrated <- function(
     }
 
     ## do we sample the nugger variance parameter
-    sample_sigma2 <- TRUE
+    sample_sigma <- TRUE
     if (!is.null(config)) {
-        if (!is.null(config[['sample_sigma2']])) {
-            sample_sigma2 <- config[['sample_sigma2']]
-            if (!is.logical(sample_sigma2) | is.na(sample_sigma2))
-                stop('If specified, sample_sigma2 must be TRUE or FALSE')
+        if (!is.null(config[['sample_sigma']])) {
+            sample_sigma <- config[['sample_sigma']]
+            if (!is.logical(sample_sigma) | is.na(sample_sigma))
+                stop('If specified, sample_sigma must be TRUE or FALSE')
         }
     }
 
@@ -260,27 +260,27 @@ mcmc_mra_integrated <- function(
     ## initialize sigma2
     ##
 
-    alpha_sigma2 <- 1
-    beta_sigma2  <- 1
-    ## check if priors for alpha_sigma2 are specified
-    if (!is.null(priors[['alpha_sigma2']])) {
-        if (!is_positive_numeric(priors[['alpha_sigma2']], 1))
-            stop("If specified, the parameter alpha_sigma2 in priors must be a positive numeric value.")
-        if (all(!is.na(priors[['alpha_sigma2']]))) {
-            alpha_sigma2 <- priors[['alpha_sigma2']]
+    alpha_sigma <- 1
+    beta_sigma  <- 1
+    ## check if priors for alpha_sigma are specified
+    if (!is.null(priors[['alpha_sigma']])) {
+        if (!is_positive_numeric(priors[['alpha_sigma']], 1))
+            stop("If specified, the parameter alpha_sigma in priors must be a positive numeric value.")
+        if (all(!is.na(priors[['alpha_sigma']]))) {
+            alpha_sigma <- priors[['alpha_sigma']]
         }
     }
-    ## check if priors for beta_sigma2 are specified
-    if (!is.null(priors[['beta_sigma2']])) {
-        if (!is_positive_numeric(priors[['beta_sigma2']], 1))
-            stop("If specified, the parameter beta_sigma2 in priors must be a positive numeric value.")
-        if (all(!is.na(priors[['beta_sigma2']]))) {
-            beta_sigma2 <- priors[['beta_sigma2']]
+    ## check if priors for beta_sigma are specified
+    if (!is.null(priors[['beta_sigma']])) {
+        if (!is_positive_numeric(priors[['beta_sigma']], 1))
+            stop("If specified, the parameter beta_sigma in priors must be a positive numeric value.")
+        if (all(!is.na(priors[['beta_sigma']]))) {
+            beta_sigma <- priors[['beta_sigma']]
         }
     }
 
-    sigma2  <- pmax(pmin(1 / rgamma(1, alpha_sigma2, beta_sigma2), 5), 0.1)
-    sigma   <- sqrt(sigma2)
+    sigma  <- pmax(pmin(1 / rgamma(1, alpha_sigma, beta_sigma), 5), 0.1)
+    sigma2   <- sigma^2
 
     ##
     ## priors for beta
@@ -418,9 +418,9 @@ mcmc_mra_integrated <- function(
     ##
 
     # tuning for sigma2
-    sigma2_accept       <- 0
-    sigma2_accept_batch <- 0
-    sigma2_tune         <- 0.25
+    sigma_accept       <- 0
+    sigma_accept_batch <- 0
+    sigma_tune         <- 0.25
 
     # tuning for tau2
     tau2_accept       <- 0
@@ -464,32 +464,63 @@ mcmc_mra_integrated <- function(
         ## sample sigma2
         ##
 
-        if (sample_sigma2) {
+        if (sample_sigma) {
             if (verbose)
                 message("sample sigma2")
 
             # devs <- y - X_beta - W_alpha
             # SS        <- sum(devs^2)
-            # sigma2 <- 1 / rgamma(1, N / 2 + alpha_sigma2, SS / 2 + beta_sigma2)
+            # sigma2 <- 1 / rgamma(1, N / 2 + alpha_sigma, SS / 2 + beta_sigma)
             # sigma     <- sqrt(sigma2)
 
-            sigma2_star <- rnorm(1, sigma2, sigma2_tune)
-            if (sigma2_star > 0) {
-                ll_proposal <- dmvn_smw(y, X, beta, tW, tWW, Q_alpha_tau2, sigma2_star, Rstruct = Rstruct)
-                mh1 <- ll_proposal +
-                    dgamma(1 / sigma2_star, alpha_sigma2, beta_sigma2, log = TRUE)
-                mh2 <- ll_current +
-                    dgamma(1 / sigma2, alpha_sigma2, beta_sigma2, log = TRUE)
-                mh <- exp(mh1 - mh2)
-                if (mh > runif(1, 0.0, 1.0)) {
-                    sigma2     <- sigma2_star
-                    ll_current <- ll_proposal
-                    if (k <= params$n_adapt) {
-                        sigma2_accept_batch <- sigma2_accept_batch + 1.0 / 50.0
-                    } else {
-                        sigma2_accept <- sigma2_accept + 1.0 / params$n_mcmc
-                    }
+            ##
+            ## regular scale
+            ##
+
+            # sigma2_star <- rnorm(1, sigma2, sigma_tune)
+            # if (sigma2_star > 0) {
+            #     ll_proposal <- dmvn_smw(y, X, beta, tW, tWW, Q_alpha_tau2, sigma2_star, Rstruct = Rstruct)
+            #     mh1 <- ll_proposal +
+            #         dgamma(1 / sigma2_star, alpha_sigma, beta_sigma, log = TRUE)
+            #     mh2 <- ll_current +
+            #         dgamma(1 / sigma2, alpha_sigma, beta_sigma, log = TRUE)
+            #     mh <- exp(mh1 - mh2)
+            #     if (mh > runif(1, 0.0, 1.0)) {
+            #         sigma2     <- sigma2_star
+            #         ll_current <- ll_proposal
+            #         if (k <= params$n_adapt) {
+            #             sigma_accept_batch <- sigma_accept_batch + 1.0 / 50.0
+            #         } else {
+            #             sigma_accept <- sigma_accept + 1.0 / params$n_mcmc
+            #         }
+            #     }
+            # }
+
+            ##
+            ## log scale proposal for sigma2
+            ##
+
+            sigma_star  <- exp(rnorm(1, log(sigma), sigma_tune))
+            sigma2_star <- sigma_star^2
+            # if (sigma2_star > 0) {
+            ll_proposal <- dmvn_smw(y, X, beta, tW, tWW, Q_alpha_tau2, sigma2_star, Rstruct = Rstruct)
+            mh1 <- ll_proposal +
+                dgamma(1 / sigma_star, alpha_sigma, beta_sigma, log = TRUE) +
+                log(sigma_star)
+            mh2 <- ll_current +
+                dgamma(1 / sigma, alpha_sigma, beta_sigma, log = TRUE) +
+                log(sigma)
+            mh <- exp(mh1 - mh2)
+            if (mh > runif(1, 0.0, 1.0)) {
+                sigma     <- sigma_star
+                sigma2    <- sigma2_star
+                ll_current <- ll_proposal
+                if (k <= params$n_adapt) {
+                    sigma_accept_batch <- sigma_accept_batch + 1.0 / 50.0
+                } else {
+                    sigma_accept <- sigma_accept + 1.0 / params$n_mcmc
                 }
+                # }
             }
 
             ## update tuning
@@ -497,11 +528,11 @@ mcmc_mra_integrated <- function(
                 if (k %% 50 == 0){
                     out_tuning <- update_tuning(
                         k,
-                        sigma2_accept_batch,
-                        sigma2_tune
+                        sigma_accept_batch,
+                        sigma_tune
                     )
-                    sigma2_tune         <- out_tuning$tune
-                    sigma2_accept_batch <- out_tuning$accept
+                    sigma_tune         <- out_tuning$tune
+                    sigma_accept_batch <- out_tuning$accept
                 }
             }
         }
@@ -651,7 +682,7 @@ mcmc_mra_integrated <- function(
 
     ## print out acceptance rates -- no tuning in this model
     message("Average acceptance rate for beta is ", mean(beta_accept))
-    message("Average acceptance rate for sigma2 is ", mean(sigma2_accept))
+    message("Average acceptance rate for sigma2 is ", mean(sigma_accept))
     message("Average acceptance rate for tau2 is ", mean(tau2_accept))
 
 

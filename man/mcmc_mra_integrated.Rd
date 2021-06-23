@@ -110,8 +110,8 @@ params <- list(
 priors <- list(
     alpha_tau2   = 1,
     beta_tau2    = 1,
-    alpha_sigma2 = 1,
-    beta_sigma2  = 1,
+    alpha_sigma = 1,
+    beta_sigma  = 1,
     mu_beta      = rep(0, ncol(X)),
     Sigma_beta   = 5 * diag(ncol(X)))
 
