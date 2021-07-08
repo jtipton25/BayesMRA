@@ -367,8 +367,8 @@ mcmc_mra <- function(
     ## initialize sigma2
     ##
 
-    alpha_sigma2 <- 1
-    beta_sigma2  <- 1
+    alpha_sigma2 <- 0.01
+    beta_sigma2  <- 0.01
     ## check if priors for alpha_sigma2 are specified
     if (!is.null(priors[['alpha_sigma2']])) {
         if (!is_positive_numeric(priors[['alpha_sigma2']], 1))
