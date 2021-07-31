@@ -247,10 +247,11 @@ mcmc_mra <- function(
 
     mu_X <- apply(X[, -1, drop = FALSE], 2, mean)
     sd_X <- apply(X[, -1, drop = FALSE], 2, sd)
-    for(i in 2:ncol(X)) {
-        X[, i] <- (X[, i] - mu_X[i-1]) / sd_X[i-1]
+    if (p > 1) {
+        for(i in 2:p) {
+            X[, i] <- (X[, i] - mu_X[i-1]) / sd_X[i-1]
+        }
     }
-
 
     ##
     ## setup MRA spatial basis
@@ -642,8 +643,10 @@ mcmc_mra <- function(
     ## return the MCMC output -- think about a better way to make this a class
     ##
 
-    for(i in 2:ncol(X)) {
-        X[, i] <- X[, i] * sd_X[i-1] + mu_X[i-1]
+    if (p > 1) {
+        for(i in 2:ncol(X)) {
+            X[, i] <- X[, i] * sd_X[i-1] + mu_X[i-1]
+        }
     }
 
     out <- list(
