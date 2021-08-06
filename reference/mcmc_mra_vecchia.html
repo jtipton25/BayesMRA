@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Bayesian Multi-resolution Spatial Regression — mcmc_mra • BayesMRA</title>
+<title>Bayesian Multi-resolution Spatial Regression — mcmc_mra_vecchia • BayesMRA</title>
 
 
 <!-- jquery -->
@@ -39,7 +39,7 @@
 
 
 
-<meta property="og:title" content="Bayesian Multi-resolution Spatial Regression — mcmc_mra" />
+<meta property="og:title" content="Bayesian Multi-resolution Spatial Regression — mcmc_mra_vecchia" />
 <meta property="og:description" content="this function runs Markov Chain Monte Carlo to estimate the Bayesian multi-resolution spatial regression model." />
 
 
@@ -124,31 +124,27 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Bayesian Multi-resolution Spatial Regression</h1>
-    <small class="dont-index">Source: <a href='https://github.com/jtipton25/BayesMRA/blob/master/R/mcmc_mra.R'><code>R/mcmc_mra.R</code></a></small>
-    <div class="hidden name"><code>mcmc_mra.Rd</code></div>
+    <small class="dont-index">Source: <a href='https://github.com/jtipton25/BayesMRA/blob/master/R/mcmc_mra_vecchia.R'><code>R/mcmc_mra_vecchia.R</code></a></small>
+    <div class="hidden name"><code>mcmc_mra_vecchia.Rd</code></div>
     </div>
 
     <div class="ref-description">
     <p>this function runs Markov Chain Monte Carlo to estimate the Bayesian multi-resolution spatial regression model.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>mcmc_mra</span><span class='op'>(</span>
+    <pre class="usage"><span class='fu'>mcmc_mra_vecchia</span><span class='op'>(</span>
   <span class='va'>y</span>,
-  <span class='va'>X</span>,
   <span class='va'>locs</span>,
   <span class='va'>params</span>,
-  priors <span class='op'>=</span> <span class='cn'>NULL</span>,
-  M <span class='op'>=</span> <span class='fl'>4</span>,
+  M <span class='op'>=</span> <span class='fl'>3</span>,
   n_neighbors <span class='op'>=</span> <span class='fl'>68</span>,
   n_coarse_grid <span class='op'>=</span> <span class='fl'>10</span>,
   n_padding <span class='op'>=</span> <span class='fl'>5L</span>,
-  n_cores <span class='op'>=</span> <span class='fl'>1L</span>,
   inits <span class='op'>=</span> <span class='cn'>NULL</span>,
-  config <span class='op'>=</span> <span class='cn'>NULL</span>,
+  normalize <span class='op'>=</span> <span class='cn'>TRUE</span>,
   verbose <span class='op'>=</span> <span class='cn'>FALSE</span>,
-  use_spam <span class='op'>=</span> <span class='cn'>TRUE</span>,
-  joint <span class='op'>=</span> <span class='cn'>TRUE</span>,
-  constraint <span class='op'>=</span> <span class='st'>"unconstrained"</span>,
+  config <span class='op'>=</span> <span class='cn'>NULL</span>,
+  constraint <span class='op'>=</span> <span class='st'>"overall"</span>,
   n_chain <span class='op'>=</span> <span class='fl'>1</span>
 <span class='op'>)</span></pre>
 
@@ -158,10 +154,6 @@
     <tr>
       <th>y</th>
       <td><p>is a \(n\) vector of Gaussian data.</p></td>
-    </tr>
-    <tr>
-      <th>X</th>
-      <td><p>is a \(n \times p\) matrix of fixed effects (like latitude, elevation, etc)</p></td>
     </tr>
     <tr>
       <th>locs</th>
@@ -182,10 +174,6 @@ outputs progress messages every 50 iterations.</p></li>
 </ul></td>
     </tr>
     <tr>
-      <th>priors</th>
-      <td><p>is the list of prior settings.</p></td>
-    </tr>
-    <tr>
       <th>M</th>
       <td><p>The number of resolutions.</p></td>
     </tr>
@@ -202,28 +190,16 @@ outputs progress messages every 50 iterations.</p></li>
       <td><p>The number of additional boundary points to add on each boundary. For example, n_padding = 5 will add 5 boundary knots to the both the left  and right side of the grid).</p></td>
     </tr>
     <tr>
-      <th>n_cores</th>
-      <td><p>is the number of cores for parallel computation using openMP.</p></td>
-    </tr>
-    <tr>
       <th>inits</th>
       <td><p>is the list of initial values if the user wishes to specify initial values. If these values are not specified, then the initial values will be randomly sampled from the prior.</p></td>
-    </tr>
-    <tr>
-      <th>config</th>
-      <td><p>is the list of configuration values if the user wishes to specify initial values. If these values are not specified, then default a configuration will be used.</p></td>
     </tr>
     <tr>
       <th>verbose</th>
       <td><p>Should verbose output be printed? Typically this is only useful for troubleshooting.</p></td>
     </tr>
     <tr>
-      <th>use_spam</th>
-      <td><p>is a boolean flag to determine whether the output is a list of spam matrix objects (<code>use_spam = TRUE</code>) or a an \(n \times n\) sparse Matrix of class "dgCMatrix" <code>use_spam = FALSE</code> (see spam and Matrix packages for details).</p></td>
-    </tr>
-    <tr>
-      <th>joint</th>
-      <td><p>Should the spatial parameters alpha be sampled jointly or by each resolution</p></td>
+      <th>config</th>
+      <td><p>is the list of configuration values if the user wishes to specify initial values. If these values are not specified, then default a configuration will be used.</p></td>
     </tr>
     <tr>
       <th>constraint</th>
@@ -232,6 +208,14 @@ outputs progress messages every 50 iterations.</p></li>
     <tr>
       <th>n_chain</th>
       <td><p>is the MCMC chain id. The default is 1.</p></td>
+    </tr>
+    <tr>
+      <th>X</th>
+      <td><p>is a \(n \times p\) matrix of fixed effects (like latitude, elevation, etc)</p></td>
+    </tr>
+    <tr>
+      <th>priors</th>
+      <td><p>is the list of prior settings.</p></td>
     </tr>
     </table>
 
@@ -285,7 +269,7 @@ outputs progress messages every 50 iterations.</p></li>
     Sigma_beta   <span class='op'>=</span> <span class='fl'>5</span> <span class='op'>*</span> <span class='fu'><a href='https://rdrr.io/r/base/diag.html'>diag</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>ncol</a></span><span class='op'>(</span><span class='va'>X</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
 
 <span class='co'>## Fit the MRA model using MCMC</span>
-<span class='va'>out</span>     <span class='op'>&lt;-</span> <span class='fu'>mcmc_mra</span><span class='op'>(</span>
+<span class='va'>out</span>     <span class='op'>&lt;-</span> <span class='fu'>mcmc_mra_vecchia</span><span class='op'>(</span>
     y             <span class='op'>=</span> <span class='va'>y</span>,
     X             <span class='op'>=</span> <span class='va'>X</span>,
     locs          <span class='op'>=</span> <span class='va'>locs</span>,
@@ -294,7 +278,7 @@ outputs progress messages every 50 iterations.</p></li>
     M             <span class='op'>=</span> <span class='fl'>2</span>,
     n_coarse_grid <span class='op'>=</span> <span class='fl'>4</span>
 <span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>Starting MCMC for chain 1, running for 5 adaptive iterations and 5 fitting iterations</span></div><div class='output co'>#&gt; <span class='message'>MCMC adaptation iteration 5 for chain 1</span></div><div class='output co'>#&gt; <span class='message'>Starting MCMC fitting for chain 1, running for 5 iterationsn</span></div><div class='output co'>#&gt; <span class='message'>MCMC fitting iteration 5 for chain 1</span></div><div class='input'>
+</div><div class='output co'>#&gt; <span class='error'>Error in mcmc_mra_vecchia(y = y, X = X, locs = locs, params = params,     priors = priors, M = 2, n_coarse_grid = 4): unused arguments (X = X, priors = priors)</span></div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
