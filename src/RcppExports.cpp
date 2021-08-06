@@ -9,6 +9,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // rmvn_arma
 arma::vec rmvn_arma(arma::mat& A, arma::vec& b);
 static SEXP _BayesMRA_rmvn_arma_try(SEXP ASEXP, SEXP bSEXP) {

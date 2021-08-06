@@ -505,11 +505,11 @@ mcmc_mra <- function(
     ## Starting MCMC chain
     ##
 
-    message("Starting MCMC for chain ", n_chain, ", running for ", params$n_adapt, " adaptive iterations and ", params$n_mcmc, " fitting iterations \n")
+    message("Starting MCMC for chain ", n_chain, ", running for ", params$n_adapt, " adaptive iterations and ", params$n_mcmc, " fitting iterations")
 
     for (k in 1:(params$n_adapt + params$n_mcmc)) {
         if (k == params$n_adapt + 1) {
-            message("Starting MCMC fitting for chain ", n_chain, ", running for ", params$n_mcmc, " iterations \n")
+            message("Starting MCMC fitting for chain ", n_chain, ", running for ", params$n_mcmc, " iterationsn")
         }
         if (k %% params$n_message == 0) {
             if (k <= params$n_adapt) {
