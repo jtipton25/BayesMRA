@@ -237,8 +237,8 @@ mcmc_mra_vecchia <- function(
             class(Q_alpha[[1]]) <- "spam"
             Q_alpha_tau2 <- make_Q_alpha_tau2(Q_alpha, tau2[m])
             W  <- MRA$W
-            tW <- t(MRA$W)
-            tWW <- t(MRA$W) %*% MRA$W
+            tW <- t(W)
+            tWW <- tW %*% W
             G <- tWW + Q_alpha_tau2
             Rstruct <- chol(G)
 
@@ -277,8 +277,8 @@ mcmc_mra_vecchia <- function(
                 class(Q_alpha[[1]]) <- "spam"
                 Q_alpha_tau2 <- make_Q_alpha_tau2(Q_alpha, tau2[m])
                 W  <- MRA$W
-                tW <- t(MRA$W)
-                tWW <- t(MRA$W) %*% MRA$W
+                tW <- t(W)
+                tWW <- tW %*% W
                 G <- tWW + Q_alpha_tau2
                 Rstruct = chol(G)
 
@@ -323,7 +323,7 @@ mcmc_mra_vecchia <- function(
             if (normalize) {
                 Walpha[, m] <- W_list[[m]]$W_star %*% alpha[[m]]
             } else {
-                Walpha[, m] <- W_list[[m]]$MRA$W %*% alpha[[m]]
+                Walpha[, m] <- W_list[[m]]$W %*% alpha[[m]]
             }
         } else {
             for (j in 1:(4^(m-1))) {
@@ -332,7 +332,7 @@ mcmc_mra_vecchia <- function(
                 if (normalize) {
                     Walpha[W_list[[m]][[j]]$grid_idx == j, m] <- W_list[[m]][[j]]$W_star %*% alpha[[m]][[j]]
                 } else {
-                    Walpha[W_list[[m]][[j]]$grid_idx == j, m] <- W_list[[m]][[j]]$MRA$W %*% alpha[[m]][[j]]
+                    Walpha[W_list[[m]][[j]]$grid_idx == j, m] <- W_list[[m]][[j]]$W %*% alpha[[m]][[j]]
                 }
             }
         }
@@ -376,14 +376,14 @@ mcmc_mra_vecchia <- function(
             if (normalize) {
                 Walpha[, m] <- W_list[[m]]$W_star %*% alpha[[m]]
             } else {
-                Walpha[, m] <- W_list[[m]]$MRA$W %*% alpha[[m]]
+                Walpha[, m] <- W_list[[m]]$W %*% alpha[[m]]
             }
         } else {
             for (j in 1:(4^(m-1))) {
                 if (normalize) {
                     Walpha[W_list[[m]][[j]]$grid_idx == j, m] <- W_list[[m]][[j]]$W_star %*% alpha[[m]][[j]]
                 } else {
-                    Walpha[W_list[[m]][[j]]$grid_idx == j, m] <- W_list[[m]][[j]]$MRA$W %*% alpha[[m]][[j]]
+                    Walpha[W_list[[m]][[j]]$grid_idx == j, m] <- W_list[[m]][[j]]$W %*% alpha[[m]][[j]]
                 }
             }
         }
