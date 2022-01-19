@@ -4,7 +4,13 @@
 \alias{mra_wendland_2d_pred}
 \title{Code to construct the mutli-resolution sparse basis function representation for fitting spatial processes}
 \usage{
-mra_wendland_2d_pred(locs_pred, MRA, max_points = NULL, use_spam = TRUE)
+mra_wendland_2d_pred(
+  locs_pred,
+  MRA,
+  max_points = NULL,
+  basis_type = "wendland",
+  use_spam = TRUE
+)
 }
 \arguments{
 \item{locs_pred}{The location variables in 2 dimensions over which to construct the basis function representation in the prediction stage.}
@@ -12,6 +18,8 @@ mra_wendland_2d_pred(locs_pred, MRA, max_points = NULL, use_spam = TRUE)
 \item{MRA}{The multi-resolution basis expansion at the observed locations. This object is the output of \verb{mra_wendland-2d()} and is of class "mra_wendland_2d".}
 
 \item{max_points}{The expected number of pairs less than or equal to the radius. Default is \code{nrow(locs)} * \code{num_neighbors}.}
+
+\item{basis_type}{A string of which basis function type to use. Currently available basis function types are at \code{\link[=make_basis]{make_basis()}}}
 
 \item{use_spam}{is a boolean flag to determine whether the output is a list of spam matrix objects (\code{use_spam = TRUE}) or a an \eqn{n \times n}{n x n} sparse Matrix of class "dgCMatrix" \code{use_spam = FALSE} (see spam and Matrix packages for details).}
 }

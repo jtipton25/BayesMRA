@@ -6,6 +6,7 @@
 #' @param n_padding The number of additional boundary points to add on each boundary. For example, n_padding = 5 will add 5 boundary knots to the both the left  and right side of the grid).
 #' @param n_neighbors The expected number of neighbors for each interior basis function. This determines the basis radius parameter.
 #' @param max_points The expected number of pairs less than or equal to the radius. Default is `nrow(locs)` * `num_neighbors`.
+#' @param basis_type A string of which basis function type to use. Currently available basis function types are at [BayesMRA::make_basis()]
 #' @param use_spam is a boolean flag to determine whether the output is a list of `spam::spam` matrix objects (`use_spam = TRUE`) or a an \eqn{n \times n}{n x n} sparse Matrix of class `Matrix::dgCMatrix` `use_spam = FALSE` (see spam and Matrix packages for details).
 #'
 #' @importFrom fields fields.rdist.near
@@ -41,6 +42,7 @@ mra_wendland_2d <- function(
     max_points    = NULL,
     # n_max_fine_grid = 2^12,
     # radius      = 25,
+    basis_type    = "wendland",
     use_spam      = TRUE
 ) {
     ##
@@ -76,12 +78,15 @@ mra_wendland_2d <- function(
     if (use_spam == FALSE) {
         stop("The Matrix package is not currently supported")
     }
+    if (!(basis_type %in% c("wendland"))) {
+        stop('The only basis function type allowed is "wendland"')
+    }
 
     N <- nrow(locs)
 
     ## Define max_points parameter
     if (is.null(max_points)) {
-        max_points <- N * n_neighbors
+        max_points <- 2* N * n_neighbors
     }
     ## Assign as many gridpoints (approximately) as data
     # n_grid <- ceiling(sqrt(N / 2^(M:1 - 1)))
@@ -102,7 +107,7 @@ mra_wendland_2d <- function(
     radius           <- radius_fine_grid * (2^(M:1 - 1))
     # radius <- radius / 2^(1:M - 1)
 
-    ## generate a set of grid locations for the Wendland basis
+    ## generate a set of grid locations for the basis
     locs_grid    <- vector(mode = "list", length = M)
     out          <- vector(mode = "list", length = M)
     W            <- vector(mode = "list", length = M)
@@ -141,7 +146,7 @@ mra_wendland_2d <- function(
         D <- fields.rdist.near(locs, locs_grid[[m]], delta = radius[m],
                                max.points = max_points)
 
-        D$ra <- wendland_basis(D$ra, radius[m])
+        D$ra <- make_basis(D$ra, radius[m], basis_type = "wendland")
         if (use_spam) {
             ## use the spam sparse matrix package
             # W[[m]] <- spam(c(wendland_basis(D, radius[m])), nrow = nrow(D), ncol = ncol(D))

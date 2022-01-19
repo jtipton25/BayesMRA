@@ -3,6 +3,7 @@
 #' @param locs_pred The location variables in 2 dimensions over which to construct the basis function representation in the prediction stage.
 #' @param MRA The multi-resolution basis expansion at the observed locations. This object is the output of `mra_wendland-2d()` and is of class "mra_wendland_2d".
 #' @param max_points The expected number of pairs less than or equal to the radius. Default is `nrow(locs)` * `num_neighbors`.
+#' @param basis_type A string of which basis function type to use. Currently available basis function types are at [BayesMRA::make_basis()]
 #' @param use_spam is a boolean flag to determine whether the output is a list of spam matrix objects (`use_spam = TRUE`) or a an \eqn{n \times n}{n x n} sparse Matrix of class "dgCMatrix" `use_spam = FALSE` (see spam and Matrix packages for details).
 #'
 #' @importFrom fields fields.rdist.near
@@ -35,8 +36,9 @@
 mra_wendland_2d_pred <- function(
     locs_pred,
     MRA,
-    max_points    = NULL,
-    use_spam = TRUE
+    max_points = NULL,
+    basis_type = "wendland",
+    use_spam   = TRUE
 ) {
     n_pred <- nrow(locs_pred)
 
@@ -54,7 +56,9 @@ mra_wendland_2d_pred <- function(
     if (!is.logical(use_spam) || length(use_spam) != 1 || is.na(use_spam)) {
         stop("use_spam must be either TRUE or FALSE")
     }
-
+    if (!(basis_type %in% c("wendland"))) {
+        stop('The only basis function type allowed is "wendland"')
+    }
 
     M      <- MRA$M
 
@@ -71,7 +75,7 @@ mra_wendland_2d_pred <- function(
         D_pred <- fields.rdist.near(locs_pred, MRA$locs_grid[[m]],
                                     delta = MRA$radius[m], max.points = max_points)
 
-        D_pred$ra <- wendland_basis(D_pred$ra, MRA$radius[m])
+        D_pred$ra <- make_basis(D_pred$ra, MRA$radius[m], basis_type = basis_type)
         if (use_spam) {
             ## use the spam sparse matrix package
             # W_pred[[m]] <- spam(c(wendland_basis(D_pred, MRA$radius[m])), nrow = nrow(D_pred), ncol = ncol(D_pred))

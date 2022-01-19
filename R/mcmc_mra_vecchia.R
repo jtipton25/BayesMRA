@@ -6,7 +6,7 @@
 #'
 #' this function runs Markov Chain Monte Carlo to estimate the Bayesian multi-resolution spatial regression model.
 #' @param y is a \eqn{n}{n} vector of Gaussian data.
-#' @param X is a \eqn{n \times p}{n x p} matrix of fixed effects (like latitude, elevation, etc)
+# @param X is a \eqn{n \times p}{n x p} matrix of fixed effects (like latitude, elevation, etc)
 #' @param locs is a \eqn{n \times 2}{n x 2} matrix of observation locations.
 #' @param params is a list of parameter settings. The list
 #' \code{params} must contain the following values:
@@ -18,12 +18,13 @@
 #' * \code{n_message}: A positive integer number of frequency of iterations
 #'  to output a progress message. For example, \code{n_message = 50}
 #'  outputs progress messages every 50 iterations.
-#' @param priors is the list of prior settings.
+# @param priors is the list of prior settings.
 #' @param M The number of resolutions.
 #' @param n_neighbors The expected number of neighbors for each interior basis function. This determines the basis radius parameter.
 #' @param n_coarse_grid The number of basis functions in one direction (e.g. \code{n_coarse_grid = 10} results in a \eqn{10 \times 10}{10x10} course grid which is further extended by the number of additional padding basis functions given by \code{n_padding}.
 #' @param n_padding The number of additional boundary points to add on each boundary. For example, n_padding = 5 will add 5 boundary knots to the both the left  and right side of the grid).
 #' @param inits is the list of initial values if the user wishes to specify initial values. If these values are not specified, then the initial values will be randomly sampled from the prior.
+#' @param normalize A logical value of whether to normalize the basis functions or not.
 #' @param config is the list of configuration values if the user wishes to specify initial values. If these values are not specified, then default a configuration will be used.
 #' @param verbose Should verbose output be printed? Typically this is only useful for troubleshooting.
 #' @param constraint What constraint should be applied to the spatial process? Options include no constraint (`constraint = "unconstrained"`), a constraint so the entire MRA process sums to 0 (`constraint = "overall"`), a constraint so that each of the M levels of the MRA process sum to 0 (`constraint = "resolution"`), or whether the predicted process must sum to 0 (`constraint = "predicted"`). Note: `constraint = "predicted"` is NOT currently supported.
@@ -78,15 +79,15 @@
 #'     Sigma_beta   = 5 * diag(ncol(X)))
 #'
 #' ## Fit the MRA model using MCMC
-#' out     <- mcmc_mra_vecchia(
-#'     y             = y,
-#'     X             = X,
-#'     locs          = locs,
-#'     params        = params,
-#'     priors        = priors,
-#'     M             = 2,
-#'     n_coarse_grid = 4
-#' )
+#' # out     <- mcmc_mra_vecchia(
+#' #     y             = y,
+#' #     X             = X,
+#' #     locs          = locs,
+#' #     params        = params,
+#' #     priors        = priors,
+#' #     M             = 2,
+#' #     n_coarse_grid = 4
+#' # )
 #'
 #' @export
 #'
@@ -217,6 +218,7 @@ mcmc_mra_vecchia <- function(
     ## setup the MRA process -- turn this into a function
     ##
 
+    N <- length(y)
     W_list <- vector(mode = "list", length = M)
     tau2 <- 100 / (2^(1:M - 1))
     Walpha <- matrix(0, N, M)

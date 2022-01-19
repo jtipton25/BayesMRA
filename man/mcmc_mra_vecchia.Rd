@@ -48,6 +48,8 @@ outputs progress messages every 50 iterations.
 
 \item{inits}{is the list of initial values if the user wishes to specify initial values. If these values are not specified, then the initial values will be randomly sampled from the prior.}
 
+\item{normalize}{A logical value of whether to normalize the basis functions or not.}
+
 \item{verbose}{Should verbose output be printed? Typically this is only useful for troubleshooting.}
 
 \item{config}{is the list of configuration values if the user wishes to specify initial values. If these values are not specified, then default a configuration will be used.}
@@ -55,10 +57,6 @@ outputs progress messages every 50 iterations.
 \item{constraint}{What constraint should be applied to the spatial process? Options include no constraint (\code{constraint = "unconstrained"}), a constraint so the entire MRA process sums to 0 (\code{constraint = "overall"}), a constraint so that each of the M levels of the MRA process sum to 0 (\code{constraint = "resolution"}), or whether the predicted process must sum to 0 (\code{constraint = "predicted"}). Note: \code{constraint = "predicted"} is NOT currently supported.}
 
 \item{n_chain}{is the MCMC chain id. The default is 1.}
-
-\item{X}{is a \eqn{n \times p}{n x p} matrix of fixed effects (like latitude, elevation, etc)}
-
-\item{priors}{is the list of prior settings.}
 }
 \description{
 this function runs Markov Chain Monte Carlo to estimate the Bayesian multi-resolution spatial regression model.
@@ -112,14 +110,14 @@ priors <- list(
     Sigma_beta   = 5 * diag(ncol(X)))
 
 ## Fit the MRA model using MCMC
-out     <- mcmc_mra_vecchia(
-    y             = y,
-    X             = X,
-    locs          = locs,
-    params        = params,
-    priors        = priors,
-    M             = 2,
-    n_coarse_grid = 4
-)
+# out     <- mcmc_mra_vecchia(
+#     y             = y,
+#     X             = X,
+#     locs          = locs,
+#     params        = params,
+#     priors        = priors,
+#     M             = 2,
+#     n_coarse_grid = 4
+# )
 
 }

@@ -7,6 +7,14 @@ test_that("wendland_basis", {
     expect_equal(wendland_basis(1:5, 3), c(0.37717827566936, 0.013971447441955, 0, 0, 0))
 })
 
+test_that("make_basis", {
+    expect_error(make_basis(1:10, 1:10, basis_type = "wendland"), "radius must be a single positive numeric value")
+    expect_error(make_basis(-10:10, 5, basis_type = "wendland"), "d must be nonnegative")
+    expect_error(make_basis(c(1:10, NA), 2, basis_type = "wendland"), "d must not contain missing values")
+    expect_error(make_basis(1:5, 3, basis_type = "aaa"), "The only currently supported basis functions are \"wendland\"")
+    expect_equal(make_basis(1:5, 3), c(0.37717827566936, 0.013971447441955, 0, 0, 0), basis_type = "wendland")
+})
+
 test_that("illegal input for mra_wendland_2d", {
     locs <- NULL
     expect_error(mra_wendland_2d(locs), "locs must be a numeric matrix with N rows and 2 columns")

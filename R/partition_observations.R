@@ -1,6 +1,6 @@
 #' Partition observations into MRA grid
 #'
-#' Partition the observation locations into MRA grids for use in \code{\link{mcmc_mra_vecchia()}}
+#' Partition the observation locations into MRA grids for use in [BayesMRA::mcmc_mra_vecchia()]
 #' @param locs is a \eqn{n \times 2}{n x 2} matrix of observation locations.
 #' @param M The number of resolutions.
 #'
@@ -23,7 +23,7 @@ partition_observations <- function(locs, M) {
     grid_labels <- matrix(1:n_grids, 2^(M-1), 2^(M-1), byrow = TRUE)
     dimnames(grid_labels) <- list(row_id = 1:(2^(M-1)), col_id = 1:(2^(M-1)))
     dat_grid_labels <- as.data.frame.table(grid_labels, responseName = "grid_id") %>%
-        mutate(row_id = as.numeric(row_id), col_id = as.numeric(col_id))
+        mutate(row_id = as.numeric(.data$row_id), col_id = as.numeric(.data$col_id))
 
     grid_idx <- NULL
 

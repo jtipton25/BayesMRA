@@ -15,5 +15,5 @@ partition_observations(locs, M)
 A data.frame of partition ids for each location
 }
 \description{
-Partition the observation locations into MRA grids for use in \code{\link{mcmc_mra_vecchia()}}
+Partition the observation locations into MRA grids for use in \code{\link[=mcmc_mra_vecchia]{mcmc_mra_vecchia()}}
 }

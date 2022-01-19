@@ -18,7 +18,7 @@ calc_omega_norm <- function(W, Q_inv) {
 #' Calculate the normalized basis function matrix so that all basis functions have the same marginal variance
 #'
 #' @param W The sparse basis function matrix
-#' @param omega The normalizing weights for the basis functions which is the output of \code{\link{calc_omega_norm()}}
+#' @param omega The normalizing weights for the basis functions which is the output of [BayesMRA::calc_omega_norm()]
 #' @param tau2 The basis function resolution precision
 #'
 #' @return A normalized basis function matrix

@@ -9,7 +9,7 @@ calc_W_star(W, omega, tau2)
 \arguments{
 \item{W}{The sparse basis function matrix}
 
-\item{omega}{The normalizing weights for the basis functions which is the output of \code{\link{calc_omega_norm()}}}
+\item{omega}{The normalizing weights for the basis functions which is the output of \code{\link[=calc_omega_norm]{calc_omega_norm()}}}
 
 \item{tau2}{The basis function resolution precision}
 }
