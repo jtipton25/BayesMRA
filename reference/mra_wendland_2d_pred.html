@@ -63,7 +63,13 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">mra_wendland_2d_pred</span><span class="op">(</span><span class="va">locs_pred</span>, <span class="va">MRA</span>, max_points <span class="op">=</span> <span class="cn">NULL</span>, use_spam <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">mra_wendland_2d_pred</span><span class="op">(</span>
+  <span class="va">locs_pred</span>,
+  <span class="va">MRA</span>,
+  max_points <span class="op">=</span> <span class="cn">NULL</span>,
+  basis_type <span class="op">=</span> <span class="st">"wendland"</span>,
+  use_spam <span class="op">=</span> <span class="cn">TRUE</span>
+<span class="op">)</span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -74,6 +80,8 @@
 <dd><p>The multi-resolution basis expansion at the observed locations. This object is the output of <code>mra_wendland-2d()</code> and is of class "mra_wendland_2d".</p></dd>
 <dt>max_points</dt>
 <dd><p>The expected number of pairs less than or equal to the radius. Default is <code>nrow(locs)</code> * <code>num_neighbors</code>.</p></dd>
+<dt>basis_type</dt>
+<dd><p>A string of which basis function type to use. Currently available basis function types are at <code><a href="make_basis.html">make_basis()</a></code></p></dd>
 <dt>use_spam</dt>
 <dd><p>is a boolean flag to determine whether the output is a list of spam matrix objects (<code>use_spam = TRUE</code>) or a an \(n \times n\) sparse Matrix of class "dgCMatrix" <code>use_spam = FALSE</code> (see spam and Matrix packages for details).</p></dd>
 </dl></div>

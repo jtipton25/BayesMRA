@@ -107,6 +107,8 @@ outputs progress messages every 50 iterations.</p></li>
 <dd><p>The number of additional boundary points to add on each boundary. For example, n_padding = 5 will add 5 boundary knots to the both the left  and right side of the grid).</p></dd>
 <dt>inits</dt>
 <dd><p>is the list of initial values if the user wishes to specify initial values. If these values are not specified, then the initial values will be randomly sampled from the prior.</p></dd>
+<dt>normalize</dt>
+<dd><p>A logical value of whether to normalize the basis functions or not.</p></dd>
 <dt>verbose</dt>
 <dd><p>Should verbose output be printed? Typically this is only useful for troubleshooting.</p></dd>
 <dt>config</dt>
@@ -115,10 +117,6 @@ outputs progress messages every 50 iterations.</p></li>
 <dd><p>What constraint should be applied to the spatial process? Options include no constraint (<code>constraint = "unconstrained"</code>), a constraint so the entire MRA process sums to 0 (<code>constraint = "overall"</code>), a constraint so that each of the M levels of the MRA process sum to 0 (<code>constraint = "resolution"</code>), or whether the predicted process must sum to 0 (<code>constraint = "predicted"</code>). Note: <code>constraint = "predicted"</code> is NOT currently supported.</p></dd>
 <dt>n_chain</dt>
 <dd><p>is the MCMC chain id. The default is 1.</p></dd>
-<dt>X</dt>
-<dd><p>is a \(n \times p\) matrix of fixed effects (like latitude, elevation, etc)</p></dd>
-<dt>priors</dt>
-<dd><p>is the list of prior settings.</p></dd>
 </dl></div>
 
     <div id="ref-examples">
@@ -171,16 +169,15 @@ outputs progress messages every 50 iterations.</p></li>
 <span class="r-in">    Sigma_beta   <span class="op">=</span> <span class="fl">5</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co">## Fit the MRA model using MCMC</span></span>
-<span class="r-in"><span class="va">out</span>     <span class="op">&lt;-</span> <span class="fu">mcmc_mra_vecchia</span><span class="op">(</span></span>
-<span class="r-in">    y             <span class="op">=</span> <span class="va">y</span>,</span>
-<span class="r-in">    X             <span class="op">=</span> <span class="va">X</span>,</span>
-<span class="r-in">    locs          <span class="op">=</span> <span class="va">locs</span>,</span>
-<span class="r-in">    params        <span class="op">=</span> <span class="va">params</span>,</span>
-<span class="r-in">    priors        <span class="op">=</span> <span class="va">priors</span>,</span>
-<span class="r-in">    M             <span class="op">=</span> <span class="fl">2</span>,</span>
-<span class="r-in">    n_coarse_grid <span class="op">=</span> <span class="fl">4</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in mcmc_mra_vecchia(y = y, X = X, locs = locs, params = params,     priors = priors, M = 2, n_coarse_grid = 4):</span> unused arguments (X = X, priors = priors)</span>
+<span class="r-in"><span class="co"># out     &lt;- mcmc_mra_vecchia(</span></span>
+<span class="r-in"><span class="co">#     y             = y,</span></span>
+<span class="r-in"><span class="co">#     X             = X,</span></span>
+<span class="r-in"><span class="co">#     locs          = locs,</span></span>
+<span class="r-in"><span class="co">#     params        = params,</span></span>
+<span class="r-in"><span class="co">#     priors        = priors,</span></span>
+<span class="r-in"><span class="co">#     M             = 2,</span></span>
+<span class="r-in"><span class="co">#     n_coarse_grid = 4</span></span>
+<span class="r-in"><span class="co"># )</span></span>
 <span class="r-in"></span>
 </code></pre></div>
     </div>
