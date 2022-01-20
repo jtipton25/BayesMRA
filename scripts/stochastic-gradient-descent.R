@@ -30,10 +30,16 @@ target_fun <- function(y, U, theta) {
 }
 
 # gradient function
-gradient_fun <- function(y, U, theta) {
+# gradient_fun <- function(y, U, theta) {
+#     # U = cbind(X, W)
+#     # theta <- c(beta, alpha)
+#     return(t(U) %*% (U %*% theta - y) / length(y))
+# }
+
+gradient_fun <- function(y, tUy, tUU, theta) {
     # U = cbind(X, W)
     # theta <- c(beta, alpha)
-    return(t(U) %*% (U %*% theta - y) / length(y))
+    return((tUU%*% theta - tUy) / length(y))
 }
 
 # Defining gradient Descent function
@@ -54,6 +60,9 @@ regression_gradient_descent <- function(target_fun, gradient_fun, y, X, W, inits
     # X_scaled <- cbind(1, X_scaled)
     # U <- cbind(X_scaled, W)
     U <- cbind(X, W)
+    tU <- t(U)
+    tUU <- tU %*% U
+    tUy <- tU %*% y
 
 
     # initialize algorithm
@@ -66,10 +75,12 @@ regression_gradient_descent <- function(target_fun, gradient_fun, y, X, W, inits
     beta_save[1, ] <- beta_old
     # first iteration
     if (is.null(minibatch_size)) {
-        beta_new <- beta_old - alpha * gradient_fun(y, U, beta_old)
+        beta_new <- beta_old - alpha * gradient_fun(y, tUy, tUU, beta_old)
     } else {
         idx <- sample(1:length(y), minibatch_size)
-        beta_new <- beta_old - alpha * gradient_fun(y[idx], U[idx, ], beta_old)
+        y_idx <- y[idx]
+        tUy_idx <- tU[, idx] %*% y_idx
+        beta_new <- beta_old - alpha * gradient_fun(y_idx, tUy_idx, tUU, beta_old)
     }
 
     i <- 2
@@ -78,12 +89,14 @@ regression_gradient_descent <- function(target_fun, gradient_fun, y, X, W, inits
     while( any(abs(beta_new - beta_old) > threshold) && i <= num_iters){
         beta_old <- beta_new
         if (is.null(minibatch_size)) {
-            beta_new <- beta_new - alpha * gradient_fun(y, U, beta_new)
+            beta_new <- beta_new - alpha * gradient_fun(y, tUy, tUU, beta_new)
         } else {
             idx <- sample(1:length(y), minibatch_size)
-            beta_new <- beta_new - alpha * gradient_fun(y[idx], U[idx, ], beta_new)
+            y_idx <- y[idx]
+            tUy_idx <- tU[, idx] %*% y_idx
+            beta_new <- beta_new - alpha * gradient_fun(y[idx], tUy_idx, tUU, beta_new)
         }
-        loss[i] <- target_fun(y, U, beta_new)
+        # loss[i] <- target_fun(y, U, beta_new)
         # save the estimates on the original data scale (not normalized scale)
         # beta_save[i, ] <- c(beta_new[1] * y_sd + y_mean - sum(beta_new[-1][1:(ncol(X)-1)] * X_mean / X_sd) * y_sd,
         #                     beta_new[-1] * y_sd / X_sd)
@@ -99,7 +112,8 @@ regression_gradient_descent <- function(target_fun, gradient_fun, y, X, W, inits
 
 # gradient descent function for regression ----
 
-dat <- regression_gradient_descent(target_fun, gradient_fun, y, X, Z, inits = rnorm(ncol(U)), threshold = 0.000001, alpha = 0.01, num_iters = 50000, print_every = 100)
+dat <- regression_gradient_descent(target_fun, gradient_fun, y, X, Z, inits = rnorm(ncol(U)), threshold = 0.000001, alpha = 0.01, num_iters = 50000, print_every = 5000,
+                                   minibatch_size = 2^6)
 
 
 ggplot(dat, aes(x = iteration, y = loss)) +
@@ -108,6 +122,8 @@ ggplot(dat, aes(x = iteration, y = loss)) +
     ggtitle("loss as a function of iteration")
 
 
+model <- lm(y ~ U-1)
+dat_coef <- data.frame(beta = coef(model), parameter = paste0("beta[", 1:ncol(U), "]"))
 # Plot the regression parameters
 
 # convert beta into a data.frame
@@ -116,6 +132,7 @@ dat %>%
     pivot_longer(cols = 1:10, names_to = "parameter", values_to = "beta") %>%
     ggplot(aes(x = iteration, y = beta, color = parameter)) +
     geom_line() +
+    geom_hline(data = dat_coef, aes(yintercept = beta, color = parameter), lty = 2) +
     theme(legend.position = "none") +
     ggtitle("Parameter estimates by iteration")
 
@@ -138,7 +155,7 @@ library(BayesMRA)
 library(spam)
 set.seed(11)
 
-N <- 100^2
+N <- 400^2
 
 ## setup the spatial process
 locs <- as.matrix(
@@ -158,7 +175,7 @@ beta <- rnorm(ncol(X))
 
 ## MRA spatio-temporal random effect
 M <- 3
-n_coarse <- 10
+n_coarse <- 20
 
 MRA    <- mra_wendland_2d(locs, M = M, n_coarse = n_coarse, use_spam = TRUE)
 
@@ -188,15 +205,40 @@ sigma2 <- runif(1, 0.25, 0.5)
 y <- X %*% beta + W %*% alpha + rnorm(N, 0, sqrt(sigma2))
 
 
-# gradient descent function for MRA ----
+# gradient descent function for MRA using minibatch ----
 
 U <- cbind(X, W)
 
-dat <- regression_gradient_descent(target_fun, gradient_fun, c(y),
-                                   X, W, inits = rnorm(ncol(U)),
-                                   threshold = 0.000001,
-                                   alpha = 0.1, num_iters = 5000, print_every = 100,
-                                   minibatch_size = 2^6)
+# profvis::profvis(
+system.time(
+    dat <- regression_gradient_descent(target_fun, gradient_fun, c(y),
+                                       X, W, inits = rnorm(ncol(U)),
+                                       threshold = 0.000001,
+                                       alpha = 0.1, num_iters = 100, print_every = 10,
+                                       minibatch_size = 2^6)
+)
+
+# Using full gradient
+# profvis::profvis(
+system.time(
+    dat <- regression_gradient_descent(target_fun, gradient_fun, c(y),
+                                       X, W, inits = rnorm(ncol(U)),
+                                       threshold = 0.000001,
+                                       alpha = 0.1, num_iters = 500, print_every = 10,
+                                       minibatch_size = NULL)
+)
+
+tUU <- t(U) %*% U
+tUy <- t(U) %*% y
+idx <- sample(1:length(y), 2^6)
+theta_test <- rnorm(ncol(U))
+gradient_fun(y[idx], U[idx, ], tUy[idx], tUU, theta_test)
+# bm <- microbenchmark::microbenchmark(
+#     gradient_fun(y, U, theta_test),
+#     gradient_fun2(y, U, tUy, tUU, theta_test), times = 10)
+#
+# all.equal(    gradient_fun(y, U, theta_test),
+#               gradient_fun2(y, U, tUy, tUU, theta_test))
 
 
 ggplot(dat, aes(x = iteration, y = loss)) +
