@@ -36,7 +36,7 @@ partition_observations <- function(locs, M) {
     col_id <- as.numeric(cut(locs[, 2], breaks = cuts_x, include.lowest = TRUE))
     grid_idx <- data.frame(row_id = row_id, col_id = col_id) %>%
         left_join(dat_grid_labels, by = c("row_id", "col_id")) %>%
-        pull(grid_id)
+        pull(.data$grid_id)
 
     return(grid_idx)
 }
