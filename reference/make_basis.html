@@ -26,7 +26,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -63,23 +63,32 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">make_basis</span><span class="op">(</span><span class="va">d</span>, <span class="va">radius</span>, basis_type <span class="op">=</span> <span class="st">"wendland"</span>, use_spam <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">make_basis</span><span class="op">(</span><span class="va">d</span>, <span class="va">radius</span>, basis_type <span class="op">=</span> <span class="st">"wendland"</span>, use_spam <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>d</dt>
 <dd><p>A vector of distances</p></dd>
+
+
 <dt>radius</dt>
 <dd><p>A radius</p></dd>
+
+
 <dt>basis_type</dt>
 <dd><p>The basis function type. Currently, only "wendland" basis functions are allowed</p></dd>
+
+
 <dt>use_spam</dt>
 <dd><p>is a boolean flag to determine whether the output is a list of <code><a href="https://www.math.uzh.ch/pages/spam/reference/spam.html" class="external-link">spam::spam</a></code> matrix objects (<code>use_spam = TRUE</code>) or a an \(n \times n\) sparse Matrix of class <code>Matrix::dgCMatrix</code> <code>use_spam = FALSE</code> (see spam and Matrix packages for details).</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>The output of the basis function</p>
+    
+
+<p>The output of the basis function</p>
     </div>
 
   </div>
@@ -94,7 +103,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

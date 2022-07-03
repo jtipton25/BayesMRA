@@ -26,7 +26,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -63,43 +63,64 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">dmvn_smw</span><span class="op">(</span>
-  <span class="va">y</span>,
-  <span class="va">X</span>,
-  <span class="va">beta</span>,
-  <span class="va">tW</span>,
-  <span class="va">tWW</span>,
-  <span class="va">Q_alpha_tau2</span>,
-  <span class="va">sigma2</span>,
-  Rstruct <span class="op">=</span> <span class="cn">NULL</span>,
-  logd <span class="op">=</span> <span class="cn">TRUE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">dmvn_smw</span><span class="op">(</span></span>
+<span>  <span class="va">y</span>,</span>
+<span>  <span class="va">X</span>,</span>
+<span>  <span class="va">beta</span>,</span>
+<span>  <span class="va">tW</span>,</span>
+<span>  <span class="va">tWW</span>,</span>
+<span>  <span class="va">Q_alpha_tau2</span>,</span>
+<span>  <span class="va">sigma2</span>,</span>
+<span>  Rstruct <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  logd <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>y</dt>
 <dd><p>is a \(n\) vector of Gaussian data.</p></dd>
+
+
 <dt>X</dt>
 <dd><p>is a \(n \times p\) matrix of fixed effects (like latitude, elevation, etc)</p></dd>
+
+
 <dt>beta</dt>
 <dd><p>is the regression parameter beta</p></dd>
+
+
 <dt>tW</dt>
 <dd><p>is the transpose of the sparse Wendland basis matrix of class spam</p></dd>
+
+
 <dt>tWW</dt>
 <dd><p>is the transpose of the sparse Wendland basis matrix multiplied by itself of class spam</p></dd>
+
+
 <dt>Q_alpha_tau2</dt>
 <dd><p>is the prior precision matrix for random effects alpha</p></dd>
+
+
 <dt>sigma2</dt>
 <dd><p>is the residual error</p></dd>
+
+
 <dt>Rstruct</dt>
 <dd><p>is the Cholesky prior precision matrix for random effects alpha</p></dd>
+
+
 <dt>logd</dt>
 <dd><p>is a logical value of whether to calculate the log density (<code>logd = TRUE</code>) or the density on the data scale (<code>logd = FALSE</code>)</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>The (log) density of a normal distribution with mean \(\mathbf{X} \boldsymbol{\beta}\) and covariance matrix \(\sigma^2 \mathbf{I} + \mathbf{W} \mathbf{Q}_{\alpha_{\tau^2}} \mathbf{W}'\)</p>
+    
+
+<p>The (log) density of a normal distribution with mean \(\mathbf{X} \boldsymbol{\beta}\) and covariance matrix \(\sigma^2 \mathbf{I} + \mathbf{W} \mathbf{Q}_{\alpha_{\tau^2}} \mathbf{W}'\)</p>
+
+
     </div>
 
   </div>
@@ -114,7 +135,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

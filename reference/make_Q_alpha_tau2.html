@@ -26,7 +26,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -63,34 +63,41 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">make_Q_alpha_tau2</span><span class="op">(</span><span class="va">Q_alpha</span>, <span class="va">tau2</span>, use_spam <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">make_Q_alpha_tau2</span><span class="op">(</span><span class="va">Q_alpha</span>, <span class="va">tau2</span>, use_spam <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>Q_alpha</dt>
 <dd><p>a list of length M composed of matrices that are the correlation structure of the CAR prior on beta.</p></dd>
+
+
 <dt>tau2</dt>
 <dd><p>a vector of length M that contains the CAR prior precision matrices.</p></dd>
+
+
 <dt>use_spam</dt>
 <dd><p>a boolean that determines if the output matrix is of class "spam" (<code>use_spam = TRUE</code>) or of class "dgCMatrix" (<code>use_spam = FALSE</code>; see Matrix package for details).</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A sparse block diagonal matrix representing the precision matrices for all of the resolutions of the random effects.</p>
+    
+
+<p>A sparse block diagonal matrix representing the precision matrices for all of the resolutions of the random effects.</p>
     </div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">n_dims</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">8</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">phi</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.8</span>, <span class="fl">0.9</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">tau2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">4</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">Q_alpha</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_Q_alpha_2d.html">make_Q_alpha_2d</a></span><span class="op">(</span><span class="va">n_dims</span>, <span class="va">phi</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">Q_alpha_tau2</span> <span class="op">&lt;-</span> <span class="fu">make_Q_alpha_tau2</span><span class="op">(</span><span class="va">Q_alpha</span>, <span class="va">tau2</span><span class="op">)</span></span>
-<span class="r-in"><span class="co">## plot the full precision matrix structure</span></span>
-<span class="r-in"><span class="fu">spam</span><span class="fu">::</span><span class="fu"><a href="https://www.math.uzh.ch/pages/spam/reference/display.html" class="external-link">display</a></span><span class="op">(</span><span class="va">Q_alpha_tau2</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">n_dims</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">8</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">phi</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.8</span>, <span class="fl">0.9</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">tau2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">4</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">Q_alpha</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_Q_alpha_2d.html">make_Q_alpha_2d</a></span><span class="op">(</span><span class="va">n_dims</span>, <span class="va">phi</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">Q_alpha_tau2</span> <span class="op">&lt;-</span> <span class="fu">make_Q_alpha_tau2</span><span class="op">(</span><span class="va">Q_alpha</span>, <span class="va">tau2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co">## plot the full precision matrix structure</span></span></span>
+<span class="r-in"><span><span class="fu">spam</span><span class="fu">::</span><span class="fu"><a href="https://www.math.uzh.ch/pages/spam/reference/display.html" class="external-link">display</a></span><span class="op">(</span><span class="va">Q_alpha_tau2</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="make_Q_alpha_tau2-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -105,7 +112,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

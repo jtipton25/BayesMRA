@@ -26,7 +26,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -63,34 +63,47 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">plot_posterior_params</span><span class="op">(</span>
-  <span class="va">out</span>,
-  base_size <span class="op">=</span> <span class="fl">12</span>,
-  alpha <span class="op">=</span> <span class="fl">0.1</span>,
-  file <span class="op">=</span> <span class="cn">NULL</span>,
-  width <span class="op">=</span> <span class="fl">16</span>,
-  height <span class="op">=</span> <span class="fl">9</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">plot_posterior_params</span><span class="op">(</span></span>
+<span>  <span class="va">out</span>,</span>
+<span>  base_size <span class="op">=</span> <span class="fl">12</span>,</span>
+<span>  alpha <span class="op">=</span> <span class="fl">0.1</span>,</span>
+<span>  file <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  width <span class="op">=</span> <span class="fl">16</span>,</span>
+<span>  height <span class="op">=</span> <span class="fl">9</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>out</dt>
 <dd><p>The output from <code><a href="mcmc_mra.html">mcmc_mra()</a></code> or <code><a href="mcmc_mra_integrated.html">mcmc_mra_integrated()</a></code></p></dd>
+
+
 <dt>base_size</dt>
 <dd><p>The base size for the plot</p></dd>
+
+
 <dt>alpha</dt>
 <dd><p>The plot transparency</p></dd>
+
+
 <dt>file</dt>
 <dd><p>If <code>file = NULL</code>, the ggplot object is returned. If <code>file</code> is not NULL, an image is saved to the file path specified by <code>file</code></p></dd>
+
+
 <dt>width</dt>
 <dd><p>If a file path is specified, <code>width</code> determines the width of the saved image (in inches)</p></dd>
+
+
 <dt>height</dt>
 <dd><p>If a file path is specified, <code>height</code> determines the height of the saved image (in inches)</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Either a ggplot object of the posterior distribution of some model parameters (if <code>file = NULL</code>) or a saved image file with no return (<code>file</code> is not NULL)</p>
+    
+
+<p>Either a ggplot object of the posterior distribution of some model parameters (if <code>file = NULL</code>) or a saved image file with no return (<code>file</code> is not NULL)</p>
     </div>
 
   </div>
@@ -105,7 +118,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

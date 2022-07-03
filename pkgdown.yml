@@ -1,7 +1,7 @@
 pandoc: 2.7.3
-pkgdown: 2.0.2
+pkgdown: 2.0.5
 pkgdown_sha: ~
 articles:
   mra-simulation: mra-simulation.html
-last_built: 2022-01-26T23:15Z
+last_built: 2022-07-03T19:18Z
 

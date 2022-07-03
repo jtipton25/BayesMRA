@@ -26,7 +26,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -63,33 +63,39 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">mcmc_mra_integrated</span><span class="op">(</span>
-  <span class="va">y</span>,
-  <span class="va">X</span>,
-  <span class="va">locs</span>,
-  <span class="va">params</span>,
-  priors <span class="op">=</span> <span class="cn">NULL</span>,
-  M <span class="op">=</span> <span class="fl">4</span>,
-  n_neighbors <span class="op">=</span> <span class="fl">68</span>,
-  n_coarse_grid <span class="op">=</span> <span class="fl">10</span>,
-  n_padding <span class="op">=</span> <span class="fl">5L</span>,
-  n_cores <span class="op">=</span> <span class="fl">1L</span>,
-  inits <span class="op">=</span> <span class="cn">NULL</span>,
-  config <span class="op">=</span> <span class="cn">NULL</span>,
-  verbose <span class="op">=</span> <span class="cn">FALSE</span>,
-  use_spam <span class="op">=</span> <span class="cn">TRUE</span>,
-  n_chain <span class="op">=</span> <span class="fl">1</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">mcmc_mra_integrated</span><span class="op">(</span></span>
+<span>  <span class="va">y</span>,</span>
+<span>  <span class="va">X</span>,</span>
+<span>  <span class="va">locs</span>,</span>
+<span>  <span class="va">params</span>,</span>
+<span>  priors <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  M <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>  n_neighbors <span class="op">=</span> <span class="fl">68</span>,</span>
+<span>  n_coarse_grid <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  n_padding <span class="op">=</span> <span class="fl">5L</span>,</span>
+<span>  n_cores <span class="op">=</span> <span class="fl">1L</span>,</span>
+<span>  inits <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  config <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  use_spam <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  n_chain <span class="op">=</span> <span class="fl">1</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>y</dt>
 <dd><p>is a \(n\) vector of Gaussian data.</p></dd>
+
+
 <dt>X</dt>
 <dd><p>is a \(n \times p\) matrix of fixed effects (like latitude, elevation, etc)</p></dd>
+
+
 <dt>locs</dt>
 <dd><p>is a \(n \times 2\) matrix of observation locations.</p></dd>
+
+
 <dt>params</dt>
 <dd><p>is a list of parameter settings. The list
 <code>params</code> must contain the following values:</p><ul><li><p><code>n_adapt</code>: A positive integer number of adaptive MCMC iterations.</p></li>
@@ -101,94 +107,117 @@ sample.</p></li>
 to output a progress message. For example, <code>n_message = 50</code>
 outputs progress messages every 50 iterations.</p></li>
 </ul></dd>
+
+
 <dt>priors</dt>
 <dd><p>is the list of prior settings.</p></dd>
+
+
 <dt>M</dt>
 <dd><p>The number of resolutions.</p></dd>
+
+
 <dt>n_neighbors</dt>
 <dd><p>The expected number of neighbors for each interior basis function. This determines the basis radius parameter.</p></dd>
+
+
 <dt>n_coarse_grid</dt>
 <dd><p>The number of basis functions in one direction (e.g. <code>n_coarse_grid = 10</code> results in a \(10 \times 10\) course grid which is further extended by the number of additional padding basis functions given by <code>n_padding</code>.</p></dd>
+
+
 <dt>n_padding</dt>
 <dd><p>The number of additional boundary points to add on each boundary. For example, n_padding = 5 will add 5 boundary knots to the both the left  and right side of the grid).</p></dd>
+
+
 <dt>n_cores</dt>
 <dd><p>is the number of cores for parallel computation using openMP.</p></dd>
+
+
 <dt>inits</dt>
 <dd><p>is the list of initial values if the user wishes to specify initial values. If these values are not specified, then the initial values will be randomly sampled from the prior.</p></dd>
+
+
 <dt>config</dt>
 <dd><p>is the list of configuration values if the user wishes to specify initial values. If these values are not specified, then default a configuration will be used.</p></dd>
+
+
 <dt>verbose</dt>
 <dd><p>Should verbose output be printed? Typically this is only useful for troubleshooting.</p></dd>
+
+
 <dt>use_spam</dt>
 <dd><p>is a boolean flag to determine whether the output is a list of spam matrix objects (<code>use_spam = TRUE</code>) or a an \(n \times n\) sparse Matrix of class "dgCMatrix" <code>use_spam = FALSE</code> (see spam and Matrix packages for details).</p></dd>
+
+
 <dt>n_chain</dt>
 <dd><p>is the MCMC chain id. The default is 1.</p></dd>
+
 </dl></div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">111</span><span class="op">)</span></span>
-<span class="r-in"><span class="co">## genereate the locations</span></span>
-<span class="r-in"><span class="va">locs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">20</span><span class="op">)</span>, <span class="fl">10</span>, <span class="fl">2</span><span class="op">)</span></span>
-<span class="r-in"><span class="co">## generate some covariates and regression coefficients</span></span>
-<span class="r-in"><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">30</span><span class="op">)</span>, <span class="fl">10</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">beta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## simulate the MRA process</span></span>
-<span class="r-in"><span class="va">M</span> <span class="op">&lt;-</span> <span class="fl">2</span></span>
-<span class="r-in"><span class="va">MRA</span> <span class="op">&lt;-</span> <span class="fu"><a href="mra_wendland_2d.html">mra_wendland_2d</a></span><span class="op">(</span><span class="va">locs</span>, M <span class="op">=</span> <span class="va">M</span>, n_coarse_grid <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">W</span> <span class="op">&lt;-</span> <span class="va">MRA</span><span class="op">$</span><span class="va">W</span></span>
-<span class="r-in"><span class="va">n_dims</span> <span class="op">&lt;-</span> <span class="va">MRA</span><span class="op">$</span><span class="va">n_dims</span></span>
-<span class="r-in"><span class="va">dims_idx</span> <span class="op">&lt;-</span> <span class="va">MRA</span><span class="op">$</span><span class="va">dims_idx</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## set up the process precision matrices</span></span>
-<span class="r-in"><span class="va">Q_alpha</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_Q_alpha_2d.html">make_Q_alpha_2d</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">n_dims</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.9</span>, <span class="fl">0.8</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">Q_alpha_tau2</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_Q_alpha_tau2.html">make_Q_alpha_tau2</a></span><span class="op">(</span><span class="va">Q_alpha</span>, tau2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## add in constraints so each resolution has random effects that sum to 0</span></span>
-<span class="r-in"><span class="va">constraints</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_constraint.html">make_constraint</a></span><span class="op">(</span><span class="va">MRA</span>, constraint <span class="op">=</span> <span class="st">"resolution"</span>, joint <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">A_constraint</span> <span class="op">&lt;-</span> <span class="va">constraints</span><span class="op">$</span><span class="va">A_constraint</span></span>
-<span class="r-in"><span class="va">a_constraint</span> <span class="op">&lt;-</span> <span class="va">constraints</span><span class="op">$</span><span class="va">a_constraint</span></span>
-<span class="r-in"><span class="va">alpha</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="fu">spam</span><span class="fu">::</span><span class="fu"><a href="https://www.math.uzh.ch/pages/spam/reference/rmvnorm.const.html" class="external-link">rmvnorm.prec.const</a></span><span class="op">(</span></span>
-<span class="r-in">    n <span class="op">=</span> <span class="fl">1</span>,</span>
-<span class="r-in">    mu <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">W</span><span class="op">)</span><span class="op">)</span>,</span>
-<span class="r-in">    Q <span class="op">=</span> <span class="va">Q_alpha_tau2</span>,</span>
-<span class="r-in">    A <span class="op">=</span> <span class="va">A_constraint</span>,</span>
-<span class="r-in">    a <span class="op">=</span> <span class="va">a_constraint</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="co">## define the data</span></span>
-<span class="r-in"><span class="va">y</span> <span class="op">&lt;-</span>  <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">X</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">beta</span> <span class="op">+</span> <span class="va">W</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">alpha</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## define the params for MCMC fitting</span></span>
-<span class="r-in"><span class="va">params</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span class="r-in">    n_mcmc    <span class="op">=</span> <span class="fl">5</span>,</span>
-<span class="r-in">    n_adapt   <span class="op">=</span> <span class="fl">5</span>,</span>
-<span class="r-in">    n_thin    <span class="op">=</span> <span class="fl">1</span>,</span>
-<span class="r-in">    n_message <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## define the model priors</span></span>
-<span class="r-in"><span class="va">priors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span class="r-in">    alpha_tau2   <span class="op">=</span> <span class="fl">1</span>,</span>
-<span class="r-in">    beta_tau2    <span class="op">=</span> <span class="fl">1</span>,</span>
-<span class="r-in">    alpha_sigma2 <span class="op">=</span> <span class="fl">1</span>,</span>
-<span class="r-in">    beta_sigma2  <span class="op">=</span> <span class="fl">1</span>,</span>
-<span class="r-in">    mu_beta      <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span>,</span>
-<span class="r-in">    Sigma_beta   <span class="op">=</span> <span class="fl">5</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## Fit the MRA model using MCMC</span></span>
-<span class="r-in"><span class="va">out</span>     <span class="op">&lt;-</span> <span class="fu"><a href="mcmc_mra.html">mcmc_mra</a></span><span class="op">(</span></span>
-<span class="r-in">    y             <span class="op">=</span> <span class="va">y</span>,</span>
-<span class="r-in">    X             <span class="op">=</span> <span class="va">X</span>,</span>
-<span class="r-in">    locs          <span class="op">=</span> <span class="va">locs</span>,</span>
-<span class="r-in">    params        <span class="op">=</span> <span class="va">params</span>,</span>
-<span class="r-in">    priors        <span class="op">=</span> <span class="va">priors</span>,</span>
-<span class="r-in">    M             <span class="op">=</span> <span class="fl">2</span>,</span>
-<span class="r-in">    n_coarse_grid <span class="op">=</span> <span class="fl">4</span></span>
-<span class="r-in"><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">111</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co">## genereate the locations</span></span></span>
+<span class="r-in"><span><span class="va">locs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">20</span><span class="op">)</span>, <span class="fl">10</span>, <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co">## generate some covariates and regression coefficients</span></span></span>
+<span class="r-in"><span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">30</span><span class="op">)</span>, <span class="fl">10</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">beta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## simulate the MRA process</span></span></span>
+<span class="r-in"><span><span class="va">M</span> <span class="op">&lt;-</span> <span class="fl">2</span></span></span>
+<span class="r-in"><span><span class="va">MRA</span> <span class="op">&lt;-</span> <span class="fu"><a href="mra_wendland_2d.html">mra_wendland_2d</a></span><span class="op">(</span><span class="va">locs</span>, M <span class="op">=</span> <span class="va">M</span>, n_coarse_grid <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">W</span> <span class="op">&lt;-</span> <span class="va">MRA</span><span class="op">$</span><span class="va">W</span></span></span>
+<span class="r-in"><span><span class="va">n_dims</span> <span class="op">&lt;-</span> <span class="va">MRA</span><span class="op">$</span><span class="va">n_dims</span></span></span>
+<span class="r-in"><span><span class="va">dims_idx</span> <span class="op">&lt;-</span> <span class="va">MRA</span><span class="op">$</span><span class="va">dims_idx</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## set up the process precision matrices</span></span></span>
+<span class="r-in"><span><span class="va">Q_alpha</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_Q_alpha_2d.html">make_Q_alpha_2d</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">n_dims</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.9</span>, <span class="fl">0.8</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">Q_alpha_tau2</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_Q_alpha_tau2.html">make_Q_alpha_tau2</a></span><span class="op">(</span><span class="va">Q_alpha</span>, tau2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## add in constraints so each resolution has random effects that sum to 0</span></span></span>
+<span class="r-in"><span><span class="va">constraints</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_constraint.html">make_constraint</a></span><span class="op">(</span><span class="va">MRA</span>, constraint <span class="op">=</span> <span class="st">"resolution"</span>, joint <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">A_constraint</span> <span class="op">&lt;-</span> <span class="va">constraints</span><span class="op">$</span><span class="va">A_constraint</span></span></span>
+<span class="r-in"><span><span class="va">a_constraint</span> <span class="op">&lt;-</span> <span class="va">constraints</span><span class="op">$</span><span class="va">a_constraint</span></span></span>
+<span class="r-in"><span><span class="va">alpha</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="fu">spam</span><span class="fu">::</span><span class="fu"><a href="https://www.math.uzh.ch/pages/spam/reference/rmvnorm.const.html" class="external-link">rmvnorm.prec.const</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    n <span class="op">=</span> <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>    mu <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">W</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    Q <span class="op">=</span> <span class="va">Q_alpha_tau2</span>,</span></span>
+<span class="r-in"><span>    A <span class="op">=</span> <span class="va">A_constraint</span>,</span></span>
+<span class="r-in"><span>    a <span class="op">=</span> <span class="va">a_constraint</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co">## define the data</span></span></span>
+<span class="r-in"><span><span class="va">y</span> <span class="op">&lt;-</span>  <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">X</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">beta</span> <span class="op">+</span> <span class="va">W</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">alpha</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## define the params for MCMC fitting</span></span></span>
+<span class="r-in"><span><span class="va">params</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    n_mcmc    <span class="op">=</span> <span class="fl">5</span>,</span></span>
+<span class="r-in"><span>    n_adapt   <span class="op">=</span> <span class="fl">5</span>,</span></span>
+<span class="r-in"><span>    n_thin    <span class="op">=</span> <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>    n_message <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## define the model priors</span></span></span>
+<span class="r-in"><span><span class="va">priors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    alpha_tau2   <span class="op">=</span> <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>    beta_tau2    <span class="op">=</span> <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>    alpha_sigma2 <span class="op">=</span> <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>    beta_sigma2  <span class="op">=</span> <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>    mu_beta      <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    Sigma_beta   <span class="op">=</span> <span class="fl">5</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## Fit the MRA model using MCMC</span></span></span>
+<span class="r-in"><span><span class="va">out</span>     <span class="op">&lt;-</span> <span class="fu"><a href="mcmc_mra.html">mcmc_mra</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    y             <span class="op">=</span> <span class="va">y</span>,</span></span>
+<span class="r-in"><span>    X             <span class="op">=</span> <span class="va">X</span>,</span></span>
+<span class="r-in"><span>    locs          <span class="op">=</span> <span class="va">locs</span>,</span></span>
+<span class="r-in"><span>    params        <span class="op">=</span> <span class="va">params</span>,</span></span>
+<span class="r-in"><span>    priors        <span class="op">=</span> <span class="va">priors</span>,</span></span>
+<span class="r-in"><span>    M             <span class="op">=</span> <span class="fl">2</span>,</span></span>
+<span class="r-in"><span>    n_coarse_grid <span class="op">=</span> <span class="fl">4</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Starting MCMC for chain 1, running for 5 adaptive iterations and 5 fitting iterations</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> MCMC adaptation iteration 5 for chain 1</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Starting MCMC fitting for chain 1, running for 5 iterationsn</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> MCMC fitting iteration 5 for chain 1</span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -203,7 +232,7 @@ outputs progress messages every 50 iterations.</p></li>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

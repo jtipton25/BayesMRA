@@ -26,7 +26,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -63,21 +63,28 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">make_constraint</span><span class="op">(</span><span class="va">MRA</span>, constraint <span class="op">=</span> <span class="st">"unconstrained"</span>, joint <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">make_constraint</span><span class="op">(</span><span class="va">MRA</span>, constraint <span class="op">=</span> <span class="st">"unconstrained"</span>, joint <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>MRA</dt>
 <dd><p>An MRA object. Usually contained in the output from <code><a href="mcmc_mra.html">mcmc_mra()</a></code> or <code><a href="mcmc_mra_integrated.html">mcmc_mra_integrated()</a></code> or for developers, the MRA object can be created directly from the function <code><a href="mra_wendland_2d.html">mra_wendland_2d()</a></code></p></dd>
+
+
 <dt>constraint</dt>
 <dd><p>What constraint should be applied to the spatial process? Options include no constraint (<code>constraint = "unconstrained"</code>), a constraint so the entire MRA process sums to 0 (<code>constraint = "overall"</code>), a constraint so that each of the M levels of the MRA process sum to 0 (<code>constraint = "resolution"</code>), or whether the predicte process must sum to 0 (<code>constraint = "predicted"</code>). Note: <code>constraint = "predicted"</code> is NOT currently supported.</p></dd>
+
+
 <dt>joint</dt>
 <dd><p>Should the spatial parameters alpha be sampled jointly or by each resolution</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A list of constraint matrices <code>A_constraint</code> and <code>a_constraint</code> for use in <code>spam</code> sampling functions</p>
+    
+
+<p>A list of constraint matrices <code>A_constraint</code> and <code>a_constraint</code> for use in <code>spam</code> sampling functions</p>
     </div>
 
   </div>
@@ -92,7 +99,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

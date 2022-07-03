@@ -26,7 +26,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -63,40 +63,57 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">mra_wendland_2d</span><span class="op">(</span>
-  <span class="va">locs</span>,
-  M <span class="op">=</span> <span class="fl">4</span>,
-  n_coarse_grid <span class="op">=</span> <span class="fl">10</span>,
-  n_padding <span class="op">=</span> <span class="fl">5L</span>,
-  n_neighbors <span class="op">=</span> <span class="fl">68</span>,
-  max_points <span class="op">=</span> <span class="cn">NULL</span>,
-  basis_type <span class="op">=</span> <span class="st">"wendland"</span>,
-  use_spam <span class="op">=</span> <span class="cn">TRUE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">mra_wendland_2d</span><span class="op">(</span></span>
+<span>  <span class="va">locs</span>,</span>
+<span>  M <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>  n_coarse_grid <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  n_padding <span class="op">=</span> <span class="fl">5L</span>,</span>
+<span>  n_neighbors <span class="op">=</span> <span class="fl">68</span>,</span>
+<span>  max_points <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  basis_type <span class="op">=</span> <span class="st">"wendland"</span>,</span>
+<span>  use_spam <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>locs</dt>
 <dd><p>The location variables in 2 dimensions over which to construct the basis function representation</p></dd>
+
+
 <dt>M</dt>
 <dd><p>The number of resolutions.</p></dd>
+
+
 <dt>n_coarse_grid</dt>
 <dd><p>The number of basis functions in one direction (e.g. <code>n_coarse_grid = 10</code> results in a \(10 \times 10\) course grid which is further extended by the number of additional padding basis functions given by <code>n_padding</code>.</p></dd>
+
+
 <dt>n_padding</dt>
 <dd><p>The number of additional boundary points to add on each boundary. For example, n_padding = 5 will add 5 boundary knots to the both the left  and right side of the grid).</p></dd>
+
+
 <dt>n_neighbors</dt>
 <dd><p>The expected number of neighbors for each interior basis function. This determines the basis radius parameter.</p></dd>
+
+
 <dt>max_points</dt>
 <dd><p>The expected number of pairs less than or equal to the radius. Default is <code>nrow(locs)</code> * <code>num_neighbors</code>.</p></dd>
+
+
 <dt>basis_type</dt>
 <dd><p>A string of which basis function type to use. Currently available basis function types are at <code><a href="make_basis.html">make_basis()</a></code></p></dd>
+
+
 <dt>use_spam</dt>
 <dd><p>is a boolean flag to determine whether the output is a list of <code><a href="https://www.math.uzh.ch/pages/spam/reference/spam.html" class="external-link">spam::spam</a></code> matrix objects (<code>use_spam = TRUE</code>) or a an \(n \times n\) sparse Matrix of class <code>Matrix::dgCMatrix</code> <code>use_spam = FALSE</code> (see spam and Matrix packages for details).</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A list of objects including the observation locations <code>locs</code>,
+    
+
+<p>A list of objects including the observation locations <code>locs</code>,
 the MRA knots locations <code>locs_grid</code>,
 the Wendland basis representation matrix <code>W</code> at the observed locations,
 the basis radius <code>radius</code>,
@@ -111,13 +128,13 @@ and the setting <code>use_spam</code> which determines whether the MRA output us
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">111</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">locs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">20</span><span class="op">)</span>, <span class="fl">10</span>, <span class="fl">2</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">MRA</span> <span class="op">&lt;-</span> <span class="fu">mra_wendland_2d</span><span class="op">(</span><span class="va">locs</span>, M <span class="op">=</span> <span class="fl">2</span>, n_coarse_grid <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
-<span class="r-in"><span class="co">## plot the MRA grid at different resolutions</span></span>
-<span class="r-in"><span class="fu"><a href="plot_MRA_grid.html">plot_MRA_grid</a></span><span class="op">(</span><span class="va">MRA</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">111</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">locs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">20</span><span class="op">)</span>, <span class="fl">10</span>, <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">MRA</span> <span class="op">&lt;-</span> <span class="fu">mra_wendland_2d</span><span class="op">(</span><span class="va">locs</span>, M <span class="op">=</span> <span class="fl">2</span>, n_coarse_grid <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co">## plot the MRA grid at different resolutions</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="plot_MRA_grid.html">plot_MRA_grid</a></span><span class="op">(</span><span class="va">MRA</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="mra_wendland_2d-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -132,7 +149,7 @@ and the setting <code>use_spam</code> which determines whether the MRA output us
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

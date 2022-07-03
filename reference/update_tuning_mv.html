@@ -26,7 +26,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -63,23 +63,34 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">update_tuning_mv</span><span class="op">(</span><span class="va">k</span>, <span class="va">accept</span>, <span class="va">lambda</span>, <span class="va">batch_samples</span>, <span class="va">Sigma_tune</span>, <span class="va">Sigma_tune_chol</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">update_tuning_mv</span><span class="op">(</span><span class="va">k</span>, <span class="va">accept</span>, <span class="va">lambda</span>, <span class="va">batch_samples</span>, <span class="va">Sigma_tune</span>, <span class="va">Sigma_tune_chol</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>k</dt>
 <dd><p>is a positive integer that is the current MCMC iteration.</p></dd>
+
+
 <dt>accept</dt>
 <dd><p>is a positive number between 0 and 1 that represents the batch accpetance rate. The target of this adaptive tuning algorithm is an acceptance rate of between 0.44 (a univariate update) and 0.234 (5+ dimensional upate).</p></dd>
+
+
 <dt>lambda</dt>
 <dd><p>is a positive scalar that scales the covariance matrix Sigma_tune and diminishes towards 0 as k increases.</p></dd>
+
+
 <dt>batch_samples</dt>
 <dd><p>is a \(50 \times d\) dimensional matrix that consists of the 50 batch samples of the d-dimensional parameter being sampled.</p></dd>
+
+
 <dt>Sigma_tune</dt>
 <dd><p>is a \(d \times d\) positive definite covariance matrix of the batch samples used to generate the multivariate Gaussian random walk proposal.</p></dd>
+
+
 <dt>Sigma_tune_chol</dt>
 <dd><p>is the \(d \times d\)  Cholesky decomposition of Sigma_tune.</p></dd>
+
 </dl></div>
 
   </div>
@@ -94,7 +105,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>
