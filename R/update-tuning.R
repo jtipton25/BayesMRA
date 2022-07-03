@@ -116,7 +116,7 @@ update_tuning_mv <- function(k, accept, lambda, batch_samples,
     }
     ## 50 is an MCMC batch size, can make this function more general later...
     Sigma_tune_out <- Sigma_tune + gamma1 *
-        (t(batch_samples) %*% batch_samples / (50.0-1.0) - Sigma_tune)
+        (t(batch_samples_tmp) %*% batch_samples_tmp / (50.0-1.0) - Sigma_tune)
     Sigma_tune_chol_out <- tryCatch(
         chol(Sigma_tune_out),
         error = function(e) {
