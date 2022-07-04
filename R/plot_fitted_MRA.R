@@ -17,9 +17,9 @@
 #'
 plot_fitted_MRA <- function(out, preds, base_size = 12, file = NULL, width = 16, height = 9) {
 
-    if (!(class(out) %in% c("mcmc_mra", "mcmc_mra_integrated")))
+    if (!inherits(out, c("mcmc_mra", "mcmc_mra_integrated")))
         stop('out must be of class "mcmc_mra" or "mcmc_mra_integrated"')
-    if(class(preds) != "mcmc_mra_pred")
+    if(!inherits(preds, "mcmc_mra_pred"))
         stop('preds must be of class "mcmc_mra_pred" which is the output of the function predict_mra()')
     if (!is_positive_numeric(width, 1))
         stop("width must be a positive number")
