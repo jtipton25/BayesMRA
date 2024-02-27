@@ -31,8 +31,10 @@ predict_mra <- function(out, new_data) {
 
     # center and scale the predictors using the same scaling as the model fit
     X_pred <- new_data$X_pred
-    for(i in 2:ncol(X_pred)) {
-        X_pred[, i] <- (X_pred[, i] - out$data$mu_X[i-1]) / out$data$sd_X[i-1]
+    if (ncol(X_pred) >= 2) {
+        for(i in 2:ncol(X_pred)) {
+            X_pred[, i] <- (X_pred[, i] - out$data$mu_X[i-1]) / out$data$sd_X[i-1]
+        }
     }
 
     Xbeta_pred  <- t(X_pred %*% t(out$beta)) * out$data$sd_y + out$data$mu_y
